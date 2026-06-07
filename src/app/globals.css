@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f8f6;
+  --foreground: #111b0d;
+
+  /* Agrofund Color System */
+  /* --primary: #5c7c1e; */
+  --primary: #6b911b;
+  --primary-dark: #4e6a19;
+  --terracotta: #d96c3a;
+  --color-ochre: #c47a2c;
+}
+
+:root {
+  --font-sans: var(--font-dm-sans), sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
+  --font-mono: var(--font-geist-mono);
+
+  /* Extend colors */
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+
+  /* Custom theme colors */
+  --color-primary: var(--primary);
+  --color-terracotta: var(--terracotta);
+  --color-ochre: var(--color-ochre);
+  --color-primary-dark: var(--primary-dark);
+
+  /* Border radius */
+  --radius-default: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-primary: 0 4px 14px 0 rgba(70, 236, 19, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #f0fdf4;
+    --foreground: #1f2937;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Custom animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-dark) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 1px solid var(--secondary-gray);
+  outline-offset: 2px;
+}
+
+/* Utility classes */
+.bg-gradient-overlay {
+  background: linear-gradient(to top, rgba(20, 34, 16, 0.9), transparent 30%);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
