@@ -76,17 +76,21 @@ export default function Navbar() {
 
   return (
     <nav className="w-full border-b border-[#eaf3e7] bg-gray-100">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
-        <div className="flex items-center h-full pl-4 gap-2">
-          <Link href="/" className="h-full flex items-center">
+        <div className="flex items-center h-full gap-2">
+          <Link href="/" className="h-full flex items-center gap-2">
             <Image
-              src="/grow-logo.svg"
+              src="/logo.png"
               alt="Grow logo"
-              width={178}
-              height={178}
+              width={1024}
+              height={1536}
+              className="h-13 md:h-16 w-auto object-contain"
               priority
             />
+            <h1 className="md:text-5xl text-4xl pb-1 font-bold text-primary">
+              Remote <span className="text-secondary">Agric</span>
+            </h1>
           </Link>
         </div>
 

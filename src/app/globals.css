@@ -4,12 +4,12 @@
   --background: #f6f8f6;
   --foreground: #111b0d;
 
-  /* Agrofund Color System */
-  /* --primary: #5c7c1e; */
-  --primary: #6b911b;
-  --primary-dark: #4e6a19;
+  /* Remote Agric Color System */
+  --primary: #32620e;
+  --primary-dark: #244808;
   --terracotta: #d96c3a;
   --color-ochre: #c47a2c;
+  --secondary: #e8ad15;
 }
 
 :root {
@@ -21,6 +21,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
   --font-mono: var(--font-geist-mono);
+  --font-montserrat: var(--font-montserrat), "Montserrat", sans-serif;
 
   /* Extend colors */
   --color-primary: var(--primary);
@@ -31,6 +32,7 @@
   --color-terracotta: var(--terracotta);
   --color-ochre: var(--color-ochre);
   --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
 
   /* Border radius */
   --radius-default: 0.5rem;
@@ -47,6 +49,15 @@
     --background: #f0fdf4;
     --foreground: #1f2937;
   }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-montserrat);
 }
 
 body {

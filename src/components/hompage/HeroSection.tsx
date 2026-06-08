@@ -13,9 +13,7 @@ import {
   FaBoxOpen,
 } from "react-icons/fa";
 import { BsTransparency } from "react-icons/bs";
-import {IconType} from "react-icons";
-
-
+import { IconType } from "react-icons";
 
 // Type definitions
 interface ButtonProps {
@@ -71,9 +69,9 @@ interface Slide {
 const slides: Slide[] = [
   {
     id: 1,
-    title: "Grow Africa – Invest in Food. Empower Farmers. Grow Together.",
+    title: "Remote Agric – Invest in Food. Empower Farmers. Grow Together.",
     subtitle:
-      "Grow Africa connects everyday investors to real farming projects across Africa — funding production, supporting farmers, and earning from harvest outcomes.",
+      "Remote Agric connects everyday investors to real farming projects across Africa — funding production, supporting farmers, and earning from harvest outcomes.",
     bgImage:
       "https://res.cloudinary.com/dbeyl29fl/image/upload/v1768213215/f3tfcfmz8hotxeekiqlb.png",
     badge: {
@@ -196,7 +194,6 @@ export default function HeroSlideshow() {
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
-
 
   useEffect(() => {
     if (!isAutoPlaying) return;
@@ -357,7 +354,6 @@ export default function HeroSlideshow() {
           )}
         </div>
       </div>
-
     </div>
   );
 }

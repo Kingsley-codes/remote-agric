@@ -32,12 +32,13 @@ export default function Footer() {
         <div className="md:flex md:justify-between w-full">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="mb-4 inline-flex items-center rounded-lg bg-white px-3 py-2">
               <Image
-                src="/grow-logo_White_Transparent.svg"
+                src="/logo.png"
                 alt="Grow logo"
-                width={178}
-                height={178}
+                width={1024}
+                height={1536}
+                className="h-20 w-auto object-contain"
               />
             </div>
             <div className="w-1/2">

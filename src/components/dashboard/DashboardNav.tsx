@@ -26,7 +26,13 @@ export default function DashboardNav({ isOpen, onToggle }: DashboardNavProps) {
         )}
 
         <div>
-          <Image src="/grow-logo.svg" alt="Grow logo" width={120} height={40} />
+          <Image
+            src="/logo.png"
+            alt="Grow logo"
+            width={1024}
+            height={1536}
+            className="h-10 w-auto object-contain"
+          />
         </div>
       </div>
     </nav>

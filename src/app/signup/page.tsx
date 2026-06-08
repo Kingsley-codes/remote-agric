@@ -220,10 +220,11 @@ export default function SignUpPage() {
         <div className="relative z-10 p-8 md:p-12 max-w-xl text-white">
           <div className="mb-6 md:mb-8 flex items-center gap-3">
             <Image
-              src="/grow-logo_White_Transparent.svg"
+              src="/logo.png"
               alt="Grow logo"
-              width={178}
-              height={178}
+              width={1024}
+              height={1536}
+              className="h-24 w-auto rounded-lg bg-white/90 px-3 py-2 object-contain"
             />
           </div>
 
@@ -277,10 +278,11 @@ export default function SignUpPage() {
           {/* Mobile Header */}
           <div className="lg:hidden mb-6 flex items-center justify-center gap-3">
             <Image
-              src="/grow-logo.svg"
+              src="/logo.png"
               alt="Grow logo"
-              width={140}
-              height={140}
+              width={1024}
+              height={1536}
+              className="h-20 w-auto object-contain"
             />
           </div>
 

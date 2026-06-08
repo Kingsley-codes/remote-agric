@@ -12,7 +12,6 @@ import {
 } from "react-icons/fi";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { IoIosChatboxes } from "react-icons/io";
-import { GrowIcon } from "@/components/GrowIcon";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
@@ -157,10 +156,11 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
               <>
                 <Link href="/">
                   <Image
-                    src="/grow-logo.svg"
+                    src="/logo.png"
                     alt="Grow logo"
-                    width={120}
-                    height={40}
+                    width={1024}
+                    height={1536}
+                    className="h-12 w-auto object-contain"
                   />
                 </Link>
 
@@ -179,10 +179,12 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
                 aria-label="Expand sidebar"
               >
                 <span className="group-hover:hidden">
-                  <GrowIcon
-                    size={32}
-                    rayColor="currentColor"
-                    centerColor="white"
+                  <Image
+                    src="/logo.png"
+                    alt="Grow logo"
+                    width={1024}
+                    height={1536}
+                    className="h-8 w-auto object-contain"
                   />
                 </span>
                 <span className="hidden group-hover:block text-gray-500">
