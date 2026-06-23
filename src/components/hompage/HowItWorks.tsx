@@ -28,7 +28,7 @@ export default function HowItWorks() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 mb-12 text-center md:text-left">
           <h2 className="text-2xl font-bold text-gray-800 text-center md:text-4xl">
-            Invest in African Agriculture From Anywhere
+            Become A Remote Farmer From Anywhere
           </h2>
           <p className="text-sm md:text-base text-gray-700 mx-auto text-center max-w-2xl">
             You choose what to farm. We connect you with real producers who do

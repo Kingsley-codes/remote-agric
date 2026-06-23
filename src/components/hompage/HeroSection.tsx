@@ -113,7 +113,7 @@ const slides: Slide[] = [
     id: 3,
     title: "Track Every Stage of Your Farm Investment",
     subtitle:
-      "From land preparation to planting, crop growth and harvest, Grow Africa keeps you informed at every phase through real-time updates and notifications",
+      "From land preparation to planting, crop growth and harvest, Remote Agric keeps you informed at every phase through real-time updates and notifications",
     bgImage:
       "https://res.cloudinary.com/dbeyl29fl/image/upload/v1768213779/mnpfq3idjgfrve9grtyw.png",
     badge: {

@@ -22,13 +22,13 @@ export default function About() {
 
           <div className="order-1 lg:order-2">
             <h2 className="text-sm font-bold tracking-widest text-primary uppercase mb-4">
-              About Grow Africa
+              About Remote Agric
             </h2>
             <h3 className="text-3xl md:text-4xl  text-gray-800 font-bold mb-6 leading-tight">
               Bridging the Gap Between Investors and Sustainable Farming
             </h3>
             <p className="text-slate-600 mb-6 leading-relaxed">
-              Grow Africa is more than an investment platform; it&apos;s a
+              Remote Agric is more than an investment platform; it&apos;s a
               movement to revolutionize food security and economic prosperity
               across the continent. We empower local communities by providing
               the resources needed for high-yield, sustainable farming.

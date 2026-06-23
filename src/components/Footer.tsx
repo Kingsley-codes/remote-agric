@@ -49,26 +49,19 @@ export default function Footer() {
               <p className=" pt-3">
                 <CiMail className="inline-block mr-2 h-5 w-5" />
                 <a
-                  href="mailto:partnership@growafrica.co"
+                  href="mailto:remoteagric2024@gmail.com"
                   className="text-gray-200 hover:text-white"
                 >
-                  partnership@growafrica.co
+                  remoteagric2024@gmail.com
                 </a>
               </p>
               <p className="pt-2">
                 <IoIosCall className="inline-block mr-2 h-5 w-5" />
                 <a
-                  href="tel:+2348134038304"
+                  href="tel:+2348060779290"
                   className="text-gray-200 hover:text-white"
                 >
-                  +234 (0) 813 403 8304
-                </a>{" "}
-                ,{" "}
-                <a
-                  href="tel:+2348125288367"
-                  className="text-gray-200 hover:text-white"
-                >
-                  +234 (0) 812 528 8367
+                  +234 (0) 806 077 9290
                 </a>
               </p>
             </div>
@@ -130,7 +123,7 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="border-t border-white/10 mt-12 pt-6 text-center text-xs text-gray-200">
-          © {new Date().getFullYear()} AgrofundHub. All rights reserved.
+          © {new Date().getFullYear()} Remote Agric. All rights reserved.
         </div>
       </div>
     </footer>
