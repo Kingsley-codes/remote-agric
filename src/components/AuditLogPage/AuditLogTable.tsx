@@ -46,7 +46,8 @@ const actionColors: Record<string, string> = {
   LOGOUT: "bg-gray-50 text-gray-700 border-gray-200",
 };
 
-const actionIcons: Record<string, JSX.Element> = {
+// Fix: Change JSX.Element to React.ReactElement
+const actionIcons: Record<string, React.ReactElement> = {
   CREATE: <MdCreate className="text-sm" />,
   UPDATE: <MdUpdate className="text-sm" />,
   DELETE: <MdDelete className="text-sm" />,
@@ -57,7 +58,8 @@ const actionIcons: Record<string, JSX.Element> = {
   LOGOUT: <MdLogout className="text-sm" />,
 };
 
-const entityIcons: Record<string, JSX.Element> = {
+// Fix: Change JSX.Element to React.ReactElement
+const entityIcons: Record<string, React.ReactElement> = {
   FARMER: <MdAgriculture className="text-sm" />,
   PRODUCT: <MdShoppingCart className="text-sm" />,
   ORDER: <MdLocalShipping className="text-sm" />,
@@ -133,7 +135,7 @@ export default function AuditLogTable({
   return (
     <div className="bg-white rounded-xl shadow-sm border border-[#d5e7cf] overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-[#d5e7cf] bg-gradient-to-r from-[#f8faf6] to-white">
+      <div className="px-6 py-4 border-b border-[#d5e7cf] bg-linear-to-r from-[#f8faf6] to-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold text-[#111b0d]">Audit Logs</h2>
@@ -347,7 +349,7 @@ export default function AuditLogTable({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-[#5e9a4c] to-[#2d4a1e] rounded-full flex items-center justify-center text-white text-sm font-medium">
+                        <div className="w-8 h-8 bg-linear-to-br from-[#5e9a4c] to-[#2d4a1e] rounded-full flex items-center justify-center text-white text-sm font-medium">
                           {log.userName.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -433,7 +435,7 @@ function AuditLogDetailModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
-        <div className="relative bg-gradient-to-r from-[#2d4a1e] to-[#5e9a4c] px-6 py-4">
+        <div className="relative bg-linear-to-r from-[#2d4a1e] to-[#5e9a4c] px-6 py-4">
           <button
             onClick={onClose}
             className="absolute right-4 top-4 text-white/70 hover:text-white transition-colors"
