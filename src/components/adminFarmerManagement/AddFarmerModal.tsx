@@ -29,7 +29,7 @@ interface FarmerFormData {
   farmSize: string;
   fundingAmount: string;
   cropsGrown: string[];
-  expextedYield: string;
+  expectedYield: string;
 }
 
 const CROP_OPTIONS = [
@@ -66,7 +66,7 @@ export default function AddFarmerModal({
     farmSize: "",
     fundingAmount: "",
     cropsGrown: [],
-    expextedYield: "",
+    expectedYield: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -114,7 +114,7 @@ export default function AddFarmerModal({
         farmSize: "",
         fundingAmount: "",
         cropsGrown: [],
-        expextedYield: "",
+        expectedYield: "",
       });
       setError(null);
       setCropInput("");
@@ -237,7 +237,7 @@ export default function AddFarmerModal({
       submitFormData.append("state", formData.state);
       submitFormData.append("farmSize", formData.farmSize);
       submitFormData.append("fundingAmount", formData.fundingAmount);
-      submitFormData.append("expextedYield", formData.expextedYield);
+      submitFormData.append("expectedYield", formData.expectedYield);
       formData.cropsGrown.forEach((crop) => {
         submitFormData.append("cropsGrown[]", crop);
       });
@@ -555,8 +555,8 @@ export default function AddFarmerModal({
                     <MdTrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5e9a4c] text-lg" />
                     <input
                       type="text"
-                      name="expextedYield"
-                      value={formData.expextedYield}
+                      name="expectedYield"
+                      value={formData.expectedYield}
                       onChange={handleChange}
                       placeholder="e.g., 500 kg, 1000 tons"
                       className="w-full pl-10 pr-3 py-2 border border-[#d5e7cf] rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
