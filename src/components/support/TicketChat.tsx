@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle2, ImagePlus, Loader2, RotateCcw, Send, X } from 
 import { backendUrl, Ticket } from "@/lib/tickets";
 import StatusBadge from "./StatusBadge";
 import { io } from "socket.io-client";
+import { toast } from "react-toastify";
 
 export default function TicketChat({ ticketId, admin = false }: { ticketId: string; admin?: boolean }) {
   const [ticket, setTicket] = useState<Ticket | null>(null), [message, setMessage] = useState("");
@@ -22,16 +23,17 @@ export default function TicketChat({ ticketId, admin = false }: { ticketId: stri
   useEffect(() => {
     const socket = io(backendUrl, { withCredentials: true, transports: ["websocket", "polling"] });
     socket.on("connect", () => socket.emit("ticket:join", ticketId));
-    const update = (incoming: Ticket) => setTicket((current) => current ? { ...current, ...incoming, user: current.user ?? incoming.user } : incoming);
-    socket.on("ticket:message", update);
-    socket.on("ticket:status", update);
+    const refresh = () => void load();
+    socket.on("ticket:message", refresh);
+    socket.on("ticket:status", refresh);
     return () => { socket.emit("ticket:leave", ticketId); socket.disconnect(); };
-  }, [ticketId]);
+  }, [load, ticketId]);
   useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), [ticket?.messages?.length]);
   async function send(e: FormEvent) {
     e.preventDefault(); if ((!message.trim() && !images.length) || sending) return;
     setSending(true); const form = new FormData(); form.append("message", message); images.forEach((file) => form.append("images", file));
-    try { const { data } = await axios.post(`${backendUrl}${base}/${ticketId}/messages`, form, { withCredentials: true }); setTicket(data.data.ticket); setMessage(""); setImages([]); }
+    try { await axios.post(`${backendUrl}${base}/${ticketId}/messages`, form, { withCredentials: true }); setMessage(""); setImages([]); await load(); }
+    catch (error) { toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to send message" : "Unable to send message"); }
     finally { setSending(false); }
   }
   async function setStatus(status: "open" | "resolved") { await axios.patch(`${backendUrl}/api/admin/tickets/${ticketId}/status`, { status }, { withCredentials: true }); await load(); }
@@ -49,8 +51,8 @@ export default function TicketChat({ ticketId, admin = false }: { ticketId: stri
         <div className="mx-auto max-w-3xl space-y-5">{ticket.messages?.map((item) => { const mine = admin ? item.senderType === "admin" : item.senderType === "user"; return <div key={item._id} className={`flex ${mine ? "justify-end" : "justify-start"}`}><div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${mine ? "rounded-tr-sm bg-primary text-white" : "rounded-tl-sm bg-white text-gray-800"}`}>
           <p className={`mb-1 text-[9px] font-extrabold uppercase tracking-widest ${mine ? "text-green-100" : "text-primary"}`}>{item.senderType === "admin" ? "Support team" : ticket.user ? `${ticket.user.firstName} ${ticket.user.lastName}` : "You"}</p>
           {item.body && <p className="whitespace-pre-wrap text-sm leading-6">{item.body}</p>}
-          {!!item.attachments.length && <div className="mt-2 grid grid-cols-2 gap-2">{item.attachments.map((a) => <a key={a.publicId} href={a.url} target="_blank" rel="noreferrer"><Image src={a.url} alt="Ticket attachment" width={420} height={280} className="max-h-56 w-full rounded-xl object-cover" /></a>)}</div>}
-          <p className={`mt-2 text-right text-[9px] font-bold uppercase tracking-wider ${mine ? "text-green-100" : "text-gray-400"}`}>{new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</p>
+          {!!item.attachments?.length && <div className="mt-2 grid grid-cols-2 gap-2">{item.attachments.filter((a) => a?.url).map((a) => <a key={a.publicId || a.url} href={a.url} target="_blank" rel="noreferrer"><Image src={a.url} alt="Ticket attachment" width={420} height={280} className="max-h-56 w-full rounded-xl object-cover" unoptimized /></a>)}</div>}
+          <p className={`mt-2 text-right text-[9px] font-bold uppercase tracking-wider ${mine ? "text-green-100" : "text-gray-400"}`}>{item.createdAt && !Number.isNaN(new Date(item.createdAt).getTime()) ? new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "Just now"}</p>
         </div></div> })}<div ref={endRef}/></div>
       </div>
       {writable ? <form onSubmit={send} className="bg-white p-4 md:p-5"><div className="mx-auto max-w-3xl rounded-2xl bg-gray-50 p-2 shadow-lg shadow-green-900/5 ring-1 ring-green-700/10">
