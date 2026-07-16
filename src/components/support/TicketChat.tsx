@@ -19,16 +19,31 @@ export default function TicketChat({ ticketId, admin = false }: { ticketId: stri
     try { const { data } = await axios.get(`${backendUrl}${base}/${ticketId}`, { withCredentials: true }); setTicket(data.data.ticket); }
     finally { setLoading(false); }
   }, [base, ticketId]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
   useEffect(() => {
     const socket = io(backendUrl, { withCredentials: true, transports: ["websocket", "polling"] });
-    socket.on("connect", () => socket.emit("ticket:join", ticketId));
-    const refresh = () => void load();
+    const joinTicket = (): void => {
+      socket.emit("ticket:join", ticketId);
+    };
+    const refresh = (): void => {
+      void load();
+    };
+    socket.on("connect", joinTicket);
     socket.on("ticket:message", refresh);
     socket.on("ticket:status", refresh);
-    return () => { socket.emit("ticket:leave", ticketId); socket.disconnect(); };
+    return (): void => {
+      socket.off("connect", joinTicket);
+      socket.off("ticket:message", refresh);
+      socket.off("ticket:status", refresh);
+      socket.emit("ticket:leave", ticketId);
+      socket.disconnect();
+    };
   }, [load, ticketId]);
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), [ticket?.messages?.length]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [ticket?.messages?.length]);
   async function send(e: FormEvent) {
     e.preventDefault(); if ((!message.trim() && !images.length) || sending) return;
     setSending(true); const form = new FormData(); form.append("message", message); images.forEach((file) => form.append("images", file));
