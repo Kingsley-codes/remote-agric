@@ -4,6 +4,7 @@ import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import AdminSidebar, { UserData } from "@/components/adminDashboard/Sidebar";
 import { useEffect, useCallback, useState } from "react";
 import AdminDashboardNav from "@/components/adminDashboard/DashboardNav";
+import PushNotifications from "@/components/support/PushNotifications";
 
 export default function DashboardLayout({
   children,
@@ -48,6 +49,7 @@ export default function DashboardLayout({
           onToggle={handleSidebarToggle}
         />
         <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
+        <PushNotifications admin />
         <DashboardFooter />
       </main>
     </div>

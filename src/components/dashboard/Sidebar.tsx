@@ -36,7 +36,7 @@ const navLinks = [
   { href: "/dashboard/investments", label: "My Investments", icon: FiPieChart },
   { href: "/opportunities", label: "New Investments", icon: FiShoppingBag },
   { href: "/dashboard/wallet", label: "Wallet", icon: FiCreditCard },
-  { href: "/dashboard/chat", label: "Chat", icon: IoIosChatboxes },
+  { href: "/dashboard/support", label: "Support", icon: IoIosChatboxes },
 ];
 
 function getInitials(user: UserData | null): string {

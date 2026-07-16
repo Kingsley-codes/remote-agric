@@ -44,7 +44,7 @@ const navLinks = [
     icon: FaMoneyBills,
   },
 
-  { href: "/admin/dashboard/chat", label: "Chat", icon: IoIosChatboxes },
+  { href: "/admin/dashboard/support", label: "Support", icon: IoIosChatboxes },
 ];
 
 function getInitials(user: UserData | null): string {
