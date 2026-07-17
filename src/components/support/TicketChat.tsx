@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, ImagePlus, Loader2, RotateCcw, Send, X } from "lucide-react";
-import { backendUrl, Ticket } from "@/lib/tickets";
+import { backendUrl, Ticket, TicketMessage } from "@/lib/tickets";
 import StatusBadge from "./StatusBadge";
 import { io } from "socket.io-client";
 import { toast } from "react-toastify";
@@ -46,10 +46,38 @@ export default function TicketChat({ ticketId, admin = false }: { ticketId: stri
   }, [ticket?.messages?.length]);
   async function send(e: FormEvent) {
     e.preventDefault(); if ((!message.trim() && !images.length) || sending) return;
-    setSending(true); const form = new FormData(); form.append("message", message); images.forEach((file) => form.append("images", file));
-    try { await axios.post(`${backendUrl}${base}/${ticketId}/messages`, form, { withCredentials: true }); setMessage(""); setImages([]); await load(); }
-    catch (error) { toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to send message" : "Unable to send message"); }
-    finally { setSending(false); }
+    const pendingBody = message;
+    const pendingImages = [...images];
+    const temporaryId = `local-${crypto.randomUUID()}`;
+    const previewUrls = pendingImages.map((file) => URL.createObjectURL(file));
+    const optimisticMessage: TicketMessage = {
+      _id: temporaryId,
+      senderType: admin ? "admin" : "user",
+      body: pendingBody,
+      createdAt: new Date().toISOString(),
+      attachments: previewUrls.map((url, index) => ({ url, publicId: `local-${index}` })),
+    };
+
+    setTicket((current) => current ? { ...current, messages: [...(current.messages ?? []), optimisticMessage] } : current);
+    setMessage("");
+    setImages([]);
+    setSending(true);
+
+    const form = new FormData();
+    form.append("message", pendingBody);
+    pendingImages.forEach((file) => form.append("images", file));
+    try {
+      await axios.post(`${backendUrl}${base}/${ticketId}/messages`, form, { withCredentials: true });
+      await load();
+    } catch (error) {
+      setTicket((current) => current ? { ...current, messages: current.messages?.filter((item) => item._id !== temporaryId) } : current);
+      setMessage(pendingBody);
+      setImages(pendingImages);
+      toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to send message" : "Unable to send message");
+    } finally {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      setSending(false);
+    }
   }
   async function setStatus(status: "open" | "resolved") { await axios.patch(`${backendUrl}/api/admin/tickets/${ticketId}/status`, { status }, { withCredentials: true }); await load(); }
   if (loading) return <div className="flex flex-1 items-center justify-center p-20"><Loader2 className="animate-spin text-primary" /></div>;
@@ -67,7 +95,7 @@ export default function TicketChat({ ticketId, admin = false }: { ticketId: stri
           <p className={`mb-1 text-[9px] font-extrabold uppercase tracking-widest ${mine ? "text-green-100" : "text-primary"}`}>{item.senderType === "admin" ? "Support team" : ticket.user ? `${ticket.user.firstName} ${ticket.user.lastName}` : "You"}</p>
           {item.body && <p className="whitespace-pre-wrap text-sm leading-6">{item.body}</p>}
           {!!item.attachments?.length && <div className="mt-2 grid grid-cols-2 gap-2">{item.attachments.filter((a) => a?.url).map((a) => <a key={a.publicId || a.url} href={a.url} target="_blank" rel="noreferrer"><Image src={a.url} alt="Ticket attachment" width={420} height={280} className="max-h-56 w-full rounded-xl object-cover" unoptimized /></a>)}</div>}
-          <p className={`mt-2 text-right text-[9px] font-bold uppercase tracking-wider ${mine ? "text-green-100" : "text-gray-400"}`}>{item.createdAt && !Number.isNaN(new Date(item.createdAt).getTime()) ? new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "Just now"}</p>
+          <p className={`mt-2 text-right text-[9px] font-bold uppercase tracking-wider ${mine ? "text-green-100" : "text-gray-400"}`}>{item._id.startsWith("local-") ? "Sending…" : item.createdAt && !Number.isNaN(new Date(item.createdAt).getTime()) ? new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "Just now"}</p>
         </div></div> })}<div ref={endRef}/></div>
       </div>
       {writable ? <form onSubmit={send} className="bg-white p-4 md:p-5"><div className="mx-auto max-w-3xl rounded-2xl bg-gray-50 p-2 shadow-lg shadow-green-900/5 ring-1 ring-green-700/10">

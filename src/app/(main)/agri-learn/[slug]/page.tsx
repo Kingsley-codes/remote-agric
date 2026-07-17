@@ -5,20 +5,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import {
-  ArrowLeft,
-  CalendarDays,
-  Clock3,
-  Copy,
-  Loader2,
-  Share2,
-  BookOpen,
-  User,
-  Tag,
-  ChevronRight,
-} from "lucide-react";
+import { Fraunces, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
+import { ArrowLeft, ArrowUpRight, Copy, Share2 } from "lucide-react";
 import { LearnPost } from "@/lib/agriLearn";
 import { toast } from "react-toastify";
+
+// Three roles, three faces: a characterful display serif for headlines,
+// a workhorse serif for long reading, and a mono face reserved for
+// ledger-style metadata (author, date, read time, category).
+const display = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-display",
+});
+const body = Source_Serif_4({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-body",
+});
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+});
 
 const formatDate = (date?: string) =>
   date
@@ -49,27 +59,34 @@ export default function ArticlePage() {
         .filter(Boolean) ?? [],
     [post?.content],
   );
-
   const readingTime = Math.max(
     1,
     Math.ceil((post?.content?.trim().split(/\s+/).length ?? 0) / 220),
   );
 
-  const handleShare = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success("Article link copied to clipboard");
-    } catch {
-      toast.error("Failed to copy link");
-    }
-  };
+  const share = () =>
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => toast.success("Article link copied"));
+
+  const fontVars = `${display.variable} ${body.variable} ${mono.variable}`;
 
   if (loading) {
     return (
-      <div className="flex min-h-[70vh] items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-emerald-700" />
-          <p className="mt-3 text-sm text-gray-500">Loading article...</p>
+      <div
+        className={`${fontVars} flex min-h-screen items-center justify-center bg-[#F6F0E4]`}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <span className="relative flex h-10 w-10 items-center justify-center">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#C98A2C]/30" />
+            <span className="relative inline-flex h-4 w-4 rounded-full bg-[#C98A2C]" />
+          </span>
+          <p
+            style={{ fontFamily: "var(--font-mono)" }}
+            className="text-[11px] uppercase tracking-[0.2em] text-[#6B6153]"
+          >
+            Retrieving field note
+          </p>
         </div>
       </div>
     );
@@ -77,23 +94,33 @@ export default function ArticlePage() {
 
   if (!post) {
     return (
-      <div className="mx-auto max-w-3xl px-5 py-24 text-center">
-        <div className="rounded-2xl bg-gray-50 p-12">
-          <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
-          <h1 className="mt-4 text-2xl font-medium text-gray-900">
-            Article not found
-          </h1>
-          <p className="mt-2 text-gray-500">
-            The article you're looking for doesn't exist or has been removed.
-          </p>
-          <Link
-            href="/agri-learn"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-800"
-          >
-            Return to Agri-Learn
-            <ChevronRight size={16} />
-          </Link>
-        </div>
+      <div
+        className={`${fontVars} flex min-h-screen flex-col items-center justify-center bg-[#F6F0E4] px-6 text-center`}
+      >
+        <p
+          style={{ fontFamily: "var(--font-mono)" }}
+          className="text-[11px] uppercase tracking-[0.2em] text-[#A8462C]"
+        >
+          Entry not found
+        </p>
+        <h1
+          style={{ fontFamily: "var(--font-display)" }}
+          className="mt-4 text-3xl font-medium text-[#241C13]"
+        >
+          This page has left the field
+        </h1>
+        <p
+          style={{ fontFamily: "var(--font-body)" }}
+          className="mt-3 max-w-sm text-[15px] leading-7 text-[#6B6153]"
+        >
+          The article you're looking for may have been moved or unpublished.
+        </p>
+        <Link
+          href="/agri-learn"
+          className="mt-7 inline-flex items-center gap-2 border-b border-[#C98A2C] pb-0.5 text-sm font-medium text-[#241C13] transition hover:gap-3"
+        >
+          <ArrowLeft size={14} /> Return to Agri-Learn
+        </Link>
       </div>
     );
   }
@@ -105,91 +132,85 @@ export default function ArticlePage() {
     "Remote Agric Editorial";
 
   return (
-    <main className="min-h-screen bg-white">
-      {/* Navigation Bar */}
-      <nav className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 lg:px-8">
+    <main
+      className={`${fontVars} min-h-screen bg-[#F6F0E4] text-[#241C13]`}
+      style={{ fontFamily: "var(--font-body)" }}
+    >
+      {/* Top bar */}
+      <div className="border-b border-[#241C13]/10">
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between px-5 py-4 lg:px-10">
           <Link
             href="/agri-learn"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 transition hover:text-emerald-700"
+            className="inline-flex items-center gap-2 text-[13px] font-medium text-[#241C13]/60 transition hover:text-[#241C13]"
           >
-            <ArrowLeft size={16} />
-            Back to Agri-Learn
+            <ArrowLeft size={15} /> Agri-Learn
           </Link>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-100"
-            >
-              <Share2 size={16} />
-              Share
-            </button>
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-50"
-            >
-              <Copy size={16} />
-              Copy link
-            </button>
-          </div>
+          <button
+              onClick={() => void share()}
+            className="inline-flex items-center gap-2 rounded-full border border-[#241C13]/15 px-3.5 py-1.5 text-[13px] font-medium text-[#241C13]/70 transition hover:border-[#241C13]/30 hover:text-[#241C13] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C98A2C]"
+          >
+            <Share2 size={14} /> Share
+          </button>
         </div>
-      </nav>
+      </div>
 
-      {/* Hero Section */}
-      <div className="border-b border-gray-100 bg-linear-to-b from-emerald-50/50 to-white">
-        <div className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
-          <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
-            {/* Content */}
-            <div className="flex flex-col justify-center order-2 lg:order-1">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
-                  <Tag size={12} />
-                  {post.category}
-                </span>
-                <span className="text-xs text-gray-400">•</span>
-                <span className="text-xs text-gray-500">
-                  {readingTime} min read
-                </span>
+      {/* Hero / masthead */}
+      <section className="relative mx-auto max-w-[1320px] px-5 pb-14 pt-12 lg:px-10 lg:pb-20 lg:pt-16">
+        <div
+          className={`grid gap-10 ${hero ? "lg:grid-cols-[minmax(0,1fr)_420px]" : ""}`}
+        >
+          {/* Left: eyebrow, title, meta ledger */}
+          <div className="relative pl-6 lg:pl-10">
+            {/* rotated category tab */}
+            <span
+              style={{ fontFamily: "var(--font-mono)" }}
+              className="absolute -left-1 top-1 origin-top-left -rotate-90 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.25em] text-[#526B4A] lg:top-2"
+            >
+              {post.category}
+            </span>
+            <div className="absolute left-3 top-0 h-full w-px bg-[#241C13]/10 lg:left-6" />
+
+            <h1
+              style={{ fontFamily: "var(--font-display)" }}
+              className="max-w-2xl text-[2.6rem] font-medium leading-[1.05] tracking-[-0.02em] text-[#241C13] md:text-[3.4rem] md:leading-[1.03]"
+            >
+              {post.title}
+            </h1>
+            <p className="mt-6 max-w-xl text-[16px] leading-8 text-[#241C13]/65">
+              {post.excerpt}
+            </p>
+
+            {/* ledger meta row */}
+            <dl
+              style={{ fontFamily: "var(--font-mono)" }}
+              className="mt-9 grid max-w-md grid-cols-3 gap-6 border-y border-[#241C13]/15 py-4 text-[11px] uppercase tracking-[0.12em] text-[#241C13]/50"
+            >
+              <div>
+                <dt>Written by</dt>
+                <dd className="mt-1.5 normal-case tracking-normal text-[13px] font-medium text-[#241C13]">
+                  {author}
+                </dd>
               </div>
-
-              <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
-                {post.title}
-              </h1>
-
-              <p className="mt-4 text-base leading-relaxed text-gray-600 sm:text-lg">
-                {post.excerpt}
-              </p>
-
-              <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-gray-100 pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-                    <User size={18} className="text-emerald-700" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {author}
-                    </p>
-                    <p className="text-xs text-gray-500">Author</p>
-                  </div>
-                </div>
-                <span className="hidden h-6 w-px bg-gray-200 sm:block" />
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span className="flex items-center gap-1.5">
-                    <CalendarDays size={14} />
-                    {formatDate(post.publishedAt ?? post.createdAt)}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock3 size={14} />
-                    {readingTime} min read
-                  </span>
-                </div>
+              <div>
+                <dt>Published</dt>
+                <dd className="mt-1.5 normal-case tracking-normal text-[13px] font-medium text-[#241C13]">
+                  {formatDate(post.publishedAt ?? post.createdAt)}
+                </dd>
               </div>
-            </div>
+              <div>
+                <dt>Read time</dt>
+                <dd className="mt-1.5 normal-case tracking-normal text-[13px] font-medium text-[#241C13]">
+                  {readingTime} min
+                </dd>
+              </div>
+            </dl>
+          </div>
 
-            {/* Media */}
-            {hero && (
-              <div className="order-1 lg:order-2">
-                <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-gray-100">
+          {/* Right: pinned photograph */}
+          {hero && (
+            <div className="relative lg:pt-2">
+              <div className="relative rotate-1 border border-[#241C13]/15 bg-white p-2 shadow-[0_18px_40px_-20px_rgba(27,20,13,0.35)] transition duration-500 hover:rotate-0">
+                <div className="relative aspect-[4/5] w-full overflow-hidden">
                   {hero.type === "image" ? (
                     <Image
                       src={hero.url}
@@ -197,126 +218,156 @@ export default function ArticlePage() {
                       fill
                       unoptimized
                       priority
-                      className="object-cover transition duration-300 hover:scale-105"
+                      sizes="(min-width: 1024px) 420px, 100vw"
+                      className="object-cover"
                     />
                   ) : (
                     <video
                       src={hero.url}
                       controls
                       playsInline
-                      className="h-full w-full object-cover"
+                      className="h-full w-full bg-[#1B140D] object-cover"
                     />
                   )}
                 </div>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Article Content */}
-      <div className="mx-auto max-w-3xl px-5 py-12 lg:px-8 lg:py-16">
-        <div className="prose prose-lg prose-emerald max-w-none">
-          {/* First paragraph with drop cap */}
-          {paragraphs[0] && (
-            <p className="text-lg leading-relaxed text-gray-700 first-letter:float-left first-letter:mr-3 first-letter:text-6xl first-letter:font-bold first-letter:text-emerald-700 first-letter:leading-[0.8]">
-              {paragraphs[0]}
-            </p>
+              <p
+                style={{ fontFamily: "var(--font-mono)" }}
+                className="mt-4 text-[10px] uppercase tracking-[0.18em] text-[#241C13]/40"
+              >
+                Field record — Remote Agric
+              </p>
+            </div>
           )}
+        </div>
+      </section>
 
-          {/* Remaining content */}
-          <div className="mt-8 space-y-6">
-            {paragraphs.slice(1).map((paragraph, index) => {
-              // Check if paragraph looks like a heading (short, no ending punctuation)
-              const isHeading =
-                paragraph.length < 80 && !/[.!?]$/.test(paragraph);
+      {/* Body */}
+      <div className="mx-auto grid max-w-[1320px] gap-14 px-5 pb-24 lg:grid-cols-[220px_minmax(0,680px)_1fr] lg:px-10">
+        {/* Ledger rail */}
+        <aside className="hidden lg:block">
+          <div
+            className="sticky top-10 space-y-8"
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#241C13]/40">
+                In this piece
+              </p>
+              <p
+                className="mt-3 border-l-2 border-[#C98A2C] pl-3 text-[13px] normal-case leading-6 tracking-normal text-[#241C13]/65"
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                {post.excerpt}
+              </p>
+            </div>
+            <div className="border-t border-[#241C13]/10 pt-5">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#241C13]/40">
+                Share this record
+              </p>
+              <button
+            onClick={() => void share()}
+                className="mt-3 inline-flex items-center gap-2 text-[13px] normal-case tracking-normal text-[#526B4A] transition hover:text-[#241C13] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C98A2C]"
+              >
+                <Copy size={14} /> Copy link
+              </button>
+            </div>
+          </div>
+        </aside>
 
-              if (isHeading) {
-                return (
-                  <h2
-                    key={index}
-                    className="mt-10 text-2xl font-bold tracking-tight text-gray-900 first:mt-0"
-                  >
-                    {paragraph}
-                  </h2>
-                );
-              }
+        {/* Article copy */}
+        <article className="min-w-0">
+          <p className="text-[19px] leading-9 text-[#241C13]/85 [text-wrap:pretty]">
+            <span
+              style={{ fontFamily: "var(--font-display)" }}
+              className="float-left mr-3 mt-1 flex h-14 w-14 items-center justify-center rounded-full bg-[#1B140D] text-3xl font-medium leading-none text-[#F6F0E4]"
+            >
+              {(paragraphs[0] ?? post.content ?? "").trim().charAt(0)}
+            </span>
+            {(paragraphs[0] ?? post.content ?? "").trim().slice(1)}
+          </p>
 
-              return (
+          <div className="mt-9 space-y-7">
+            {paragraphs.slice(1).map((paragraph, index) =>
+              paragraph.length < 90 && !/[.!?]$/.test(paragraph) ? (
+                <h2
+                  key={index}
+                  style={{ fontFamily: "var(--font-display)" }}
+                  className="flex items-center gap-3 pt-6 text-[1.7rem] font-medium leading-8 tracking-tight text-[#241C13]"
+                >
+                  <span className="h-4 w-1 shrink-0 bg-[#C98A2C]" />
+                  {paragraph}
+                </h2>
+              ) : (
                 <p
                   key={index}
-                  className="text-lg leading-relaxed text-gray-700"
+                  className="text-[16px] leading-8 text-[#241C13]/80"
                 >
                   {paragraph}
                 </p>
-              );
-            })}
+              ),
+            )}
           </div>
-        </div>
 
-        {/* Additional Media */}
-        {post.media?.slice(1).map((media, index) => (
-          <figure
-            key={media.publicId}
-            className="mt-12 overflow-hidden rounded-2xl bg-gray-50"
-          >
-            <div className="relative aspect-video">
+          {post.media?.slice(1).map((media, index) => (
+            <figure
+              key={media.publicId}
+              className="my-12 border border-[#241C13]/15 bg-white p-2"
+            >
               {media.type === "image" ? (
                 <Image
                   src={media.url}
                   alt={`${post.title} – image ${index + 2}`}
-                  fill
+                  width={1200}
+                  height={760}
                   unoptimized
-                  className="object-cover"
+                  className="w-full object-cover"
                 />
               ) : (
                 <video
                   src={media.url}
                   controls
                   playsInline
-                  className="h-full w-full object-cover"
+                  className="w-full bg-[#1B140D]"
                 />
               )}
-            </div>
-            <figcaption className="px-6 py-3 text-sm text-gray-500">
-              Supporting media for this article
-            </figcaption>
-          </figure>
-        ))}
+              <figcaption
+                style={{ fontFamily: "var(--font-mono)" }}
+                className="px-2 pb-1 pt-3 text-[10px] uppercase tracking-[0.18em] text-[#241C13]/40"
+              >
+                Supporting record, field {index + 2}
+              </figcaption>
+            </figure>
+          ))}
 
-        {/* Article Footer / CTA */}
-        <div className="mt-16 rounded-2xl bg-linear-to-br from-emerald-50 to-emerald-100/50 p-8">
-          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Continue learning with Agri-Learn
-              </h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Explore more articles, guides, and insights for modern
-                agriculture.
-              </p>
-            </div>
+          {/* Footer CTA */}
+          <footer className="mt-16 border border-[#1B140D] bg-[#1B140D] p-8 text-[#F6F0E4] md:p-10">
+            <p
+              style={{ fontFamily: "var(--font-mono)" }}
+              className="text-[10px] uppercase tracking-[0.2em] text-[#C98A2C]"
+            >
+              Keep learning
+            </p>
+            <h2
+              style={{ fontFamily: "var(--font-display)" }}
+              className="mt-3 text-2xl font-medium leading-snug"
+            >
+              More field notes on sustainable, practical agriculture.
+            </h2>
+            <p className="mt-2 max-w-md text-[14px] leading-6 text-[#F6F0E4]/60">
+              Written for farmers, investors, and anyone building in agriculture
+              across Nigeria.
+            </p>
             <Link
               href="/agri-learn"
-              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-emerald-700 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-800"
+              className="mt-6 inline-flex items-center gap-2 border-b border-[#C98A2C] pb-0.5 text-sm font-medium text-[#F6F0E4] transition hover:gap-3"
             >
-              Browse all articles
-              <ChevronRight size={16} />
+              Browse Agri-Learn <ArrowUpRight size={16} />
             </Link>
-          </div>
-        </div>
+          </footer>
+        </article>
 
-        {/* Share Section Mobile */}
-        <div className="mt-8 flex items-center justify-between border-t border-gray-100 pt-6 lg:hidden">
-          <p className="text-sm text-gray-500">Share this article</p>
-          <button
-            onClick={handleShare}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-          >
-            <Copy size={16} />
-            Copy link
-          </button>
-        </div>
+        <div className="hidden lg:block" />
       </div>
     </main>
   );
