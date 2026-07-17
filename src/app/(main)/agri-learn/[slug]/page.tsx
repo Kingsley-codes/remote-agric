@@ -30,17 +30,24 @@ export default function BlogDetailsPage() {
 
   return <main className="min-h-screen bg-[#f6f8f6] text-[#0f1a0b]">
     <article>
-      <header className="mx-auto max-w-5xl px-5 pb-10 pt-8 sm:px-8 lg:pb-14 lg:pt-12">
-        <div className="flex items-center justify-between gap-4">
-          <Link href="/agri-learn" className="inline-flex items-center gap-2 rounded-full bg-[#e0e8df] px-4 py-2 text-sm text-[#3d4b36] transition hover:bg-[#d8e2d7]"><ArrowLeft size={16} /> Back to Agri-Learn</Link>
-          <button onClick={share} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-[#3d4b36] transition hover:bg-[#e0e8df]" aria-label="Copy article link"><Share2 size={16} /> <span className="hidden sm:inline">Share</span></button>
+      <header className="relative min-h-[520px] overflow-hidden bg-[#244808] sm:min-h-[600px]">
+        {hero?.type === "image" && <Image src={hero.url} alt={post.title} fill unoptimized priority sizes="100vw" className="object-cover" />}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/20" />
+        <div className="relative z-10 mx-auto flex min-h-[520px] max-w-6xl flex-col justify-between px-5 py-7 sm:min-h-[600px] sm:px-8 sm:py-10">
+          <div className="flex items-center justify-between gap-4">
+            <Link href="/agri-learn" className="inline-flex items-center gap-2 rounded-full bg-black/30 px-4 py-2 text-sm text-white backdrop-blur-md transition hover:bg-black/45"><ArrowLeft size={16} /> Back to Agri-Learn</Link>
+            <button onClick={share} className="inline-flex items-center gap-2 rounded-full bg-black/30 px-4 py-2 text-sm text-white backdrop-blur-md transition hover:bg-black/45" aria-label="Copy article link"><Share2 size={16} /> <span className="hidden sm:inline">Share</span></button>
+          </div>
+          <div className="max-w-4xl pb-4 sm:pb-8">
+            <span className="inline-flex rounded-full bg-primary px-3 py-1.5 text-xs uppercase tracking-[0.16em] text-white">{post.category}</span>
+            <h1 className="mt-5 text-3xl font-medium leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">{post.title}</h1>
+            <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-white/80"><span>By Remote Agric team</span><span aria-hidden>·</span><time>{formatDate(post.publishedAt ?? post.createdAt)}</time><span aria-hidden>·</span><span>{readTime(post.content)} min read</span></div>
+          </div>
         </div>
-        <div className="mx-auto mt-12 max-w-3xl text-center"><p className="text-xs uppercase tracking-[0.18em] text-primary">{post.category}</p><h1 className="mt-5 text-3xl font-medium leading-tight tracking-tight sm:text-4xl lg:text-5xl">{post.title}</h1><p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-[#3d4b36]">{post.excerpt}</p><div className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-[#3d4b36]/75"><span>By Remote Agric team</span><span aria-hidden>·</span><time>{formatDate(post.publishedAt ?? post.createdAt)}</time><span aria-hidden>·</span><span>{readTime(post.content)} min read</span></div></div>
       </header>
 
-      {hero?.type === "image" && <div className="mx-auto max-w-6xl px-5 sm:px-8"><div className="relative aspect-[16/8] overflow-hidden rounded-3xl bg-[#e0e8df]"><Image src={hero.url} alt={post.title} fill unoptimized priority sizes="(min-width: 1280px) 1152px, 100vw" className="object-cover" /></div></div>}
-
       <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8 lg:py-16">
+        <p className="mb-9 text-xl leading-9 text-[#3d4b36]">{post.excerpt}</p>
         <div className="space-y-7 text-[17px] leading-8 text-[#263322]">
           {paragraphs.map((paragraph, index) => <div key={index}>
             <p>{paragraph}</p>
