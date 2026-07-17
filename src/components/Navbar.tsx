@@ -71,6 +71,7 @@ export default function Navbar() {
     { href: "/", label: "Home" },
     { href: "/opportunities", label: "Opportunities" },
     { href: "/agri-learn", label: "Agri-Learn" },
+    { href: "/community", label: "Community" },
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
   ];

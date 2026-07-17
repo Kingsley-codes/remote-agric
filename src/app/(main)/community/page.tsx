@@ -1,0 +1,27 @@
+"use client";
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+
+type Author = { username?: string; firstName?: string; lastName?: string };
+type Message = { _id: string; body: string; createdAt: string; author: Author; replies?: Message[] };
+type Room = { id: string; title: string; subtitle?: string; type: string; stage?: string };
+const base = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+export default function CommunityPage() {
+  const [rooms, setRooms] = useState<Room[]>([]), [room, setRoom] = useState("general");
+  const [messages, setMessages] = useState<Message[]>([]), [canPost, setCanPost] = useState(false), [username, setUsername] = useState<string>();
+  const [body, setBody] = useState(""), [replyTo, setReplyTo] = useState<string>(), [nameInput, setNameInput] = useState(""), [error, setError] = useState("");
+  useEffect(() => { fetch(`${base}/api/forum/rooms`).then((r) => r.json()).then((data) => setRooms(data.rooms ?? [])); }, []);
+  const load = useCallback(async () => { const response = await fetch(`${base}/api/forum/rooms/${room}/messages`, { credentials: "include" }); const data = await response.json(); setMessages(data.messages ?? []); setCanPost(Boolean(data.canPost)); setUsername(data.username); }, [room]);
+  useEffect(() => { load(); }, [load]);
+  const submit = async (event: FormEvent) => { event.preventDefault(); setError(""); const response = await fetch(`${base}/api/forum/rooms/${room}/messages`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body, parentId: replyTo }) }); const data = await response.json(); if (!response.ok) return setError(data.message); setBody(""); setReplyTo(undefined); load(); };
+  const saveUsername = async (event: FormEvent) => { event.preventDefault(); setError(""); const response = await fetch(`${base}/api/forum/username`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: nameInput }) }); const data = await response.json(); if (!response.ok) return setError(data.message); setUsername(data.username); load(); };
+  const author = (message: Message) => message.author.username ? `@${message.author.username}` : `${message.author.firstName ?? "User"} ${message.author.lastName?.[0] ?? ""}`;
+  return <main className="min-h-[calc(100vh-5rem)] bg-[#f4f7f3] p-4 md:p-8"><div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-[18rem_1fr]">
+    <aside className="rounded-2xl bg-white p-3 shadow-sm"><h1 className="px-3 py-3 text-xl font-bold text-gray-900">Community</h1><div className="flex gap-2 overflow-x-auto md:flex-col">{rooms.map((item) => <button key={item.id} onClick={() => { setRoom(item.id); setReplyTo(undefined); }} className={`min-w-fit rounded-xl p-3 text-left ${room === item.id ? "bg-primary text-white" : "hover:bg-gray-100"}`}><p className="font-bold">{item.title}</p>{item.subtitle && <p className="text-xs opacity-75">{item.subtitle}</p>}</button>)}</div></aside>
+    <section className="flex min-h-[70vh] flex-col overflow-hidden rounded-2xl bg-white shadow-sm"><header className="border-b p-5"><h2 className="text-lg font-bold">{rooms.find((item) => item.id === room)?.title ?? "General"} room</h2><p className="text-sm text-gray-500">Public to read. Use @username to tag a community member.</p></header>
+      <div className="flex-1 space-y-4 overflow-y-auto p-5">{messages.map((message) => <article key={message._id} className="rounded-xl border p-4"><div className="flex justify-between gap-3"><strong className="text-sm text-primary">{author(message)}</strong><time className="text-xs text-gray-400">{new Date(message.createdAt).toLocaleString()}</time></div><p className="mt-2 whitespace-pre-wrap text-gray-700">{message.body}</p>{canPost && <button onClick={() => setReplyTo(message._id)} className="mt-2 text-xs font-bold text-primary">Reply</button>}
+        {!!message.replies?.length && <div className="mt-3 space-y-2 border-l-2 border-green-200 pl-4">{message.replies.map((reply) => <div key={reply._id} className="rounded-lg bg-gray-50 p-3"><strong className="text-xs text-primary">{author(reply)}</strong><p className="mt-1 text-sm text-gray-700">{reply.body}</p></div>)}</div>}</article>)}</div>
+      <footer className="border-t p-4">{error && <p className="mb-2 text-sm text-red-600">{error}</p>}{canPost ? !username ? <form onSubmit={saveUsername} className="flex gap-2"><input value={nameInput} onChange={(e) => setNameInput(e.target.value.toLowerCase())} className="flex-1 rounded-xl border px-4 py-3" placeholder="Choose a username" /><button className="rounded-xl bg-primary px-5 font-bold text-white">Save username</button></form> : <form onSubmit={submit}>{replyTo && <div className="mb-2 flex justify-between rounded-lg bg-green-50 px-3 py-2 text-sm">Replying to a message <button type="button" onClick={() => setReplyTo(undefined)}>Cancel</button></div>}<div className="flex gap-2"><textarea value={body} onChange={(e) => setBody(e.target.value)} className="min-h-12 flex-1 rounded-xl border px-4 py-3" placeholder="Write a message…" maxLength={2000} /><button className="rounded-xl bg-primary px-5 font-bold text-white">Post</button></div></form> : <p className="text-center text-sm text-gray-500">{room === "general" ? <>Please <Link className="font-bold text-primary" href="/login">sign in</Link> to post.</> : "Only users with an active investment in this produce can post. Everyone can read."}</p>}</footer>
+    </section></div></main>;
+}
