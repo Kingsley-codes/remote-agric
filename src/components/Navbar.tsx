@@ -117,15 +117,9 @@ export default function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="hidden md:flex h-10 items-center justify-center rounded-xl bg-primary/10 px-4 text-sm font-bold text-primary border border-primary hover:bg-primary hover:text-white transition-colors"
-                >
-                  Log In
-                </Link>
-                <Link
-                  href="/signup"
                   className="hidden md:flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-bold text-white hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/20 transition-all"
                 >
-                  Sign Up
+                  Log In
                 </Link>
               </>
             ) : (
