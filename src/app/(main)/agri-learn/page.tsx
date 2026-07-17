@@ -60,11 +60,11 @@ export default function AgriLearnPage() {
     ],
     [posts],
   );
-  const visible =
+  const featured = posts[0];
+  const articles =
     category === "All articles"
-      ? posts
-      : posts.filter((post) => post.category === category);
-  const [featured, ...articles] = visible;
+      ? posts.slice(1)
+      : posts.slice(1).filter((post) => post.category === category);
 
   return (
     <main className="min-h-screen bg-[#f6f8f6] text-[#0f1a0b]">
@@ -76,10 +76,6 @@ export default function AgriLearnPage() {
           <h1 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
             Agri-Learn Blog Hub
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#3d4b36]">
-            Practical agricultural knowledge, market perspectives and ideas from
-            the Remote Agric team.
-          </p>
         </header>
 
         {loading ? (
@@ -90,12 +86,13 @@ export default function AgriLearnPage() {
           <>
             <Link
               href={`/agri-learn/${featured.slug}`}
-              className="group grid overflow-hidden rounded-3xl bg-[#e0e8df] shadow-[0_8px_30px_rgba(15,26,11,0.06)] lg:grid-cols-[3fr_2fr]"
+              className="group grid min-h-[480px] overflow-hidden rounded-[2rem] bg-[#e0e8df] shadow-[0_8px_30px_rgba(15,26,11,0.06)] lg:grid-cols-[3fr_2fr]"
             >
-              <div className="relative min-h-72 overflow-hidden lg:min-h-[470px]">
+              <div className="relative min-h-80 overflow-hidden lg:min-h-[480px]">
                 <Cover post={featured} priority />
-                <div className="absolute left-5 top-5 rounded-full bg-[#f6f8f6]/90 px-3 py-1.5 text-xs text-[#0f1a0b] backdrop-blur">
-                  Featured insight
+                <div className="absolute left-6 top-6 flex flex-wrap gap-2">
+                  <span className="rounded-full bg-primary px-3 py-1.5 text-[11px] uppercase tracking-[0.12em] text-white">Featured insight</span>
+                  <span className="rounded-full bg-white/90 px-3 py-1.5 text-[11px] text-[#0f1a0b] backdrop-blur">{readTime(featured.content)} min read</span>
                 </div>
               </div>
               <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12">
@@ -112,8 +109,7 @@ export default function AgriLearnPage() {
                   <div>
                     <p className="text-sm text-[#0f1a0b]">Remote Agric team</p>
                     <p className="mt-1 text-xs text-[#3d4b36]/70">
-                      {formatDate(featured.publishedAt ?? featured.createdAt)} ·{" "}
-                      {readTime(featured.content)} min read
+                      {formatDate(featured.publishedAt ?? featured.createdAt)}
                     </p>
                   </div>
                   <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white transition group-hover:translate-x-1">
@@ -138,7 +134,7 @@ export default function AgriLearnPage() {
               ))}
             </nav>
 
-            {articles.length > 0 && (
+            {articles.length > 0 ? (
               <section className="mt-8 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
                 {articles.map((post) => (
                   <Link
@@ -175,6 +171,12 @@ export default function AgriLearnPage() {
                   </Link>
                 ))}
               </section>
+            ) : (
+              <div className="mt-8 rounded-3xl bg-white px-6 py-16 text-center">
+                <BookOpen className="mx-auto text-primary/40" />
+                <h2 className="mt-4 text-xl font-medium">No more articles in this category</h2>
+                <p className="mt-2 text-sm text-[#3d4b36]">Try another category to continue exploring.</p>
+              </div>
             )}
           </>
         ) : (
