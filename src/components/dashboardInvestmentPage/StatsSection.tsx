@@ -69,7 +69,7 @@ export default function StatsSection({
           {totalActiveInvestments}
         </p>
         <p className="text-xs text-[#5e9a4c] font-medium mt-1">
-          All investments in pre-harvest stage
+          Investments currently in an active farm cycle
         </p>
       </div>
     </div>

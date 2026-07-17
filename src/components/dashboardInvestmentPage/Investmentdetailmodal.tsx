@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { UserInvestment } from "@/app/dashboard/investments/page";
+import Link from "next/link";
 
 interface Props {
   investment: UserInvestment | null;
@@ -8,20 +9,24 @@ interface Props {
 
 function getStageLabel(stage: string): string {
   const labels: Record<string, string> = {
-    "pre-harvest": "Pre-Harvest",
+    "accepting-investments": "Accepting Investments",
+    "land-clearing": "Land Clearing",
+    planting: "Planting",
     growing: "Growing",
-    harvest: "Harvest",
-    completed: "Completed",
+    harvesting: "Harvesting",
+    "returns-to-investment": "Returns to Investment",
   };
   return labels[stage] ?? stage;
 }
 
 function StageChip({ stage }: { stage: string }) {
   const colors: Record<string, string> = {
-    "pre-harvest": "bg-amber-50 text-amber-700 border-amber-200",
+    "accepting-investments": "bg-amber-50 text-amber-700 border-amber-200",
+    "land-clearing": "bg-orange-50 text-orange-700 border-orange-200",
+    planting: "bg-lime-50 text-lime-700 border-lime-200",
     growing: "bg-green-50 text-green-700 border-green-200",
-    harvest: "bg-blue-50 text-blue-700 border-blue-200",
-    completed: "bg-gray-100 text-gray-600 border-gray-200",
+    harvesting: "bg-blue-50 text-blue-700 border-blue-200",
+    "returns-to-investment": "bg-purple-50 text-purple-700 border-purple-200",
   };
   return (
     <span
@@ -219,6 +224,7 @@ export default function InvestmentDetailModal({ investment, onClose }: Props) {
 
         {/* Footer */}
         <div className="shrink-0 px-5 py-4 border-t border-[#eaf2e8] bg-white">
+          <Link href={`/community?room=${investment.produce?._id}`} onClick={onClose} className="mb-2 block w-full rounded-xl border border-primary py-3 text-center text-sm font-bold text-primary hover:bg-green-50">Open produce community</Link>
           <button
             onClick={onClose}
             className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark active:bg-[#1e4b1b] transition-colors"

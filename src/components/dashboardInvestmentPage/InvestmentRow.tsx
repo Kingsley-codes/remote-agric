@@ -35,16 +35,20 @@ function StatusBadge({ status }: StatusBadgeProps) {
 
 function StageLabel({ stage }: { stage: string }) {
   const labels: Record<string, string> = {
-    "pre-harvest": "Pre-Harvest",
+    "accepting-investments": "Accepting Investments",
+    "land-clearing": "Land Clearing",
+    planting: "Planting",
     growing: "Growing",
-    harvest: "Harvest",
-    completed: "Completed",
+    harvesting: "Harvesting",
+    "returns-to-investment": "Returns to Investment",
   };
   const colors: Record<string, string> = {
-    "pre-harvest": "text-amber-700",
+    "accepting-investments": "text-amber-700",
+    "land-clearing": "text-orange-700",
+    planting: "text-lime-700",
     growing: "text-green-700",
-    harvest: "text-blue-700",
-    completed: "text-gray-500",
+    harvesting: "text-blue-700",
+    "returns-to-investment": "text-purple-700",
   };
   return (
     <span

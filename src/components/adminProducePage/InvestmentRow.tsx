@@ -24,6 +24,7 @@ interface Investment {
   image1: { url: string };
   image2: { url: string };
   image3: { url: string };
+  stage: string;
 }
 
 interface InvestmentRowProps {
@@ -44,6 +45,16 @@ export default function InvestmentRow({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [stage, setStage] = useState(investment.stage);
+  const [stageSaving, setStageSaving] = useState(false);
+  const stages = ["accepting-investments", "land-clearing", "planting", "growing", "harvesting", "returns-to-investment"];
+  const updateStage = async (nextStage: string) => {
+    const previous = stage; setStage(nextStage); setStageSaving(true);
+    try { await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${investment._id}/stage`, { stage: nextStage }, { withCredentials: true }); toast.success("Produce stage updated and investors notified"); refreshInvestments?.(); }
+    catch (error: any) { setStage(previous); toast.error(error.response?.data?.message ?? "Failed to update stage"); }
+    finally { setStageSaving(false); }
+  };
+  const stageSelect = <select aria-label="Produce stage" value={stage} disabled={stageSaving} onChange={(event) => updateStage(event.target.value)} className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-50">{stages.map((item) => <option key={item} value={item}>{item.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ")}</option>)}</select>;
 
   const getCategoryStyles = (category: string) => {
     switch (category.toLowerCase()) {
@@ -215,6 +226,7 @@ export default function InvestmentRow({
               <span className="capitalize">{investment.category}</span>
             </span>
           </div>
+          <div>{stageSelect}</div>
         </div>
         {modals}
       </>
@@ -240,6 +252,7 @@ export default function InvestmentRow({
                 {investment.produceName}
               </p>
             </div>
+            {stageSelect}
           </div>
         </td>
 

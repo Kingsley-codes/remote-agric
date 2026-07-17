@@ -12,6 +12,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { FiLogOut, FiChevronUp } from "react-icons/fi";
 import { MdOutlineCardTravel } from "react-icons/md";
+import { FiBell } from "react-icons/fi";
 import axios from "axios";
 
 export interface UserData {
@@ -48,6 +49,7 @@ const navLinks = [
   { href: "/admin/dashboard/support", label: "Support", icon: IoIosChatboxes },
   { href: "/admin/dashboard/referrals", label: "Referrals", icon: FiGift },
   { href: "/admin/dashboard/agri-learn", label: "Agri-Learn", icon: FiBookOpen },
+  { href: "/admin/dashboard/notifications", label: "Notifications", icon: FiBell },
 ];
 
 function getInitials(user: UserData | null): string {

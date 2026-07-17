@@ -23,6 +23,7 @@ interface Produce {
   image3: { url: string };
   createdAt: string;
   updatedAt: string;
+  stage: string;
 }
 
 export default function InvestmentTable() {
