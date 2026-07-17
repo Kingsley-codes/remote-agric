@@ -70,6 +70,7 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/opportunities", label: "Opportunities" },
+    { href: "/agri-learn", label: "Agri-Learn" },
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
   ];

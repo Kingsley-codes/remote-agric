@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { IoIosChatboxes } from "react-icons/io";
+import { FiGift } from "react-icons/fi";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
@@ -37,6 +38,7 @@ const navLinks = [
   { href: "/opportunities", label: "New Investments", icon: FiShoppingBag },
   { href: "/dashboard/wallet", label: "Wallet", icon: FiCreditCard },
   { href: "/dashboard/support", label: "Support", icon: IoIosChatboxes },
+  { href: "/dashboard/referrals", label: "Referrals", icon: FiGift },
 ];
 
 function getInitials(user: UserData | null): string {

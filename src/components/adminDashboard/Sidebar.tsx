@@ -7,6 +7,7 @@ import { PiPlantDuotone } from "react-icons/pi";
 import { FaMoneyBills } from "react-icons/fa6";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { IoIosChatboxes } from "react-icons/io";
+import { FiBookOpen, FiGift } from "react-icons/fi";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { FiLogOut, FiChevronUp } from "react-icons/fi";
@@ -45,6 +46,8 @@ const navLinks = [
   },
 
   { href: "/admin/dashboard/support", label: "Support", icon: IoIosChatboxes },
+  { href: "/admin/dashboard/referrals", label: "Referrals", icon: FiGift },
+  { href: "/admin/dashboard/agri-learn", label: "Agri-Learn", icon: FiBookOpen },
 ];
 
 function getInitials(user: UserData | null): string {

@@ -23,12 +23,18 @@ export default function SignUpPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    referralCode: "",
     terms: false,
   });
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [isCreateAccountDisabled, setIsCreateAccountDisabled] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("ref");
+    if (code) setFormData((current) => ({ ...current, referralCode: code.toUpperCase() }));
+  }, []);
 
   // Validate password strength
   const validatePassword = (password: string) => {
@@ -420,6 +426,11 @@ export default function SignUpPage() {
                         className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white py-2.5 px-3 md:px-4 text-sm text-slate-900 placeholder-slate-400 transition-all"
                         required
                       />
+                    </div>
+
+                    <div className="flex flex-col gap-1 md:gap-1.5">
+                      <label htmlFor="referralCode" className="text-xs md:text-sm font-semibold text-slate-700">Referral code <span className="font-normal text-slate-400">(optional)</span></label>
+                      <input id="referralCode" name="referralCode" type="text" placeholder="AGU-XXXXXXXX" value={formData.referralCode} onChange={handleInputChange} className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-primary py-2.5 px-3 md:px-4 text-sm uppercase" />
                     </div>
 
                     {/* Continue Button */}
