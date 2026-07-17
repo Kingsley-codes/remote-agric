@@ -25,7 +25,7 @@ export default function ManageLearn() {
   async function submit(event: FormEvent<HTMLFormElement>, status: "draft" | "published") {
     event.preventDefault(); setSaving(true);
     const form = new FormData(event.currentTarget); form.set("status", status);
-    try { await axios.post(`${API}/api/admin/agri-learn`, form, { withCredentials: true }); toast.success(status === "published" ? "Article published" : "Draft saved"); close(); await load(); }
+    try { await axios.post(`${API}/api/admin/agri-learn`, form, { withCredentials: true }); toast.success(status === "published" ? "Article published" : "Draft saved"); setOpen(false); setFiles([]); formRef.current?.reset(); await load(); }
     catch (error) { toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to save article" : "Unable to save article"); }
     finally { setSaving(false); }
   }
