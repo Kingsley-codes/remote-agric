@@ -5,11 +5,29 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowUpRight, CalendarDays, Clock3, Copy, Loader2, Share2 } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  Clock3,
+  Copy,
+  Loader2,
+  Share2,
+  BookOpen,
+  User,
+  Tag,
+  ChevronRight,
+} from "lucide-react";
 import { LearnPost } from "@/lib/agriLearn";
 import { toast } from "react-toastify";
 
-const formatDate = (date?: string) => date ? new Intl.DateTimeFormat("en-NG", { day: "numeric", month: "long", year: "numeric" }).format(new Date(date)) : "Recently published";
+const formatDate = (date?: string) =>
+  date
+    ? new Intl.DateTimeFormat("en-NG", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(date))
+    : "Recently published";
 
 export default function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -17,63 +35,289 @@ export default function ArticlePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agri-learn/${slug}`)
+    axios
+      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agri-learn/${slug}`)
       .then((response) => setPost(response.data.data.post))
       .finally(() => setLoading(false));
   }, [slug]);
 
-  const paragraphs = useMemo(() => post?.content?.split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean) ?? [], [post?.content]);
-  const readingTime = Math.max(1, Math.ceil((post?.content?.trim().split(/\s+/).length ?? 0) / 220));
+  const paragraphs = useMemo(
+    () =>
+      post?.content
+        ?.split(/\n\s*\n/)
+        .map((part) => part.trim())
+        .filter(Boolean) ?? [],
+    [post?.content],
+  );
 
-  if (loading) return <div className="flex min-h-[70vh] items-center justify-center bg-[#f7f8f6]"><Loader2 className="animate-spin text-primary"/></div>;
-  if (!post) return <div className="mx-auto max-w-3xl px-5 py-24 text-center"><h1 className="text-2xl font-medium">Article not found</h1><Link href="/agri-learn" className="mt-5 inline-block text-sm font-medium text-primary">Return to Agri-Learn</Link></div>;
+  const readingTime = Math.max(
+    1,
+    Math.ceil((post?.content?.trim().split(/\s+/).length ?? 0) / 220),
+  );
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Article link copied to clipboard");
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-emerald-700" />
+          <p className="mt-3 text-sm text-gray-500">Loading article...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="mx-auto max-w-3xl px-5 py-24 text-center">
+        <div className="rounded-2xl bg-gray-50 p-12">
+          <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
+          <h1 className="mt-4 text-2xl font-medium text-gray-900">
+            Article not found
+          </h1>
+          <p className="mt-2 text-gray-500">
+            The article you're looking for doesn't exist or has been removed.
+          </p>
+          <Link
+            href="/agri-learn"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-800"
+          >
+            Return to Agri-Learn
+            <ChevronRight size={16} />
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const hero = post.media?.[0];
-  const author = post.author?.name || [post.author?.firstName, post.author?.lastName].filter(Boolean).join(" ") || "Remote Agric Editorial";
-  const share = () => navigator.clipboard.writeText(window.location.href).then(() => toast.success("Article link copied"));
+  const author =
+    post.author?.name ||
+    [post.author?.firstName, post.author?.lastName].filter(Boolean).join(" ") ||
+    "Remote Agric Editorial";
 
-  return <main className="min-h-screen bg-[#f7f8f6] text-slate-800">
-    <div className="border-b border-white/10 bg-[#183d22] text-white">
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 lg:px-8">
-        <Link href="/agri-learn" className="inline-flex items-center gap-2 text-sm text-green-50/70 transition hover:text-white"><ArrowLeft size={16}/>Agri-Learn</Link>
-        <button onClick={share} className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-green-50/70 transition hover:bg-white/10 hover:text-white"><Share2 size={16}/>Share article</button>
-      </div>
-    </div>
-
-    <header className="relative overflow-hidden bg-[#183d22] text-white">
-      <div className="pointer-events-none absolute -left-32 -top-40 h-96 w-96 rounded-full bg-[#7fb069]/20 blur-3xl"/>
-      <div className="pointer-events-none absolute bottom-0 right-[35%] h-64 w-64 rounded-full bg-[#d7a928]/10 blur-3xl"/>
-      <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "26px 26px" }}/>
-      <div className={`relative mx-auto grid max-w-[1440px] ${hero ? "lg:grid-cols-[minmax(0,0.92fr)_minmax(480px,1.08fr)]" : ""}`}>
-        <div className="flex min-h-[500px] flex-col justify-center px-6 py-14 md:px-12 lg:min-h-[640px] lg:px-16 xl:px-20">
-          <div className="max-w-3xl">
-            <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-green-100 backdrop-blur-sm">{post.category}</span>
-            <h1 className="mt-7 text-4xl font-medium leading-[1.1] tracking-[-0.035em] text-white md:text-5xl xl:text-[3.65rem]">{post.title}</h1>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-green-50/75 md:text-lg">{post.excerpt}</p>
-            <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-white/15 pt-6">
-              <div><p className="text-[11px] text-green-100/50">Written by</p><p className="mt-1 text-sm font-medium text-white">{author}</p></div>
-              <span className="hidden h-8 w-px bg-white/15 sm:block"/>
-              <span className="inline-flex items-center gap-2 text-xs text-green-50/65"><CalendarDays size={14}/>{formatDate(post.publishedAt ?? post.createdAt)}</span>
-              <span className="inline-flex items-center gap-2 text-xs text-green-50/65"><Clock3 size={14}/>{readingTime} min read</span>
-            </div>
+  return (
+    <main className="min-h-screen bg-white">
+      {/* Navigation Bar */}
+      <nav className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 lg:px-8">
+          <Link
+            href="/agri-learn"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 transition hover:text-emerald-700"
+          >
+            <ArrowLeft size={16} />
+            Back to Agri-Learn
+          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleShare}
+              className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-100"
+            >
+              <Share2 size={16} />
+              Share
+            </button>
+            <button
+              onClick={handleShare}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 transition hover:bg-gray-50"
+            >
+              <Copy size={16} />
+              Copy link
+            </button>
           </div>
         </div>
-        {hero && <div className="relative min-h-[360px] overflow-hidden lg:min-h-[640px]">
-          {hero.type === "image" ? <Image src={hero.url} alt={post.title} fill unoptimized priority sizes="(min-width: 1024px) 55vw, 100vw" className="object-cover"/> : <video src={hero.url} controls playsInline className="h-full min-h-[360px] w-full bg-slate-950 object-cover lg:min-h-[640px]"/>}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#183d22]/35 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#183d22]/30 lg:to-transparent"/>
-          <div className="absolute bottom-5 left-5 rounded-lg bg-slate-950/45 px-3 py-2 text-[11px] text-white/75 backdrop-blur-md">Featured story · Remote Agric</div>
-        </div>}
-      </div>
-    </header>
+      </nav>
 
-    <div className="mx-auto grid max-w-6xl gap-12 px-5 py-14 lg:grid-cols-[190px_minmax(0,720px)] lg:px-8 lg:py-20">
-      <aside className="hidden lg:block"><div className="sticky top-24"><p className="text-xs font-medium uppercase tracking-[0.15em] text-slate-400">In this article</p><div className="mt-4 border-l border-slate-200 pl-4"><p className="text-sm leading-6 text-slate-500">{post.excerpt}</p></div><div className="mt-8 border-t border-slate-200 pt-5"><p className="text-xs text-slate-400">Share this story</p><button onClick={share} className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-primary"><Copy size={15}/>Copy link</button></div></div></aside>
-      <article>
-        <div className="border-b border-slate-200 pb-9"><p className="text-xl leading-9 text-slate-600 first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:text-6xl first-letter:font-medium first-letter:leading-[0.8] first-letter:text-primary">{paragraphs[0] ?? post.content}</p></div>
-        <div className="mt-9 space-y-7">{paragraphs.slice(1).map((paragraph, index) => paragraph.length < 90 && !/[.!?]$/.test(paragraph) ? <h2 key={index} className="pt-5 text-2xl font-medium leading-8 tracking-tight text-slate-900">{paragraph}</h2> : <p key={index} className="text-[16px] leading-8 text-slate-600">{paragraph}</p>)}</div>
-        {post.media?.slice(1).map((media, index) => <figure key={media.publicId} className="my-11">{media.type === "image" ? <Image src={media.url} alt={`${post.title} – image ${index + 2}`} width={1200} height={760} unoptimized className="w-full rounded-xl object-cover"/> : <video src={media.url} controls playsInline className="w-full rounded-xl bg-slate-950"/>}<figcaption className="mt-3 text-xs text-slate-400">Supporting media for this article</figcaption></figure>)}
-        <footer className="mt-14 rounded-2xl bg-[#eaf2e7] p-7 md:p-8"><p className="text-xs font-medium uppercase tracking-[0.15em] text-primary">Keep learning</p><h2 className="mt-3 text-xl font-medium text-slate-800">Explore more field knowledge and agricultural insights.</h2><p className="mt-2 text-sm leading-6 text-slate-500">Discover practical articles prepared for farmers, investors and everyone interested in sustainable agriculture.</p><Link href="/agri-learn" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary">Browse Agri-Learn <ArrowUpRight size={16}/></Link></footer>
-      </article>
-    </div>
-  </main>;
+      {/* Hero Section */}
+      <div className="border-b border-gray-100 bg-linear-to-b from-emerald-50/50 to-white">
+        <div className="mx-auto max-w-6xl px-5 py-12 lg:px-8 lg:py-16">
+          <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:gap-12">
+            {/* Content */}
+            <div className="flex flex-col justify-center order-2 lg:order-1">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
+                  <Tag size={12} />
+                  {post.category}
+                </span>
+                <span className="text-xs text-gray-400">•</span>
+                <span className="text-xs text-gray-500">
+                  {readingTime} min read
+                </span>
+              </div>
+
+              <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
+                {post.title}
+              </h1>
+
+              <p className="mt-4 text-base leading-relaxed text-gray-600 sm:text-lg">
+                {post.excerpt}
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-gray-100 pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+                    <User size={18} className="text-emerald-700" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {author}
+                    </p>
+                    <p className="text-xs text-gray-500">Author</p>
+                  </div>
+                </div>
+                <span className="hidden h-6 w-px bg-gray-200 sm:block" />
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1.5">
+                    <CalendarDays size={14} />
+                    {formatDate(post.publishedAt ?? post.createdAt)}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock3 size={14} />
+                    {readingTime} min read
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Media */}
+            {hero && (
+              <div className="order-1 lg:order-2">
+                <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-gray-100">
+                  {hero.type === "image" ? (
+                    <Image
+                      src={hero.url}
+                      alt={post.title}
+                      fill
+                      unoptimized
+                      priority
+                      className="object-cover transition duration-300 hover:scale-105"
+                    />
+                  ) : (
+                    <video
+                      src={hero.url}
+                      controls
+                      playsInline
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Article Content */}
+      <div className="mx-auto max-w-3xl px-5 py-12 lg:px-8 lg:py-16">
+        <div className="prose prose-lg prose-emerald max-w-none">
+          {/* First paragraph with drop cap */}
+          {paragraphs[0] && (
+            <p className="text-lg leading-relaxed text-gray-700 first-letter:float-left first-letter:mr-3 first-letter:text-6xl first-letter:font-bold first-letter:text-emerald-700 first-letter:leading-[0.8]">
+              {paragraphs[0]}
+            </p>
+          )}
+
+          {/* Remaining content */}
+          <div className="mt-8 space-y-6">
+            {paragraphs.slice(1).map((paragraph, index) => {
+              // Check if paragraph looks like a heading (short, no ending punctuation)
+              const isHeading =
+                paragraph.length < 80 && !/[.!?]$/.test(paragraph);
+
+              if (isHeading) {
+                return (
+                  <h2
+                    key={index}
+                    className="mt-10 text-2xl font-bold tracking-tight text-gray-900 first:mt-0"
+                  >
+                    {paragraph}
+                  </h2>
+                );
+              }
+
+              return (
+                <p
+                  key={index}
+                  className="text-lg leading-relaxed text-gray-700"
+                >
+                  {paragraph}
+                </p>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Additional Media */}
+        {post.media?.slice(1).map((media, index) => (
+          <figure
+            key={media.publicId}
+            className="mt-12 overflow-hidden rounded-2xl bg-gray-50"
+          >
+            <div className="relative aspect-video">
+              {media.type === "image" ? (
+                <Image
+                  src={media.url}
+                  alt={`${post.title} – image ${index + 2}`}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+              ) : (
+                <video
+                  src={media.url}
+                  controls
+                  playsInline
+                  className="h-full w-full object-cover"
+                />
+              )}
+            </div>
+            <figcaption className="px-6 py-3 text-sm text-gray-500">
+              Supporting media for this article
+            </figcaption>
+          </figure>
+        ))}
+
+        {/* Article Footer / CTA */}
+        <div className="mt-16 rounded-2xl bg-linear-to-br from-emerald-50 to-emerald-100/50 p-8">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Continue learning with Agri-Learn
+              </h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Explore more articles, guides, and insights for modern
+                agriculture.
+              </p>
+            </div>
+            <Link
+              href="/agri-learn"
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-emerald-700 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-800"
+            >
+              Browse all articles
+              <ChevronRight size={16} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Share Section Mobile */}
+        <div className="mt-8 flex items-center justify-between border-t border-gray-100 pt-6 lg:hidden">
+          <p className="text-sm text-gray-500">Share this article</p>
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+          >
+            <Copy size={16} />
+            Copy link
+          </button>
+        </div>
+      </div>
+    </main>
+  );
 }

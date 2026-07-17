@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ChevronRight, Hash, LockKeyhole, MessageCircle, Search, Send, Sprout, Users, X } from "lucide-react";
+import { io } from "socket.io-client";
 
 type Author = { username?: string; firstName?: string; lastName?: string };
-type Message = { _id: string; body: string; createdAt: string; author: Author; replies?: Message[] };
+type Message = { _id: string; body: string; createdAt: string; author: Author; parent?: string | null; replies?: Message[]; pending?: boolean; failed?: boolean };
 type Room = { id: string; title: string; subtitle?: string; type: "general" | "produce"; stage?: string; image?: string };
 const base = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -54,6 +55,22 @@ export default function CommunityPage() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
+  const receiveMessage = useCallback((incoming: Message) => {
+    setMessages((current) => {
+      if (incoming.parent) return current.map((message) => message._id === String(incoming.parent)
+        ? { ...message, replies: (message.replies ?? []).some((reply) => reply._id === incoming._id) ? message.replies : [...(message.replies ?? []), incoming] }
+        : message);
+      return current.some((message) => message._id === incoming._id) ? current : [...current, incoming];
+    });
+  }, []);
+
+  useEffect(() => {
+    const socket = io(base!, { withCredentials: true });
+    socket.emit("forum:join", room);
+    socket.on("forum:message", receiveMessage);
+    return () => { socket.emit("forum:leave", room); socket.disconnect(); };
+  }, [room, receiveMessage]);
+
   const selectedRoom = rooms.find((item) => item.id === room);
   const filteredRooms = useMemo(() => rooms.filter((item) => `${item.title} ${item.subtitle ?? ""}`.toLowerCase().includes(search.toLowerCase())), [rooms, search]);
   const activeThread = messages.find((message) => message._id === threadId);
@@ -61,21 +78,29 @@ export default function CommunityPage() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault(); if (!body.trim() || posting) return; setError(""); setPosting(true);
+    const text = body.trim();
+    const temporaryId = `pending-${Date.now()}`;
+    setMessages((current) => [...current, { _id: temporaryId, body: text, createdAt: new Date().toISOString(), author: { username }, replies: [], pending: true }]);
+    setBody("");
     try {
-      const response = await fetch(`${base}/api/forum/rooms/${room}/messages`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body }) });
+      const response = await fetch(`${base}/api/forum/rooms/${room}/messages`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body: text }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.message);
-      setBody(""); await load();
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to post your message"); }
+      setMessages((current) => current.filter((message) => message._id !== temporaryId)); receiveMessage(data.message);
+    } catch (cause) { setMessages((current) => current.map((message) => message._id === temporaryId ? { ...message, pending: false, failed: true } : message)); setError(cause instanceof Error ? cause.message : "Unable to post your message"); }
     finally { setPosting(false); }
   };
 
   const submitReply = async (event: FormEvent) => {
     event.preventDefault(); if (!threadBody.trim() || !threadId || posting) return; setError(""); setPosting(true);
+    const text = threadBody.trim();
+    const temporaryId = `pending-${Date.now()}`;
+    const optimistic: Message = { _id: temporaryId, body: text, createdAt: new Date().toISOString(), author: { username }, parent: threadId, pending: true };
+    receiveMessage(optimistic); setThreadBody("");
     try {
-      const response = await fetch(`${base}/api/forum/rooms/${room}/messages`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body: threadBody, parentId: threadId }) });
+      const response = await fetch(`${base}/api/forum/rooms/${room}/messages`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ body: text, parentId: threadId }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.message);
-      setThreadBody(""); await load();
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to post your reply"); }
+      setMessages((current) => current.map((message) => message._id === threadId ? { ...message, replies: (message.replies ?? []).filter((reply) => reply._id !== temporaryId) } : message)); receiveMessage(data.message);
+    } catch (cause) { setMessages((current) => current.map((message) => message._id === threadId ? { ...message, replies: (message.replies ?? []).map((reply) => reply._id === temporaryId ? { ...reply, pending: false, failed: true } : reply) } : message)); setError(cause instanceof Error ? cause.message : "Unable to post your reply"); }
     finally { setPosting(false); }
   };
 
@@ -118,7 +143,7 @@ export default function CommunityPage() {
             <div className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_right,rgba(69,125,52,0.055),transparent_34%)] px-4 py-6 sm:px-8">
               {loading ? <div className="grid h-full min-h-80 place-items-center"><div className="text-center"><div className="mx-auto size-9 animate-spin rounded-full border-2 border-primary/20 border-t-primary" /><p className="mt-3 text-sm text-slate-500">Loading conversation…</p></div></div> : messages.length === 0 ? <div className="grid h-full min-h-80 place-items-center"><div className="max-w-sm text-center"><div className="mx-auto grid size-16 place-items-center rounded-2xl bg-[#eaf4e7] text-primary"><MessageCircle size={28} /></div><h3 className="mt-5 text-xl font-bold text-slate-900">Start the conversation</h3><p className="mt-2 text-sm leading-6 text-slate-500">Be the first to share an update, ask a thoughtful question, or introduce yourself.</p></div></div> : <div className="mx-auto max-w-4xl space-y-5">{messages.map((message) => <article key={message._id} className="group flex gap-3 sm:gap-4">
                 <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-xs font-bold text-white shadow-sm sm:size-11">{initials(message.author)}</div>
-                <div className="min-w-0 flex-1"><div className="flex flex-wrap items-baseline gap-x-2"><strong className="text-sm text-slate-900">{displayName(message.author)}</strong><time className="text-[11px] text-slate-400">{new Date(message.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</time></div><div className="mt-1.5 rounded-2xl rounded-tl-md border border-[#e2e9df] bg-white px-4 py-3.5 shadow-[0_2px_10px_rgba(20,45,16,0.035)]"><p className="whitespace-pre-wrap break-words text-[15px] leading-6 text-slate-700">{message.body}</p><button onClick={() => setThreadId(message._id)} className="mt-3 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold text-primary transition hover:bg-[#edf5ea]"><MessageCircle size={14} /> {message.replies?.length ? `View thread · ${message.replies.length} ${message.replies.length === 1 ? "reply" : "replies"}` : canPost && username ? "Reply in thread" : "View thread"}</button></div>
+                <div className={`min-w-0 flex-1 ${message.pending ? "opacity-65" : ""}`}><div className="flex flex-wrap items-baseline gap-x-2"><strong className="text-sm text-slate-900">{displayName(message.author)}</strong><time className="text-[11px] text-slate-400">{message.pending ? "Sending…" : message.failed ? "Not sent" : new Date(message.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</time></div><div className={`mt-1.5 rounded-2xl rounded-tl-md border bg-white px-4 py-3.5 shadow-[0_2px_10px_rgba(20,45,16,0.035)] ${message.failed ? "border-red-200" : "border-[#e2e9df]"}`}><p className="whitespace-pre-wrap break-words text-[15px] leading-6 text-slate-700">{message.body}</p>{!message.pending && !message.failed && <button onClick={() => setThreadId(message._id)} className="mt-3 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold text-primary transition hover:bg-[#edf5ea]"><MessageCircle size={14} /> {message.replies?.length ? `View thread · ${message.replies.length} ${message.replies.length === 1 ? "reply" : "replies"}` : canPost && username ? "Reply in thread" : "View thread"}</button>}</div>
                 </div></article>)}</div>}
             </div>
 
@@ -126,7 +151,7 @@ export default function CommunityPage() {
               <header className="flex items-center gap-3 border-b border-[#e2e9df] px-5 py-4"><button onClick={() => setThreadId(undefined)} className="grid size-10 place-items-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50" aria-label="Close thread"><ArrowLeft size={19} /></button><div className="flex-1"><h3 className="font-bold text-slate-900">Thread</h3><p className="text-xs text-slate-500">{activeThread.replies?.length ?? 0} {(activeThread.replies?.length ?? 0) === 1 ? "reply" : "replies"} in {selectedRoom?.title}</p></div><button onClick={() => setThreadId(undefined)} className="hidden size-9 place-items-center rounded-full text-slate-500 hover:bg-slate-100 sm:grid"><X size={18} /></button></header>
               <div className="flex-1 overflow-y-auto bg-[#f7f9f6] p-5"><div className="rounded-2xl border border-[#dce6d9] bg-white p-4 shadow-sm"><div className="flex items-center gap-3"><div className="grid size-10 place-items-center rounded-xl bg-primary text-xs font-bold text-white">{initials(activeThread.author)}</div><div><strong className="text-sm text-slate-900">{displayName(activeThread.author)}</strong><p className="text-[11px] text-slate-400">{new Date(activeThread.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</p></div></div><p className="mt-4 whitespace-pre-wrap break-words text-[15px] leading-6 text-slate-700">{activeThread.body}</p></div>
                 <div className="my-5 flex items-center gap-3"><span className="h-px flex-1 bg-slate-200" /><span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Replies</span><span className="h-px flex-1 bg-slate-200" /></div>
-                <div className="space-y-4">{activeThread.replies?.length ? activeThread.replies.map((reply) => <article key={reply._id} className="flex gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-lg bg-slate-200 text-[10px] font-bold text-slate-600">{initials(reply.author)}</div><div className="min-w-0 flex-1 rounded-2xl rounded-tl-md border border-slate-200 bg-white px-4 py-3"><div className="flex flex-wrap items-baseline gap-2"><strong className="text-xs text-slate-800">{displayName(reply.author)}</strong><time className="text-[10px] text-slate-400">{new Date(reply.createdAt).toLocaleString()}</time></div><p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">{reply.body}</p></div></article>) : <div className="py-10 text-center"><MessageCircle className="mx-auto text-slate-300" size={28} /><p className="mt-3 text-sm font-semibold text-slate-600">No replies yet</p><p className="mt-1 text-xs text-slate-400">Start a focused discussion about this message.</p></div>}</div></div>
+                <div className="space-y-4">{activeThread.replies?.length ? activeThread.replies.map((reply) => <article key={reply._id} className={`flex gap-3 ${reply.pending ? "opacity-65" : ""}`}><div className="grid size-9 shrink-0 place-items-center rounded-lg bg-slate-200 text-[10px] font-bold text-slate-600">{initials(reply.author)}</div><div className={`min-w-0 flex-1 rounded-2xl rounded-tl-md border bg-white px-4 py-3 ${reply.failed ? "border-red-200" : "border-slate-200"}`}><div className="flex flex-wrap items-baseline gap-2"><strong className="text-xs text-slate-800">{displayName(reply.author)}</strong><time className="text-[10px] text-slate-400">{reply.pending ? "Sending…" : reply.failed ? "Not sent" : new Date(reply.createdAt).toLocaleString()}</time></div><p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">{reply.body}</p></div></article>) : <div className="py-10 text-center"><MessageCircle className="mx-auto text-slate-300" size={28} /><p className="mt-3 text-sm font-semibold text-slate-600">No replies yet</p><p className="mt-1 text-xs text-slate-400">Start a focused discussion about this message.</p></div>}</div></div>
               <footer className="border-t border-[#e2e9df] bg-white p-4">{canPost && username ? <form onSubmit={submitReply}><div className="flex items-end gap-2 rounded-2xl border border-[#dce5d9] bg-[#fafcf9] p-2 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10"><textarea value={threadBody} onChange={(event) => setThreadBody(event.target.value)} rows={2} maxLength={2000} placeholder="Write a reply…" className="max-h-32 min-h-12 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none" /><button disabled={posting || !threadBody.trim()} className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-white disabled:opacity-40" aria-label="Send reply"><Send size={18} /></button></div></form> : <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3"><LockKeyhole size={17} className="text-slate-400" /><p className="text-xs text-slate-500">You can read this thread, but posting requires access to this room.</p></div>}</footer>
             </aside></div>}
 
