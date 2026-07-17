@@ -5,6 +5,7 @@ import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import Sidebar, { UserData } from "@/components/dashboard/Sidebar";
 import { useEffect, useCallback, useState } from "react";
 import PushNotifications from "@/components/support/PushNotifications";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function DashboardLayout({
   children,
@@ -46,6 +47,7 @@ export default function DashboardLayout({
       <main className="flex-1 flex flex-col h-full overflow-y-auto relative">
         <DashboardNav isOpen={sidebarOpen} onToggle={handleSidebarToggle} />
         {children}
+        <NotificationBell />
         <PushNotifications />
         <DashboardFooter />
       </main>
