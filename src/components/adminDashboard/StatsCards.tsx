@@ -3,7 +3,7 @@ import { FiAlertTriangle } from "react-icons/fi";
 
 const stats = [
   {
-    title: "Total Investments",
+    title: "Total Farm Ownerships",
     value: "$4,250,000",
     change: "+12%",
     changeBg: "bg-green-100 dark:bg-green-900/30",

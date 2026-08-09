@@ -19,7 +19,7 @@ export default function MissionSection() {
           </p>
           <p className="text-lg leading-relaxed opacity-90">
             Our mission is to create a sustainable ecosystem where urban
-            investors and rural farmers thrive together.
+            remote farmers and rural producers thrive together.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -29,7 +29,7 @@ export default function MissionSection() {
             </div>
             <div className="text-3xl font-black text-primary mb-2">5k+</div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Farmers Empowered
+              Producers Empowered
             </p>
           </div>
           <div className="bg-white p-8 rounded-lg shadow text-center border-t-6 border-[#D96C3A]">

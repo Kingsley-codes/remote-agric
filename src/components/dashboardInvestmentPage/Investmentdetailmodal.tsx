@@ -9,12 +9,12 @@ interface Props {
 
 function getStageLabel(stage: string): string {
   const labels: Record<string, string> = {
-    "accepting-investments": "Accepting Investments",
+    "accepting-investments": "Open for Ownership",
     "land-clearing": "Land Clearing",
     planting: "Planting",
     growing: "Growing",
     harvesting: "Harvesting",
-    "returns-to-investment": "Returns to Investment",
+    "returns-to-investment": "Harvest Returns",
   };
   return labels[stage] ?? stage;
 }
@@ -195,7 +195,7 @@ export default function InvestmentDetailModal({ investment, onClose }: Props) {
               value={`${investment.duration} months`}
             />
             <DetailRow
-              label="Amount Invested"
+              label="Farm Value"
               value={`₦${investment.totalPrice.toLocaleString()}`}
             />
             <DetailRow label="ROI" value={`+${investment.ROI}%`} accent />

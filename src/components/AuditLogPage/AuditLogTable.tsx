@@ -228,7 +228,7 @@ export default function AuditLogTable({
                   className="w-full px-3 py-2 border border-[#d5e7cf] rounded-lg focus:ring-2 focus:ring-[#5e9a4c]/50 focus:border-[#5e9a4c] outline-none text-sm"
                 >
                   <option value="">All Entities</option>
-                  <option value="FARMER">Farmer</option>
+                  <option value="FARMER">Producer</option>
                   <option value="PRODUCT">Product</option>
                   <option value="ORDER">Order</option>
                   <option value="USER">User</option>

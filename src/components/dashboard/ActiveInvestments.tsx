@@ -2,7 +2,7 @@ export default function ActiveInvestments() {
   return (
     <div className="bg-card-light rounded-xl border border-gray-100 shadow-sm flex flex-col">
       <div className="p-6 border-b flex justify-between items-center">
-        <h3 className="text-lg font-bold">Active Investments</h3>
+        <h3 className="text-lg font-bold">Active Farms</h3>
         <a className="text-sm font-bold text-primary">View All</a>
       </div>
 
@@ -54,7 +54,7 @@ function InvestmentItem({
       <div className="flex items-center gap-6 flex-1 sm:justify-end">
         <div className="flex flex-col items-end min-w-[80px]">
           <span className="text-sm font-bold">{amount}</span>
-          <span className="text-xs text-gray-500">Invested</span>
+          <span className="text-xs text-gray-500">Farm Value</span>
         </div>
 
         <div className="hidden sm:flex flex-col w-32 gap-1">

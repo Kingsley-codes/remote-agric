@@ -151,7 +151,7 @@ export default function RecentTransactions() {
           <thead>
             <tr className="bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-semibold">
               <th className="px-6 py-4">Transaction ID</th>
-              <th className="px-6 py-4">Investor</th>
+              <th className="px-6 py-4">Remote Farmer</th>
               <th className="px-6 py-4">Type</th>
               <th className="px-6 py-4">Amount</th>
               <th className="px-6 py-4">Date</th>

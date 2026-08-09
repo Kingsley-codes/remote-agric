@@ -26,7 +26,7 @@ export default function InvestmentTable({ investments }: InvestmentTableProps) {
               <th className="px-6 py-4">Order ID</th>
               <th className="px-6 py-4">Asset</th>
               <th className="px-6 py-4">Name</th>
-              <th className="px-6 py-4">Invested</th>
+              <th className="px-6 py-4">Farm Value</th>
               <th className="px-6 py-4">Stage</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">ROI</th>

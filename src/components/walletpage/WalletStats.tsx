@@ -8,7 +8,7 @@ export default function WalletStats() {
       </div>
 
       <div className="bg-white border border-[#d5e7cf] rounded-xl p-6 shadow-sm">
-        <p className="text-gray-500 font-semibold">Active Investments</p>
+        <p className="text-gray-500 font-semibold">Active Farms</p>
         <p className="text-3xl font-bold">$8,200.00</p>
         <p className="text-sm text-gray-500">4 Active Cycles</p>
       </div>

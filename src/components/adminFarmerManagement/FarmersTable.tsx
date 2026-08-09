@@ -226,7 +226,7 @@ export default function FarmersTable() {
         setPage(json.page ?? currentPage ?? 1);
         setTotalPages(json.pages ?? 1);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load farmers");
+        setError(err instanceof Error ? err.message : "Failed to load producers");
         // Clear farmers on error to avoid showing stale data
         setFarmers([]);
       } finally {
@@ -300,7 +300,7 @@ export default function FarmersTable() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or farmer ID..."
+            placeholder="Search by name or producer ID..."
             className="w-full h-11 pl-12 pr-4 bg-white border border-[#d5e7cf] rounded-xl text-sm text-[#111b0d] placeholder:text-[#5e9a4c] focus:ring-2 focus:ring-[#46ec13]/50 focus:border-[#46ec13] focus:outline-none transition-all"
           />
         </label>
@@ -367,8 +367,8 @@ export default function FarmersTable() {
             <thead>
               <tr className="bg-[#f9fcf8] border-b border-[#d5e7cf]">
                 {[
-                  "Farmer ID",
-                  "Farmer",
+                  "Producer ID",
+                  "Producer",
                   "Location",
                   "Farm Size",
                   "Crops",
@@ -396,7 +396,7 @@ export default function FarmersTable() {
                     colSpan={8}
                     className="text-center py-12 text-[#5e9a4c] text-sm"
                   >
-                    No farmers match your search.
+                    No producers match your search.
                   </td>
                 </tr>
               ) : (

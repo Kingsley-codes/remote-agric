@@ -18,7 +18,7 @@ export default function InvestmentChart() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-            Investment Inflow
+            Farm Ownership Inflow
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Growth over the last 6 months

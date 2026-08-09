@@ -193,7 +193,7 @@ export default function AddFarmerModal({
 
     // Validation
     if (!formData.name.trim()) {
-      setError("Farmer name is required");
+      setError("Producer name is required");
       setLoading(false);
       return;
     }
@@ -223,7 +223,7 @@ export default function AddFarmerModal({
       return;
     }
     if (!profilePhoto) {
-      setError("Farmer's profile photo is required");
+      setError("Producer's profile photo is required");
       setLoading(false);
       return;
     }
@@ -256,7 +256,7 @@ export default function AddFarmerModal({
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.message || data.error || "Failed to create farmer",
+          data.message || data.error || "Failed to create producer",
         );
       }
 
@@ -287,9 +287,9 @@ export default function AddFarmerModal({
               <MdPerson className="text-white text-2xl" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Add New Farmer</h2>
+              <h2 className="text-xl font-bold text-white">Add New Producer</h2>
               <p className="text-white/80 text-sm">
-                Register a farmer to the platform
+                Register a producer on the platform
               </p>
             </div>
           </div>
@@ -615,7 +615,7 @@ export default function AddFarmerModal({
               ) : (
                 <>
                   <MdCheckCircle className="text-lg" />
-                  Create Farmer
+                  Create Producer
                 </>
               )}
             </button>

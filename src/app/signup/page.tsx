@@ -239,9 +239,9 @@ export default function SignUpPage() {
           </h1>
 
           <p className="text-base md:text-lg text-slate-200 mb-6 md:mb-8 leading-relaxed">
-            Partner with thousands of farmers who have ventured into sustainable
-            farming and livestock production. Transparency and growth, all
-            rooted in nature.
+            Join thousands of remote farmers who own sustainable crop and
+            livestock units. Transparent ownership and growth, all rooted in
+            nature.
           </p>
 
           {/* Trust Badge */}
@@ -271,7 +271,7 @@ export default function SignUpPage() {
                 ))}
               </div>
               <p className="text-xs text-slate-300 font-medium mt-0.5">
-                Trusted by farmers nationwide
+                Trusted by remote farmers nationwide
               </p>
             </div>
           </div>
@@ -302,7 +302,7 @@ export default function SignUpPage() {
                 </h2>
                 <p className="text-xs text-center md:text-sm text-slate-500">
                   {formStep === 1
-                    ? "Begin your journey as a bonafide farmer with Agrofund Hub."
+                    ? "Begin your journey as a remote farmer with Remote Agric."
                     : "Secure your account with a strong password."}
                 </p>
               </div>

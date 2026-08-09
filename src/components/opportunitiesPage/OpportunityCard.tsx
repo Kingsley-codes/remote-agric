@@ -126,7 +126,7 @@ export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
               }}
               className="flex-1 mt-3 rounded-lg bg-primary py-2.5 text-sm font-bold text-white hover:bg-primary-dark transition-colors"
             >
-              Invest Now
+              Own This Farm
             </button>
             <button className="flex-1 mt-3 rounded-lg bg-white border border-primary py-2.5 text-sm font-bold text-gray-700 hover:bg-primary/50 hover:text-primary transition-colors">
               <Link href={`/opportunities/${opportunity._id}`}>Details</Link>

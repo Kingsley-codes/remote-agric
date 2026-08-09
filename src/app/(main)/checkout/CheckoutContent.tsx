@@ -141,7 +141,7 @@ export default function CheckoutContent() {
             Secure Checkout
           </h1>
           <p className="text-gray-600">
-            Complete your investment in the Cassava Plantation Cycle 2.
+            Complete your remote farm ownership securely.
           </p>
         </div>
 

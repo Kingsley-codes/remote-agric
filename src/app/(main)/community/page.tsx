@@ -32,11 +32,17 @@ export default function CommunityPage() {
   const [mobileRoomsOpen, setMobileRoomsOpen] = useState(true);
 
   useEffect(() => {
-    fetch(`${base}/api/forum/rooms`).then((response) => response.json()).then((data) => {
+    fetch(`${base}/api/forum/rooms`, { credentials: "include" }).then((response) => response.json()).then((data) => {
       const nextRooms: Room[] = data.rooms ?? [];
       setRooms(nextRooms);
       const requested = new URLSearchParams(window.location.search).get("room");
-      if (requested && nextRooms.some((item) => item.id === requested)) { setRoom(requested); setMobileRoomsOpen(false); }
+      if (requested && nextRooms.some((item) => item.id === requested)) {
+        setRoom(requested);
+        setMobileRoomsOpen(false);
+      } else if (requested) {
+        setRoom("general");
+        window.history.replaceState(null, "", "/community?room=general");
+      }
     });
   }, []);
 
@@ -45,10 +51,18 @@ export default function CommunityPage() {
     try {
       const response = await fetch(`${base}/api/forum/rooms/${room}/messages`, { credentials: "include" });
       const data = await response.json();
+      if (!response.ok) throw new Error(data.message ?? "Unable to open this room");
       setMessages(data.messages ?? []);
       setAuthenticated(Boolean(data.authenticated));
       setCanPost(Boolean(data.canPost));
       setUsername(data.username);
+    } catch (cause) {
+      setMessages([]);
+      setError(cause instanceof Error ? cause.message : "Unable to open this room");
+      if (room !== "general") {
+        setRoom("general");
+        window.history.replaceState(null, "", "/community?room=general");
+      }
     } finally { setLoading(false); }
   }, [room]);
   // The selected room is an external data source; reload whenever it changes.
@@ -120,7 +134,7 @@ export default function CommunityPage() {
           <aside className={`${mobileRoomsOpen ? "flex" : "hidden"} flex-col border-r border-[#e6ece3] bg-[#f8faf7] lg:flex`}>
             <div className="border-b border-[#e6ece3] px-5 py-6">
               <div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Remote Agric</p><h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Community</h1></div><div className="grid size-11 place-items-center rounded-2xl bg-primary text-white shadow-md shadow-green-900/15"><Users size={21} /></div></div>
-              <p className="mt-3 text-sm leading-6 text-slate-500">Connect with investors and follow every farm cycle.</p>
+              <p className="mt-3 text-sm leading-6 text-slate-500">Connect with remote farmers and follow every farm cycle.</p>
               <div className="relative mt-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search communities" className="h-11 w-full rounded-xl border border-[#dfe7dc] bg-white pl-10 pr-3 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" /></div>
             </div>
             <div className="flex-1 overflow-y-auto p-3"><p className="px-3 pb-2 pt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Channels</p><div className="space-y-1.5">{filteredRooms.map((item) => {
@@ -156,9 +170,9 @@ export default function CommunityPage() {
             </aside></div>}
 
             <footer className="border-t border-[#e1e9de] bg-white p-4 sm:px-7 sm:py-5">{error && <div className="mb-3 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">{error}</div>}
-              {authenticated && !username ? <form onSubmit={saveUsername} className="mx-auto max-w-3xl rounded-2xl border border-primary/20 bg-[#f4f9f2] p-4"><div className="flex items-start gap-3"><div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-white"><Users size={18} /></div><div><h3 className="font-bold text-slate-900">Choose your community username</h3><p className="mt-0.5 text-xs leading-5 text-slate-500">This is how other investors will recognize and mention you.</p></div></div><div className="mt-4 flex flex-col gap-2 sm:flex-row"><div className="flex h-11 flex-1 items-center rounded-xl border bg-white px-3 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10"><span className="text-slate-400">@</span><input value={nameInput} onChange={(event) => setNameInput(event.target.value.toLowerCase())} className="min-w-0 flex-1 border-0 px-1 outline-none" placeholder="your_username" /></div><button disabled={posting} className="h-11 rounded-xl bg-primary px-5 text-sm font-bold text-white disabled:opacity-60">Create username</button></div></form>
+              {authenticated && !username ? <form onSubmit={saveUsername} className="mx-auto max-w-3xl rounded-2xl border border-primary/20 bg-[#f4f9f2] p-4"><div className="flex items-start gap-3"><div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-white"><Users size={18} /></div><div><h3 className="font-bold text-slate-900">Choose your community username</h3><p className="mt-0.5 text-xs leading-5 text-slate-500">This is how other remote farmers will recognize and mention you.</p></div></div><div className="mt-4 flex flex-col gap-2 sm:flex-row"><div className="flex h-11 flex-1 items-center rounded-xl border bg-white px-3 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10"><span className="text-slate-400">@</span><input value={nameInput} onChange={(event) => setNameInput(event.target.value.toLowerCase())} className="min-w-0 flex-1 border-0 px-1 outline-none" placeholder="your_username" /></div><button disabled={posting} className="h-11 rounded-xl bg-primary px-5 text-sm font-bold text-white disabled:opacity-60">Create username</button></div></form>
               : canPost ? <form onSubmit={submit} className="mx-auto max-w-4xl"><div className="flex items-end gap-2 rounded-2xl border border-[#dce5d9] bg-[#fafcf9] p-2 transition focus-within:border-primary focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10"><textarea value={body} onChange={(event) => setBody(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} rows={1} maxLength={2000} placeholder={`Message ${selectedRoom?.title ?? "the community"}…`} className="max-h-36 min-h-11 flex-1 resize-none bg-transparent px-3 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400" /><button disabled={posting || !body.trim()} className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-white shadow-sm transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40" aria-label="Send message"><Send size={18} /></button></div><div className="mt-2 flex justify-between px-1 text-[11px] text-slate-400"><span>Use @username to mention someone · Shift + Enter for a new line</span><span>{body.length}/2000</span></div></form>
-              : <div className="mx-auto flex max-w-4xl items-center gap-3 rounded-2xl border border-[#e2e8df] bg-[#f8faf7] p-4"><div className="grid size-10 shrink-0 place-items-center rounded-xl bg-slate-200 text-slate-500"><LockKeyhole size={18} /></div><div className="flex-1"><p className="text-sm font-bold text-slate-800">{authenticated ? "Investor-only conversation" : "Join the conversation"}</p><p className="mt-0.5 text-xs text-slate-500">{authenticated ? "You can read this room. An active investment in this produce is required to post." : "This community is public to read. Sign in to share a message or reply."}</p></div>{!authenticated && <Link href="/login" className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white">Sign in</Link>}</div>}
+              : <div className="mx-auto flex max-w-4xl items-center gap-3 rounded-2xl border border-[#e2e8df] bg-[#f8faf7] p-4"><div className="grid size-10 shrink-0 place-items-center rounded-xl bg-slate-200 text-slate-500"><LockKeyhole size={18} /></div><div className="flex-1"><p className="text-sm font-bold text-slate-800">{authenticated ? "Remote-farmer conversation" : "Join the conversation"}</p><p className="mt-0.5 text-xs text-slate-500">{authenticated ? "An active farm for this produce is required to access its private room." : "The General community is public to read. Sign in to share a message or reply."}</p></div>{!authenticated && <Link href="/login" className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white">Sign in</Link>}</div>}
             </footer>
           </section>
         </div>

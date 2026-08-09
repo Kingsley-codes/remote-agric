@@ -50,7 +50,7 @@ export default function InvestmentRow({
   const stages = ["accepting-investments", "land-clearing", "planting", "growing", "harvesting", "returns-to-investment"];
   const updateStage = async (nextStage: string) => {
     const previous = stage; setStage(nextStage); setStageSaving(true);
-    try { await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${investment._id}/stage`, { stage: nextStage }, { withCredentials: true }); toast.success("Produce stage updated and investors notified"); refreshInvestments?.(); }
+    try { await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${investment._id}/stage`, { stage: nextStage }, { withCredentials: true }); toast.success("Produce stage updated and remote farmers notified"); refreshInvestments?.(); }
     catch (error: any) { setStage(previous); toast.error(error.response?.data?.message ?? "Failed to update stage"); }
     finally { setStageSaving(false); }
   };
@@ -93,7 +93,7 @@ export default function InvestmentRow({
         { withCredentials: true },
       );
       if (response.status === 200) {
-        toast.success("Investment deleted successfully!");
+        toast.success("Farm listing deleted successfully!");
         onDeleteSuccess?.();
         refreshInvestments?.();
       }
@@ -101,7 +101,7 @@ export default function InvestmentRow({
       console.error("Error deleting investment:", error);
       toast.error(
         (error as { response?: { data?: { message?: string } } }).response?.data
-          ?.message || "Failed to delete investment",
+          ?.message || "Failed to delete farm listing",
       );
     } finally {
       setIsDeleting(false);
@@ -127,7 +127,7 @@ export default function InvestmentRow({
       )}
       <ConfirmModal
         isOpen={isConfirmModalOpen}
-        title="Delete Investment"
+        title="Delete Farm Listing"
         message={`Are you sure you want to delete "${investment.title}"? This action cannot be undone.`}
         confirmText="Delete"
         cancelText="Cancel"

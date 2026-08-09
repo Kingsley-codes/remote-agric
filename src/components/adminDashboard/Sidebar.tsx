@@ -33,11 +33,11 @@ interface SidebarProps {
 const navLinks = [
   { href: "/admin/dashboard", label: "Dashboard", icon: FiGrid },
   { href: "/admin/dashboard/users", label: "Users", icon: FaUsers },
-  { href: "/admin/dashboard/farmers", label: "Farmers", icon: FaUsers },
+  { href: "/admin/dashboard/farmers", label: "Producers", icon: FaUsers },
   { href: "/admin/dashboard/produce", label: "Produces", icon: PiPlantDuotone },
   {
     href: "/admin/dashboard/investments",
-    label: "Investments",
+    label: "Farm Ownerships",
     icon: MdOutlineCardTravel,
   },
   {

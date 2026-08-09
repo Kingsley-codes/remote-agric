@@ -25,13 +25,13 @@ export default function About() {
               About Remote Agric
             </h2>
             <h3 className="text-3xl md:text-4xl  text-gray-800 font-bold mb-6 leading-tight">
-              Bridging the Gap Between Investors and Sustainable Farming
+              Making Sustainable Farm Ownership Possible From Anywhere
             </h3>
             <p className="text-slate-600 mb-6 leading-relaxed">
-              Remote Agric is more than an investment platform; it&apos;s a
-              movement to revolutionize food security and economic prosperity
-              across the continent. We empower local communities by providing
-              the resources needed for high-yield, sustainable farming.
+              Remote Agric is a remote farm ownership platform and a movement
+              to strengthen food security across the continent. We let remote
+              farmers own farm units while equipping local producers for
+              high-yield, sustainable production.
             </p>
             <p className="text-slate-600 mb-6 leading-relaxed">
               We partner directly with farming communities and supply them with
@@ -44,7 +44,7 @@ export default function About() {
               <div className="flex gap-4">
                 <BiCheckCircle className="text-primary text-2xl shrink-0" />
                 <p className="font-medium italic">
-                  On a mission to empower 50,000+ local smallholder farmers
+                  On a mission to empower 50,000+ local producers
                 </p>
               </div>
               <div className="flex gap-4">

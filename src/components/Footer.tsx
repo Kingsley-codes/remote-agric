@@ -14,8 +14,8 @@ export default function Footer() {
           Interested in farming but never had the land, or time?
         </h2>
         <p className="text-gray-200 mb-8 md:text-sm w-1/2 mx-auto">
-          Join Grow Africa and take part in building sustainable food systems
-          while growing your investment through real agricultural production.
+          Join Remote Agric, own a farm from anywhere, and take part in building
+          sustainable food systems through real agricultural production.
         </p>
 
         <button>

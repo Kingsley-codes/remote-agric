@@ -206,7 +206,7 @@ export default function FarmerDetailModal({
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.message || data.error || "Failed to update farmer",
+          data.message || data.error || "Failed to update producer",
         );
       }
 
@@ -301,7 +301,7 @@ export default function FarmerDetailModal({
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.message || data.error || "Failed to delete farmer",
+          data.message || data.error || "Failed to delete producer",
         );
       }
 
@@ -421,7 +421,7 @@ export default function FarmerDetailModal({
           {showDeleteConfirm && (
             <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50">
               <div className="bg-white rounded-xl p-6 max-w-md mx-4">
-                <h3 className="text-lg font-semibold mb-2">Delete Farmer</h3>
+                <h3 className="text-lg font-semibold mb-2">Delete Producer</h3>
                 <p className="text-gray-600 mb-4">
                   Are you sure you want to delete {farmer.name}? This action
                   cannot be undone.

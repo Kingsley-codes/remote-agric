@@ -108,7 +108,7 @@ export default function VerifyPaymentContent() {
         setDetails({
           reference: payload.investment?.transactionRef ?? reference,
           amount: payload.amount,
-          produce: payload.investment?.title ?? "Investment",
+          produce: payload.investment?.title ?? "Remote farm",
           units: payload.investment?.units ?? 1,
           paymentMethod: payload.paymentMethod ?? "—",
           date: payload.investment?.orderDate
@@ -149,7 +149,7 @@ export default function VerifyPaymentContent() {
 
   const subtext = {
     success:
-      "Your investment has been received. You'll get a confirmation email shortly.",
+      "Your farm ownership has been received. You'll get a confirmation email shortly.",
     pending:
       "Your payment is being processed. We'll notify you once it's confirmed.",
     failed:
@@ -315,7 +315,7 @@ export default function VerifyPaymentContent() {
                       label="Amount Paid"
                       value={`₦${details.amount.toLocaleString()}`}
                     />
-                    <DetailRow label="Investment" value={details.produce} />
+                    <DetailRow label="Farm" value={details.produce} />
                     <DetailRow
                       label="Units"
                       value={`${details.units} Unit${details.units !== 1 ? "s" : ""}`}

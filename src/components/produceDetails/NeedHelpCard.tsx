@@ -9,10 +9,10 @@ export function NeedHelpCard() {
 
       <div>
         <h4 className="font-bold text-sm text-gray-900">
-          Need help investing?
+          Need help choosing a farm?
         </h4>
         <p className="text-xs text-gray-500 mt-1 mb-2">
-          Our investment advisors are available to guide you.
+          Our farm ownership team is available to guide you.
         </p>
         <a
           href="#"

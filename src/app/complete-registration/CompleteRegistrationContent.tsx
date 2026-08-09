@@ -65,7 +65,7 @@ export default function CompleteRegistrationContent() {
           </div>
           <h1 className="text-2xl font-bold">Complete Your Registration</h1>
           <p className="text-sm text-gray-500">
-            Your investment is confirmed! Set a password to secure your account
+            Your farm ownership is confirmed! Set a password to secure your account
             and access your dashboard.
           </p>
         </div>

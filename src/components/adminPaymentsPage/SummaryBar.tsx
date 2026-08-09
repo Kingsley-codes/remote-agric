@@ -86,7 +86,7 @@ export default function SummaryBar() {
   if (error) {
     return (
       <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-        Failed to load investment stats: {error}
+        Failed to load farm ownership stats: {error}
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function SummaryBar() {
       <div className="bg-white border border-primary/10 p-6 rounded-xl flex items-center justify-between shadow-sm">
         <div>
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-            Total Active Investments
+            Total Active Farms
           </p>
           <h3 className="lg:text-3xl text-2xl font-bold mt-1 text-slate-900">
             {stats?.totalActiveInvestments ?? 0}
@@ -105,7 +105,7 @@ export default function SummaryBar() {
           <div className="flex items-center gap-1 mt-2 text-primary font-bold text-sm">
             <MdArrowUpward size={14} />
             <span>
-              {stats?.investmentsThisMonth ?? 0} new investments this month
+              {stats?.investmentsThisMonth ?? 0} new farm ownerships this month
             </span>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function SummaryBar() {
       <div className="bg-white border border-primary/10 p-6 rounded-xl flex items-center justify-between shadow-sm">
         <div>
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-            Total Amount Invested
+            Total Farm Ownership Value
           </p>
           <h3 className="lg:text-3xl text-2xl font-bold mt-1 text-slate-900">
             {formatCurrency(stats?.totalAmountInvested ?? 0)}
@@ -141,7 +141,7 @@ export default function SummaryBar() {
           <div className="flex items-center gap-1 mt-2 text-primary font-bold text-sm">
             <MdTrendingUp size={14} />
             <span>
-              {stats?.totalInvestorsForPopularProduce ?? 0} Active Investors
+              {stats?.totalInvestorsForPopularProduce ?? 0} Active Remote Farmers
             </span>
           </div>
         </div>

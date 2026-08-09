@@ -9,7 +9,7 @@ export default function StatsBanner({ totalCount }: StatsBannerProps) {
         <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div className="flex max-w-2xl flex-col gap-3">
             <h1 className="text-3xl font-semibold leading-tight pb-5 tracking-[-0.033em] text-gray-800 sm:text-4xl lg:text-5xl">
-              Explore Investment Opportunities in Agriculture
+              Explore Farms You Can Own Remotely
             </h1>
 
             <p className="text-base font-semibold leading-normal text-gray-600 lg:text-lg">

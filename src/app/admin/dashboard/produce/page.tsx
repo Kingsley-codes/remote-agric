@@ -23,7 +23,7 @@ export default function Producepage() {
               Opportunities
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1">
-              Manage active listings, track ROI, and create new investment
+              Manage active farm listings, track harvest returns, and create new ownership opportunities
               vehicles.
             </p>
           </div>

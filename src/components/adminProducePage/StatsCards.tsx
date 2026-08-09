@@ -11,7 +11,7 @@ const stats = [
     positive: null,
   },
   {
-    title: "Total Investments",
+    title: "Total Farm Listings",
     value: "$4,250,000",
     change: "+12%",
     changeBg: "bg-green-100 dark:bg-green-900/30",

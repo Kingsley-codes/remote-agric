@@ -14,7 +14,7 @@ const testimonials = [
     name: "David Ayobami",
     Location: "Abuja, Nigeria",
     message:
-      "I wanted to try farming without investing in land or equipment. This app connected me with producers who took care of my vegetables and poultry. I received high-quality produce and even made a profit when I chose to sell some units—truly hands-on farming from anywhere!",
+      "I wanted to try farming without buying land or equipment. This app connected me with producers who took care of my vegetables and poultry. I received high-quality produce and even made a profit when I chose to sell some units—truly hands-on farming from anywhere!",
     avatar: "twnucpgeribcxhmklriu",
   },
   {

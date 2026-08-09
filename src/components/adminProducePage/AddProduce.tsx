@@ -187,7 +187,7 @@ export default function NewOpportunityModal({
                 New Project
               </h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                Create a new project vehicle for remote farmers join
+                Create a new farm opportunity for remote farmers to own
               </p>
             </div>
             <button

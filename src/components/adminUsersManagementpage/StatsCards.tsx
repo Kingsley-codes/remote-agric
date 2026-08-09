@@ -19,14 +19,14 @@ const stats = [
     ),
   },
   {
-    label: "Active Investors",
+    label: "Active Remote Farmers",
     value: "850",
     icon: MdAttachMoney,
     iconBg: "bg-[#eaf3e7]",
     iconColor: "text-[#5e9a4c]",
   },
   {
-    label: "Top Investor",
+    label: "Top Remote Farmer",
     value: "John Doe",
     icon: MdHourglassEmpty,
     iconBg: "bg-orange-100",

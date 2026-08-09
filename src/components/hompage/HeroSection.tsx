@@ -69,9 +69,9 @@ interface Slide {
 const slides: Slide[] = [
   {
     id: 1,
-    title: "Remote Agric – Invest in Food. Empower Farmers. Grow Together.",
+    title: "Remote Agric – Own a Farm Remotely. Grow Food. Grow Together.",
     subtitle:
-      "Remote Agric connects everyday investors to real farming projects across Africa — funding production, supporting farmers, and earning from harvest outcomes.",
+      "Remote Agric lets everyday people own real farm units across Africa while trusted producers manage cultivation and you follow each stage through harvest.",
     bgImage:
       "https://res.cloudinary.com/dbeyl29fl/image/upload/v1768213215/f3tfcfmz8hotxeekiqlb.png",
     badge: {
@@ -80,20 +80,20 @@ const slides: Slide[] = [
       animate: true,
     },
     stats: [
-      { value: "5,000+", label: "Active Farmers" },
+      { value: "5,000+", label: "Remote Farmers" },
       { value: "12,000", label: "Hectares Owned" },
       { value: "₦500M", label: "Harvest Returns" },
     ],
     buttons: [
-      { text: "Start Investing", primary: true, icon: FaChartLine },
+      { text: "Own a Farm", primary: true, icon: FaChartLine },
       { text: "Explore Projects", primary: false },
     ],
   },
   {
     id: 2,
-    title: "Your Investment Goes Directly to the Farm",
+    title: "Your Farm Ownership Goes Directly to Production",
     subtitle:
-      "Your funds are used to supply farmers with seeds, fertilizers, equipment and inputs — not cash handouts — ensuring every naira is spent on real production.",
+      "Your payment supplies producers with seeds, fertilizers, equipment and inputs — ensuring every naira supports the farm units you own.",
     bgImage:
       "https://res.cloudinary.com/dbeyl29fl/image/upload/v1768213423/mptkzxaetnjot7uhfxlv.png",
     badge: {
@@ -111,7 +111,7 @@ const slides: Slide[] = [
   },
   {
     id: 3,
-    title: "Track Every Stage of Your Farm Investment",
+    title: "Track Every Stage of Your Remote Farm",
     subtitle:
       "From land preparation to planting, crop growth and harvest, Remote Agric keeps you informed at every phase through real-time updates and notifications",
     bgImage:
@@ -139,9 +139,9 @@ const slides: Slide[] = [
   },
   {
     id: 4,
-    title: "Empowering Farmers. Strengthening Communities.",
+    title: "Empowering Producers. Strengthening Communities.",
     subtitle:
-      "We work directly with trusted farming communities to remove financial barriers and help farmers focus on what they do best — growing food.",
+      "We work directly with trusted farming communities to remove operational barriers and help producers focus on what they do best — growing food.",
     bgImage:
       "https://res.cloudinary.com/dbeyl29fl/image/upload/v1768213837/yvapk8gjlpc0lkzhtfk3.png",
     badge: {

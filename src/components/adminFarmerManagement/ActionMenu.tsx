@@ -57,7 +57,7 @@ export default function ActionMenu({
             className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-green-700 hover:bg-green-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <MdCheckCircle className="text-base shrink-0" />
-            Activate Farmer
+            Activate Producer
           </button>
           <button
             onClick={() => handleAction("suspend")}
@@ -65,7 +65,7 @@ export default function ActionMenu({
             className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <MdBlock className="text-base shrink-0" />
-            Suspend Farmer
+            Suspend Producer
           </button>
         </div>
       )}

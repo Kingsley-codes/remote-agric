@@ -76,8 +76,8 @@ export default function ContactForm() {
             className="w-full border-slate-200 rounded-md focus:ring-primary focus:border-primary px-4 py-3"
           >
             <option>General Inquiry</option>
-            <option>Farmer Relations (Investors)</option>
-            <option>Producer Support (Farm Owners)</option>
+            <option>Remote Farmer Relations</option>
+            <option>Producer Support</option>
             <option>Technical Assistance</option>
           </select>
         </div>

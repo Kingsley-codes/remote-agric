@@ -30,7 +30,7 @@ export default function StatsSection({
       {/* Total Invested */}
       <div className="flex flex-col gap-1 rounded-xl p-5 bg-white border border-[#d5e7cf] shadow-sm">
         <div className="flex justify-between items-start">
-          <p className="text-gray-400 text-sm font-medium">Total Invested</p>
+          <p className="text-gray-400 text-sm font-medium">Total Farm Value</p>
           <span className="bg-[#eaf3e7] text-[#5e9a4c] p-1.5 rounded-lg">
             <FaWallet className="text-xl" />
           </span>
@@ -39,7 +39,7 @@ export default function StatsSection({
           {formatCurrency(totalInvestedAmount)}
         </p>
         <p className="text-xs text-green-600 font-medium mt-1 flex items-center gap-1">
-          {totalActiveInvestments} active investment
+          {totalActiveInvestments} active farm
           {totalActiveInvestments !== 1 ? "s" : ""}
         </p>
       </div>
@@ -69,7 +69,7 @@ export default function StatsSection({
           {totalActiveInvestments}
         </p>
         <p className="text-xs text-[#5e9a4c] font-medium mt-1">
-          Investments currently in an active farm cycle
+          Farms currently in an active production cycle
         </p>
       </div>
     </div>

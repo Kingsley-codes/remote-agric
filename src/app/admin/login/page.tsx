@@ -132,8 +132,8 @@ export default function LoginPage() {
           {/* Centered Content */}
           <div className="max-w-md space-y-6 text-center px-4">
             <blockquote className="text-xl md:text-2xl font-display font-medium leading-relaxed">
-              &quot;Investing in agriculture is not just about profit; it&apos;s
-              about sustaining the future. Grow Africa makes it seamless.&quot;
+              &quot;Remote farm ownership grows food, supports producers, and
+              sustains the future. Remote Agric makes it seamless.&quot;
             </blockquote>
           </div>
         </div>
@@ -161,7 +161,7 @@ export default function LoginPage() {
                 Welcome Back
               </h1>
               <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 text-center">
-                Invest in the future of farming today.
+                Manage remote farm ownership with confidence.
               </p>
             </div>
 

@@ -21,16 +21,16 @@ export default function StorySection() {
           <h2 className="text-primary text-4xl font-semibold mb-8">Our Story</h2>
           <div className="space-y-6 text-slate-700 leading-relaxed">
             <p>
-              What started as a simple investment platform in Lagos has blossomed into a full-scale agricultural venture. Many Nigerians wanted to invest in agriculture but lacked time and expertise.
+              What started as a simple idea in Lagos has blossomed into a full-scale agricultural venture. Many Nigerians wanted to own and run farms but lacked the time, land, or expertise.
             </p>
             <p>
-              Talented rural farmers were trapped in cycles of subsistence farming due to lack of modern machinery and capital.
+              Talented rural producers were trapped in cycles of subsistence farming due to a lack of modern machinery and resources.
             </p>
             <div className="pl-6 border-l-4 border-[#D96C3A] italic text-xl font-medium text-slate-800 py-2 flex items-center gap-2">
               <FaQuoteLeft /> &quot;We didn&apos;t just want to build a Fintech app; we wanted to build a bridge that felt like soil under your fingernails.&quot;
             </div>
             <p>
-              Today, Agrofund Hub manages dozens of farm clusters across Nigeria, using IoT technology to give remote farmers real-time updates while ensuring local partners receive fair wages, training, and a stake in the harvest.
+              Today, Remote Agric manages dozens of farm clusters across Nigeria, using IoT technology to give remote farmers real-time updates while ensuring producers receive fair wages, training, and a stake in the harvest.
             </p>
           </div>
         </div>

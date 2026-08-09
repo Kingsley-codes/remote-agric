@@ -7,7 +7,7 @@ import {
 
 const stats = [
   {
-    label: "Total Farmers",
+    label: "Total Producers",
     value: "1,240",
     icon: MdGroup,
     iconBg: "bg-[#eaf3e7]",
@@ -19,14 +19,14 @@ const stats = [
     ),
   },
   {
-    label: "Active Farmers",
+    label: "Active Producers",
     value: "850",
     icon: MdAttachMoney,
     iconBg: "bg-[#eaf3e7]",
     iconColor: "text-[#5e9a4c]",
   },
   {
-    label: "Funded Farmers",
+    label: "Funded Producers",
     value: "John Doe",
     icon: MdHourglassEmpty,
     iconBg: "bg-orange-100",

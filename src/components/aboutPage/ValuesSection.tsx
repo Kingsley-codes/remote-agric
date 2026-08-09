@@ -5,7 +5,7 @@ import { FaEye, FaHeart, FaKey, FaUsers } from "react-icons/fa";
 const values = [
   { icon: FaEye, title: "Transparency", desc: "Every kobo accounted for. Real-time monitoring and reporting for every farm cycle.", color: "primary" },
   { icon: FaHeart, title: "Impact", desc: "Measuring success by the improved livelihoods of our rural host communities.", color: "terracotta" },
-  { icon: FaKey, title: "Ownership", desc: "Fostering a sense of pride and stewardship for both investors and farmers.", color: "ochre" },
+  { icon: FaKey, title: "Ownership", desc: "Fostering pride and stewardship for both remote farmers and producers.", color: "ochre" },
   { icon: FaUsers, title: "Community", desc: "Building a network that shares knowledge, risks, and the joy of a bountiful harvest.", color: "primary" },
 ];
 

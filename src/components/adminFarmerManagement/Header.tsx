@@ -17,8 +17,8 @@ export default function Header() {
     <>
       <header className="w-full flex items-center justify-between px-6 py-5 bg-[#f6f8f6]">
         <div>
-          <h1 className="text-3xl font-semibold">Farmer Management</h1>
-          <p className="text-gray-500 text-sm">Manage platform farmers.</p>
+          <h1 className="text-3xl font-semibold">Producer Management</h1>
+          <p className="text-gray-500 text-sm">Manage platform producers.</p>
         </div>
 
         <button
@@ -26,7 +26,7 @@ export default function Header() {
           className="flex h-9 sm:h-10 items-center justify-center rounded-xl bg-primary text-gray-100 text-sm font-semibold hover:bg-primary-dark transition-colors gap-2 px-2 sm:px-4 whitespace-nowrap"
         >
           <IoIosAdd className="h-5 w-5 shrink-0" />
-          <span className="hidden sm:inline">Add Farmer</span>
+          <span className="hidden sm:inline">Add Producer</span>
         </button>
       </header>
 

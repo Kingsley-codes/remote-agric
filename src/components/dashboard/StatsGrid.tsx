@@ -3,7 +3,7 @@ import StatCard from "./StatCard";
 export default function StatsGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <StatCard title="Total Invested" value="$12,450" badge="+12%" />
+      <StatCard title="Total Farm Value" value="$12,450" badge="+12%" />
 
       <StatCard title="Active Projects" value="4" />
 

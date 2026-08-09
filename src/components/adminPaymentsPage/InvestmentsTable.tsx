@@ -278,7 +278,7 @@ export default function InvestmentsTable() {
           );
         } else {
           setError(
-            err instanceof Error ? err.message : "Failed to load investments",
+            err instanceof Error ? err.message : "Failed to load farm ownerships",
           );
         }
       } finally {
@@ -302,7 +302,7 @@ export default function InvestmentsTable() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search investors or projects..."
+            placeholder="Search remote farmers or projects..."
             className="w-full h-11 pl-12 pr-4 bg-white border border-primary/20 rounded-xl text-sm text-slate-900 placeholder:text-primary/60 focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none transition-all"
           />
         </label>
@@ -367,7 +367,7 @@ export default function InvestmentsTable() {
               <tr className="bg-[#f9fcf8] border-b border-primary/20">
                 {[
                   "Order ID",
-                  "Investor",
+                  "Remote Farmer",
                   "Project",
                   "Units",
                   "Amount",
@@ -395,7 +395,7 @@ export default function InvestmentsTable() {
                     colSpan={8}
                     className="text-center py-12 text-primary text-sm"
                   >
-                    No investments match your search.
+                    No farm ownerships match your search.
                   </td>
                 </tr>
               ) : (

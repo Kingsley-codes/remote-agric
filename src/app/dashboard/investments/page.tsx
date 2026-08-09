@@ -55,7 +55,7 @@ export default function InvestmentsPage() {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/investments`,
           { credentials: "include" },
         );
-        if (!res.ok) throw new Error("Failed to fetch investments");
+        if (!res.ok) throw new Error("Failed to fetch your farms");
         const json = await res.json();
         if (json.success) {
           setData(json.data);

@@ -52,7 +52,7 @@ export default function OrderSummary({
 
   const handlePayment = async () => {
     if (!agreed) {
-      setError("Please agree to the Terms of Investment to continue.");
+      setError("Please agree to the Farm Ownership Terms to continue.");
       return;
     }
 
@@ -107,7 +107,7 @@ export default function OrderSummary({
   return (
     <div className="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
       <div className="p-6 bg-linear-to-br from-white to-background-light border-b border-gray-100">
-        <h3 className="text-lg font-bold mb-4">Investment Summary</h3>
+        <h3 className="text-lg font-bold mb-4">Farm Ownership Summary</h3>
 
         <div className="flex gap-4 mb-4">
           <div
@@ -147,7 +147,7 @@ export default function OrderSummary({
           />
           <div className="text-xs text-gray-500">
             <label className="font-medium text-gray-700">
-              I agree to the Terms of Investment
+              I agree to the Farm Ownership Terms
             </label>
             <p>
               By continuing, you agree to Agrofund&apos;s{" "}

@@ -48,7 +48,7 @@ export default function TransactionRow({ transaction }: TransactionRowProps) {
           <div
             className="size-8 rounded-full bg-slate-200 dark:bg-slate-600 bg-cover bg-center"
             style={{ backgroundImage: `url('${transaction.investorImage}')` }}
-            aria-label={`Portrait of investor ${transaction.investor}`}
+            aria-label={`Portrait of remote farmer ${transaction.investor}`}
           />
           <span className="text-slate-700 dark:text-slate-200">
             {transaction.investor}

@@ -10,9 +10,9 @@ const steps: Step[] = [
   },
   {
     icon: <FaRegUser />,
-    title: "2. We Assign Trusted Farmers",
+    title: "2. We Assign Trusted Producers",
     description:
-      "We engage experienced farmers to cultivate your chosen crops or livestock. They handle all the work while you track progress through our platform.",
+      "We engage experienced producers to cultivate your chosen crops or livestock. They handle farm operations while you track progress through our platform.",
   },
   {
     icon: <FaWallet />,

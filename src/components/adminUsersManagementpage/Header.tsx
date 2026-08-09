@@ -3,7 +3,7 @@ export default function Header() {
     <header className="w-full px-6 py-5 bg-[#f6f8f6]">
       <div>
         <h1 className="text-3xl font-semibold">User Management</h1>
-        <p className="text-gray-500 text-sm">Manage investor accounts.</p>
+        <p className="text-gray-500 text-sm">Manage remote farmer accounts.</p>
       </div>
     </header>
   );

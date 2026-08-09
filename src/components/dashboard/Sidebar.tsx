@@ -34,8 +34,8 @@ interface SidebarProps {
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: FiGrid },
-  { href: "/dashboard/investments", label: "My Investments", icon: FiPieChart },
-  { href: "/opportunities", label: "New Investments", icon: FiShoppingBag },
+  { href: "/dashboard/investments", label: "My Farms", icon: FiPieChart },
+  { href: "/opportunities", label: "Own a New Farm", icon: FiShoppingBag },
   { href: "/dashboard/wallet", label: "Wallet", icon: FiCreditCard },
   { href: "/dashboard/support", label: "Support", icon: IoIosChatboxes },
   { href: "/dashboard/referrals", label: "Referrals", icon: FiGift },
@@ -266,7 +266,7 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
                   <div>
                     <p className="text-sm font-bold">{displayName}</p>
                     <p className="text-xs text-gray-500 capitalize">
-                      {user?.role ?? "Investor"}
+                      {user?.role ?? "Remote Farmer"}
                     </p>
                   </div>
 

@@ -20,7 +20,7 @@ export const MontserratFont = Montserrat({
 export const metadata: Metadata = {
   title: "Remote Agric",
   description:
-    "An agric investment platform that connects investors with farmers to promote sustainable agriculture and improve livelihoods.",
+    "Own and manage farms remotely with trusted producers, transparent updates, and flexible harvest options.",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

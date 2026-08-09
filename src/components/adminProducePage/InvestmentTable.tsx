@@ -47,19 +47,19 @@ export default function InvestmentTable() {
       }
     } catch (error) {
       console.error("Error fetching investments:", error);
-      toast.error("Failed to load investments");
+      toast.error("Failed to load farm listings");
     } finally {
       setLoading(false);
     }
   };
 
   const handleEditSuccess = () => {
-    toast.success("Investment updated successfully!");
+    toast.success("Farm listing updated successfully!");
     fetchInvestments();
   };
 
   const handleDeleteSuccess = () => {
-    toast.success("Investment deleted successfully!");
+    toast.success("Farm listing deleted successfully!");
     fetchInvestments();
   };
 
@@ -95,7 +95,7 @@ export default function InvestmentTable() {
         </div>
       ) : filteredInvestments.length === 0 ? (
         <div className="text-center py-12 text-slate-500 dark:text-slate-400 text-sm">
-          No investments found
+          No farm listings found
         </div>
       ) : (
         <>
@@ -118,7 +118,7 @@ export default function InvestmentTable() {
             <table className="w-full text-left border-collapse">
               <thead className="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold">
                 <tr>
-                  <th className="px-6 py-4">Investment Name</th>
+                  <th className="px-6 py-4">Farm Listing</th>
                   <th className="px-6 py-4">Category</th>
                   <th className="px-6 py-4 text-right">ROI</th>
                   <th className="px-6 py-4 text-right">Duration</th>

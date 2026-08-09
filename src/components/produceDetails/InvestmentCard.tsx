@@ -117,11 +117,11 @@ export function InvestmentCard({
           }}
           className="w-full h-12 bg-primary text-gray-100 font-bold rounded-xl text-lg hover:bg-primary-dark transition-all flex items-center justify-center gap-2"
         >
-          Invest Now <FaMoneyBillWave />
+          Own This Farm <FaMoneyBillWave />
         </button>
 
         <p className="text-xs text-center text-gray-500">
-          By clicking Invest, you agree to the{" "}
+          By continuing, you agree to the{" "}
           <a
             href="#"
             className="underline text-primary hover:text-primary-dark"

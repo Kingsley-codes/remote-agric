@@ -12,7 +12,7 @@ const items: FAQItem[] = [
       "Returns (capital plus profit) are paid automatically into your Grow Africa wallet at the end of the 9-month cycle.",
   },
   {
-    question: "Is my investment insured?",
+    question: "Is my farm ownership insured?",
     answer:
       "Yes. This farm cycle is insured against natural disasters, fire and theft. The certificate is available in the documents section.",
   },
