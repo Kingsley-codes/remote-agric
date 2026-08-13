@@ -1,23 +1,37 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+interface InvestmentSummary {
+  totalActiveInvestments: number;
+  totalProjectedROI: number;
+}
+
+const formatNaira = (value: number) => `₦${value.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 export default function WalletStats() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="bg-white border border-[#d5e7cf] rounded-xl p-6 shadow-sm">
-        <p className="text-gray-500 font-semibold">Total Balance</p>
-        <p className="text-3xl font-bold">₦12,450.00</p>
-        <p className="text-green-500 text-sm">+12% vs last month</p>
-      </div>
+  const [balance, setBalance] = useState(0);
+  const [investments, setInvestments] = useState<InvestmentSummary>({ totalActiveInvestments: 0, totalProjectedROI: 0 });
+  const [loading, setLoading] = useState(true);
 
-      <div className="bg-white border border-[#d5e7cf] rounded-xl p-6 shadow-sm">
-        <p className="text-gray-500 font-semibold">Active Farms</p>
-        <p className="text-3xl font-bold">₦8,200.00</p>
-        <p className="text-sm text-gray-500">4 Active Cycles</p>
-      </div>
+  useEffect(() => {
+    const base = process.env.NEXT_PUBLIC_BACKEND_URL;
+    Promise.all([
+      fetch(`${base}/api/user/profile`, { credentials: "include" }).then((response) => response.ok ? response.json() : Promise.reject()),
+      fetch(`${base}/api/user/dashboard/investments`, { credentials: "include" }).then((response) => response.ok ? response.json() : Promise.reject()),
+    ])
+      .then(([profile, investmentData]) => {
+        setBalance(Number(profile.data?.wallet ?? 0));
+        setInvestments(investmentData.data);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-      <div className="bg-white border border-[#d5e7cf] rounded-xl p-6 shadow-sm">
-        <p className="text-gray-500 font-semibold">Withdrawable Earnings</p>
-        <p className="text-3xl font-bold">₦2,300.00</p>
-        <p className="text-sm text-gray-500">Available now</p>
-      </div>
-    </div>
-  );
+  const cards = [
+    ["Total Balance", formatNaira(balance), "Available in your wallet"],
+    ["Active Farms", formatNaira(0), `${investments.totalActiveInvestments} active cycle${investments.totalActiveInvestments === 1 ? "" : "s"}`],
+    ["Projected Earnings", formatNaira(investments.totalProjectedROI), "From active farms"],
+  ];
+
+  return <div className="grid grid-cols-1 gap-4 md:grid-cols-3">{cards.map(([label, value, detail]) => <div key={label} className="rounded-xl border border-[#d5e7cf] bg-white p-6 shadow-sm"><p className="font-semibold text-gray-500">{label}</p><p className="text-3xl font-bold">{loading ? "—" : value}</p><p className="text-sm text-gray-500">{loading ? "Loading…" : detail}</p></div>)}</div>;
 }

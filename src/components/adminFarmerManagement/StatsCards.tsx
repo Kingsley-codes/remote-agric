@@ -1,59 +1,15 @@
-import {
-  MdGroup,
-  MdAttachMoney,
-  MdHourglassEmpty,
-  MdTrendingUp,
-} from "react-icons/md";
+"use client";
 
-const stats = [
-  {
-    label: "Total Producers",
-    value: "1,240",
-    icon: MdGroup,
-    iconBg: "bg-[#eaf3e7]",
-    iconColor: "text-[#5e9a4c]",
-    footer: (
-      <p className="text-xs text-green-600 font-medium mt-1 flex items-center gap-1">
-        <MdTrendingUp className="text-base" /> +12% this month
-      </p>
-    ),
-  },
-  {
-    label: "Active Producers",
-    value: "850",
-    icon: MdAttachMoney,
-    iconBg: "bg-[#eaf3e7]",
-    iconColor: "text-[#5e9a4c]",
-  },
-  {
-    label: "Funded Producers",
-    value: "John Doe",
-    icon: MdHourglassEmpty,
-    iconBg: "bg-orange-100",
-    iconColor: "text-orange-500",
-  },
-];
+import { MdGroup, MdAttachMoney, MdHourglassEmpty } from "react-icons/md";
+import { useAdminDashboardStats } from "@/hooks/useAdminDashboardStats";
 
 export default function StatsCards() {
-  return (
-    <div className="grid px-4 grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      {stats.map(({ label, value, icon: Icon, iconBg, iconColor, footer }) => (
-        <div
-          key={label}
-          className="flex flex-col gap-1 rounded-xl p-5 bg-white border border-[#d5e7cf] shadow-sm"
-        >
-          <div className="flex justify-between items-start">
-            <p className="text-gray-500 text-sm font-medium">{label}</p>
-            <span className={`${iconBg} ${iconColor} p-1.5 rounded-lg`}>
-              <Icon className="text-xl" />
-            </span>
-          </div>
-          <p className="text-gray-800 text-3xl font-bold tracking-tight mt-2">
-            {value}
-          </p>
-          {footer}
-        </div>
-      ))}
-    </div>
-  );
+  const { data, loading } = useAdminDashboardStats();
+  const stats = [
+    { label: "Total Producers", value: data?.farmers.total ?? 0, icon: MdGroup },
+    { label: "Active Producers", value: data?.farmers.active ?? 0, icon: MdAttachMoney },
+    { label: "Funded Producers", value: data?.farmers.funded ?? 0, icon: MdHourglassEmpty },
+  ];
+
+  return <div className="mb-8 grid grid-cols-1 gap-6 px-4 md:grid-cols-3">{stats.map(({ label, value, icon: Icon }) => <div key={label} className="flex flex-col gap-1 rounded-xl border border-[#d5e7cf] bg-white p-5 shadow-sm"><div className="flex items-start justify-between"><p className="text-sm font-medium text-gray-500">{label}</p><span className="rounded-lg bg-[#eaf3e7] p-1.5 text-[#5e9a4c]"><Icon className="text-xl" /></span></div><p className="mt-2 text-3xl font-bold tracking-tight text-gray-800">{loading ? "—" : value.toLocaleString("en-NG")}</p></div>)}</div>;
 }

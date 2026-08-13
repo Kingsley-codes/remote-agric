@@ -1,15 +1,30 @@
 import StatCard from "./StatCard";
 
-export default function StatsGrid() {
+interface StatsGridProps {
+  totalFarmValue: number;
+  activeProjects: number;
+  projectedRoi: number;
+  nextPayout: string;
+}
+
+const formatNaira = (amount: number) =>
+  `₦${amount.toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
+
+export default function StatsGrid({
+  totalFarmValue,
+  activeProjects,
+  projectedRoi,
+  nextPayout,
+}: StatsGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <StatCard title="Total Farm Value" value="₦12,450" badge="+12%" />
+      <StatCard title="Total Farm Value" value={formatNaira(totalFarmValue)} />
 
-      <StatCard title="Active Projects" value="4" />
+      <StatCard title="Active Projects" value={String(activeProjects)} />
 
-      <StatCard title="Total ROI Earned" value="₦3,200" badge="+5%" />
+      <StatCard title="Projected ROI" value={formatNaira(projectedRoi)} />
 
-      <StatCard title="Next Payout" value="Oct 24, 2023" />
+      <StatCard title="Next Payout" value={nextPayout} />
     </div>
   );
 }
