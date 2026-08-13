@@ -36,7 +36,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (loading) return;
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/investments`, { credentials: "include" })
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/overview`, { credentials: "include" })
       .then(async (response) => {
         if (!response.ok) throw new Error("Unable to load dashboard data");
         return response.json();

@@ -1,46 +1,53 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import TransactionRow from "./TransactionRow";
 
+interface Transaction {
+  id: string;
+  reference: string;
+  title: string;
+  subtitle: string;
+  amount: number;
+  direction: "credit" | "debit";
+  status: string;
+  createdAt: string;
+}
+
+const formatNaira = (amount: number) => `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 export default function TransactionTable() {
-  return (
-    <div className="flex flex-col gap-4">
-      <h3 className="text-xl font-bold">Transaction History</h3>
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-      <div className="bg-white border border-[#d5e7cf] rounded-xl overflow-hidden shadow-sm">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-[#d5e7cf] text-xs uppercase text-gray-500">
-            <tr>
-              <th className="p-4">withdrawalID</th>
-              <th className="p-4">Transaction</th>
-              <th className="p-4">Date</th>
-              <th className="p-4">Status</th>
-              <th className="p-4 text-right">Amount</th>
-            </tr>
-          </thead>
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/transactions`, { credentials: "include" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Unable to load transaction history");
+        return response.json();
+      })
+      .then((payload) => setTransactions(payload.data?.transactions ?? []))
+      .catch((reason: Error) => setError(reason.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-          <tbody>
-            <TransactionRow
-              withdrawalID="FGHJKSK"
-              title="Cassava Farm Cycle 2"
-              subtitle="ROI Payment"
-              date="Oct 24, 2023"
-              time="10:42 AM"
-              status="Completed"
-              amount="+₦450.00"
-              positive
-            />
-
-            <TransactionRow
-              withdrawalID="FGHJKSK"
-              title="Withdrawal to Bank"
-              subtitle="Transfer to ****1234"
-              date="Oct 20, 2023"
-              time="02:15 PM"
-              status="Processing"
-              amount="-₦1,000.00"
-            />
-          </tbody>
-        </table>
-      </div>
+  return <div className="flex flex-col gap-4">
+    <h3 className="text-xl font-bold">Transaction History</h3>
+    <div className="overflow-x-auto rounded-xl border border-[#d5e7cf] bg-white shadow-sm">
+      <table className="w-full min-w-[720px] text-left">
+        <thead className="border-b border-[#d5e7cf] bg-gray-50 text-xs uppercase text-gray-500"><tr><th className="p-4">Reference</th><th className="p-4">Transaction</th><th className="p-4">Date</th><th className="p-4">Status</th><th className="p-4 text-right">Amount</th></tr></thead>
+        <tbody>
+          {loading && <tr><td colSpan={5} className="p-10 text-center text-sm text-gray-500">Loading transactions…</td></tr>}
+          {!loading && error && <tr><td colSpan={5} className="p-10 text-center text-sm text-red-600">{error}</td></tr>}
+          {!loading && !error && !transactions.length && <tr><td colSpan={5} className="p-10 text-center text-sm text-gray-500">No transactions yet.</td></tr>}
+          {transactions.map((transaction) => {
+            const date = new Date(transaction.createdAt);
+            const positive = transaction.direction === "credit";
+            return <TransactionRow key={transaction.id} withdrawalID={transaction.reference} title={transaction.title} subtitle={transaction.subtitle} date={date.toLocaleDateString("en-NG", { day: "2-digit", month: "short", year: "numeric" })} time={date.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })} status={transaction.status} amount={`${positive ? "+" : "-"}${formatNaira(transaction.amount)}`} positive={positive} />;
+          })}
+        </tbody>
+      </table>
     </div>
-  );
+  </div>;
 }
