@@ -11,7 +11,7 @@ export default function ActiveInvestments() {
         <InvestmentItem
           title="Maize Farm - Batch A"
           maturity="Dec 12, 2023"
-          amount="$4,500"
+          amount="₦4,500"
           progress={65}
           image="https://lh3.googleusercontent.com/aida-public/AB6AXuBoMmtoO__WULK6e_x_HZ44r2aXIxZioRtGIBv4Q8bbsPRp46y7FppaB3SS5OSEb42V7aUjKi8uMSiXrX9ltMFIckRU_8_ocN2CKGoqajahR_FQDzvEQ0OFNSblbHyd1wSd9tcG42K8Gx-sR4I5clr1GynjWfx-JVYJlVoq2fGRC0c_QiNiGAWcMkGOm_iUND-GtWuab9UYotvLRVWFOhq74eQKr-qqN9h99UuvaV0w4wo1uQm0ZrlCD5JtyQkd-8BVWbTrbK8rA5w"
         />

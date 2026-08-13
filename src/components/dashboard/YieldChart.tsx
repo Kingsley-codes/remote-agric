@@ -10,7 +10,7 @@ export default function YieldChart() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-2xl text-gray-700 font-bold">$14,250</span>
+          <span className="text-2xl text-gray-700 font-bold">₦14,250</span>
           <span className="text-sm font-bold text-[#078821] bg-[#eaf3e7] px-2 py-0.5 rounded">
             +15%
           </span>

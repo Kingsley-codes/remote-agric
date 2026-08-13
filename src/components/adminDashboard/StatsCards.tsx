@@ -4,7 +4,7 @@ import { FiAlertTriangle } from "react-icons/fi";
 const stats = [
   {
     title: "Total Farm Ownerships",
-    value: "$4,250,000",
+    value: "₦4,250,000",
     change: "+12%",
     changeBg: "bg-green-100 dark:bg-green-900/30",
     changeColor: "text-green-700 dark:text-green-400",
@@ -31,7 +31,7 @@ const stats = [
   },
   {
     title: "Pending Withdrawals",
-    value: "$125,000",
+    value: "₦125,000",
     change: "Action",
     changeBg: "bg-red-100 dark:bg-red-900/30",
     changeColor: "text-red-700 dark:text-red-400",

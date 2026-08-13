@@ -2,13 +2,13 @@ export default function PortfolioMix() {
   const portfolioItems = [
     {
       name: "Produce/Crops",
-      value: "$2.9M",
+      value: "₦2.9M",
       percentage: 70,
       color: "bg-primary",
     },
     {
       name: "Livestock",
-      value: "$1.3M",
+      value: "₦1.3M",
       percentage: 30,
       color: "bg-slate-300 dark:bg-slate-600",
     },

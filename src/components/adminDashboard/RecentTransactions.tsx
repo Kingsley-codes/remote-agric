@@ -12,7 +12,7 @@ export default function RecentTransactions() {
       investorImage:
         "https://lh3.googleusercontent.com/aida-public/AB6AXuAYyOUg8r4onY2ycEIrgZsn9M5-IyTMdvLM_8Ixn6JXxuU-S2EUbEEnxL9Mpab0K7PjPl9z4aHIkhVYVwUXXQnlf3zaMq_7ZrtgE5B-U8Zp1IH33vgEmBOdC-bpFjesDvcmriGBdK8cAke6k0mPe8sHZWykAE0Q8s5LXaDH4CCR27n3TCb8ILRvRSZziL-r7S3l89nHrOaM5v8vHBVvO-TzUX0WRibM1-pbfeVVp0QA0rH4Hz8L8gYDNsYZy4cc_72ANcBRByMBHlE",
       type: "Corn (Crop)",
-      amount: "$5,000",
+      amount: "₦5,000",
       date: "Oct 24, 2023",
       status: "Completed",
       statusColor: "green",
@@ -23,7 +23,7 @@ export default function RecentTransactions() {
       investorImage:
         "https://lh3.googleusercontent.com/aida-public/AB6AXuBlvpB22zCig5HFmXf2wFJ75Ok7NpwZbVTyuSKQOXOD0AVwGCCuXLtKZXS3kFEHqQ2G_f1P4r1mZox4lWv9aA8wsieum_O6Qt8zYYYJc-6YTNS5aqb_ntUeSi9x3lHyp5TwQ9A3b-yHtAq_gcVWvCY5NvbTi8sVio4La5yGe8z_yXxzFHVSKRn4Lvk7XL7QQfG6_5zN5ui0_-iK6rZL-GHbC6Mjb4BMoohvQwpPYu49sTMqolonxUZeskQjFBhh0Vi0XNca1-rpwts",
       type: "Cattle (Livestock)",
-      amount: "$12,500",
+      amount: "₦12,500",
       date: "Oct 23, 2023",
       status: "Pending",
       statusColor: "yellow",
@@ -34,7 +34,7 @@ export default function RecentTransactions() {
       investorImage:
         "https://lh3.googleusercontent.com/aida-public/AB6AXuDX3q1w2h1ChFWjKOpaXJEIAr5vp_oH3skTD_76b4kn9WuaVUd5ANQGd4BL9z6wm2-D_dbIT2as8NkpvXSjKfadOpXoOPAkv72FGg11A_AwQIbAO0YwL0wMC9vsyL5zhhFZwqHCLbGmYC83yZCS87xa7Hd0W5po__rufuJXzn6hxUdTmaS1VnHESWoFk0MDKSlnSPqPRw22jEAmZsIYGD7mDv0ZgXMmR81TfERJOEqESiecCJCoVsOsmd-QIYKVhnTtdTpf9E07RTc",
       type: "Soybeans (Crop)",
-      amount: "$2,100",
+      amount: "₦2,100",
       date: "Oct 22, 2023",
       status: "Completed",
       statusColor: "green",

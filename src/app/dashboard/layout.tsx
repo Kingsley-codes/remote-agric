@@ -38,15 +38,15 @@ export default function DashboardLayout({
   );
 
   return (
-    <div className="flex h-screen bg-gray-50 w-full overflow-y-auto">
+    <div className="flex h-dvh w-full overflow-hidden bg-gray-50">
       <Sidebar
         user={user}
         isOpen={sidebarOpen}
         onToggle={handleSidebarToggle}
       />
-      <main className="flex-1 flex flex-col h-full overflow-y-auto relative">
+      <main className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden">
         <DashboardNav isOpen={sidebarOpen} onToggle={handleSidebarToggle} />
-        {children}
+        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         <NotificationBell />
         <PushNotifications />
         <DashboardFooter />

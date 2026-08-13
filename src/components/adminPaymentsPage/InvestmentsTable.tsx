@@ -71,9 +71,9 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatAmount(amount: number) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-NG", {
     style: "currency",
-    currency: "USD",
+    currency: "NGN",
   }).format(amount);
 }
 

@@ -12,7 +12,7 @@ const stats = [
   },
   {
     title: "Total Farm Listings",
-    value: "$4,250,000",
+    value: "₦4,250,000",
     change: "+12%",
     changeBg: "bg-green-100 dark:bg-green-900/30",
     changeColor: "text-green-700 dark:text-green-400",

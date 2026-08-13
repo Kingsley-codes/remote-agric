@@ -25,7 +25,7 @@ export default function TransactionTable() {
               date="Oct 24, 2023"
               time="10:42 AM"
               status="Completed"
-              amount="+$450.00"
+              amount="+₦450.00"
               positive
             />
 
@@ -36,7 +36,7 @@ export default function TransactionTable() {
               date="Oct 20, 2023"
               time="02:15 PM"
               status="Processing"
-              amount="-$1000.00"
+              amount="-₦1,000.00"
             />
           </tbody>
         </table>
