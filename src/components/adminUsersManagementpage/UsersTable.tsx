@@ -61,8 +61,7 @@ function normalizeStatus(raw: string): Status {
 
 function formatWalletBalance(wallet?: ApiUser["wallet"]): string {
   if (!wallet) return "N/A";
-  const currency = wallet.currency === "NGN" ? "₦" : "$";
-  return `${currency}${wallet.balance.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
+  return `₦${wallet.balance.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 }
 
 function formatDate(iso: string): { date: string; time: string } {
