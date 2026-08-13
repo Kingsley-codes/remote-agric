@@ -2,80 +2,13 @@
 
 import Link from "next/link";
 
-export interface ActiveInvestment {
-  _id: string;
-  title: string;
-  totalPrice: number;
-  duration: number;
-  stage?: string;
-  produce?: { image1?: { url?: string } };
-}
+export interface ActiveInvestment { _id: string; title: string; totalPrice: number; duration: number; stage?: string; orderDate?: string; produce?: { image1?: { url?: string } } }
+
+const stageLabel = (stage?: string) => (stage ?? "in progress").replaceAll("-", " ");
 
 export default function ActiveInvestments({ investments }: { investments: ActiveInvestment[] }) {
-  return (
-    <div className="bg-card-light rounded-xl border border-gray-100 shadow-sm flex flex-col">
-      <div className="p-6 border-b flex justify-between items-center">
-        <h3 className="text-lg font-bold">Active Farms</h3>
-        <Link href="/dashboard/investments" className="text-sm font-bold text-primary">View All</Link>
-      </div>
-
-      <div className="p-6 flex flex-col gap-6">
-        {investments.length ? investments.map((investment) => <InvestmentItem key={investment._id} title={investment.title} maturity={`${investment.duration} month cycle`} amount={`₦${investment.totalPrice.toLocaleString("en-NG")}`} stage={investment.stage ?? "In progress"} image={investment.produce?.image1?.url} />) : <p className="py-6 text-center text-sm text-gray-500">You do not have any active farms yet.</p>}
-      </div>
-    </div>
-  );
-}
-
-interface ItemProps {
-  title: string;
-  maturity: string;
-  amount: string;
-  stage: string;
-  image?: string;
-}
-
-function InvestmentItem({
-  title,
-  maturity,
-  amount,
-  stage,
-  image,
-}: ItemProps) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div className="flex items-center gap-4">
-        <div
-          className="w-12 h-12 rounded-lg bg-cover bg-center shrink-0"
-          style={image ? { backgroundImage: `url(${image})` } : undefined}
-        >{!image && <span className="grid h-full place-items-center text-xs text-primary">Farm</span>}</div>
-
-        <div>
-          <h4 className="font-bold">{title}</h4>
-          <p className="text-xs text-gray-500">
-            Maturity: {maturity}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-6 flex-1 sm:justify-end">
-        <div className="flex flex-col items-end min-w-[80px]">
-          <span className="text-sm font-bold">{amount}</span>
-          <span className="text-xs text-gray-500">Farm Value</span>
-        </div>
-
-        <div className="hidden sm:flex flex-col w-32 gap-1">
-          <div className="flex justify-between text-xs font-medium">
-            <span className="capitalize text-primary">{stage.replaceAll("-", " ")}</span>
-          </div>
-
-          <div className="w-full bg-gray-100 h-1.5 rounded-full">
-            <div
-              className="bg-primary h-full rounded-full"
-              style={{ width: "100%" }}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <section className="overflow-hidden rounded-2xl border border-[#dce7d8] bg-white shadow-sm">
+    <div className="flex items-center justify-between gap-4 border-b border-[#e6ede3] p-5 sm:p-6"><div><h3 className="text-xl font-bold text-slate-900">Active farms</h3><p className="mt-1 text-sm text-slate-500">Track the farms currently earning toward your portfolio.</p></div><Link href="/dashboard/investments" className="shrink-0 text-sm font-bold text-primary hover:underline">View all</Link></div>
+    {investments.length ? <div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left"><thead className="bg-[#f8fbf7] text-[11px] font-bold uppercase tracking-wider text-slate-500"><tr><th className="px-6 py-3">Farm</th><th className="px-5 py-3">Cycle</th><th className="px-5 py-3">Stage</th><th className="px-5 py-3">Farm value</th><th className="px-6 py-3 text-right">Details</th></tr></thead><tbody className="divide-y divide-[#edf1eb]">{investments.map((investment) => <tr key={investment._id} className="transition hover:bg-[#fbfdf9]"><td className="px-6 py-4"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center overflow-hidden rounded-xl bg-[#e8f1e4] text-xs font-bold text-primary">{investment.produce?.image1?.url ? <span className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${investment.produce.image1.url})` }} /> : "FA"}</span><div><p className="font-bold text-slate-800">{investment.title}</p><p className="text-xs text-slate-400">Active ownership</p></div></div></td><td className="px-5 py-4 text-sm text-slate-600">{investment.duration} months</td><td className="px-5 py-4"><span className="rounded-full bg-[#edf6e9] px-2.5 py-1 text-xs font-semibold capitalize text-primary">{stageLabel(investment.stage)}</span></td><td className="px-5 py-4 font-bold text-slate-800">₦{investment.totalPrice.toLocaleString("en-NG")}</td><td className="px-6 py-4 text-right"><Link href="/dashboard/investments" className="text-sm font-semibold text-primary">View</Link></td></tr>)}</tbody></table></div> : <div className="p-12 text-center"><p className="font-semibold text-slate-700">No active farms yet</p><p className="mt-1 text-sm text-slate-500">Your active farm ownerships will appear here.</p><Link href="/opportunities" className="mt-4 inline-block text-sm font-bold text-primary">Explore opportunities</Link></div>}
+  </section>;
 }

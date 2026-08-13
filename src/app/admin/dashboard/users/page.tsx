@@ -8,7 +8,7 @@ export default function Page() {
       <main className="flex-1 flex flex-col">
         <Header />
 
-        <div className="flex-1 overflow-y-auto px-6 pb-8">
+        <div className="flex-1 px-6 pb-8">
           <StatsCards />
           <UsersTable />
         </div>

@@ -76,12 +76,9 @@ export default function DashboardPage() {
 
           <StatsGrid totalFarmValue={dashboard?.totalInvestedAmount ?? 0} activeProjects={dashboard?.totalActiveInvestments ?? 0} projectedRoi={dashboard?.totalProjectedROI ?? 0} nextPayout={dashboard?.totalActiveInvestments ? "At harvest" : "No upcoming payout"} />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <div className="lg:col-span-2 flex flex-col gap-8">
-              <YieldChart projectedRoi={dashboard?.totalProjectedROI ?? 0} activeProjects={dashboard?.totalActiveInvestments ?? 0} />
-              <ActiveInvestments investments={(dashboard?.userInvestments ?? []).filter((investment) => investment.status === "ongoing").slice(0, 3)} />
-            </div>
-            <div />
+          <div className="flex flex-col gap-8 mb-8">
+              <YieldChart projectedRoi={dashboard?.totalProjectedROI ?? 0} investments={dashboard?.userInvestments ?? []} />
+              <ActiveInvestments investments={(dashboard?.userInvestments ?? []).filter((investment) => investment.status === "ongoing").slice(0, 5)} />
           </div>
     </div>
   );
