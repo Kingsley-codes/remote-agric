@@ -6,13 +6,13 @@ type Props = {
   status: string;
   amount: string;
   positive?: boolean;
-  withdrawalID: string;
+  transactionID: string;
   id?: string;
   onOpen?: (id: string) => void;
 };
 
 export default function TransactionRow({
-  withdrawalID,
+  transactionID,
   title,
   subtitle,
   date,
@@ -29,7 +29,7 @@ export default function TransactionRow({
       className="border-b last:border-b-0 border-[#e6f0e6] hover:bg-gray-50 cursor-pointer"
     >
       <td className="p-4">
-        <span className="text-sm">{withdrawalID}</span>
+        <span className="text-sm">{transactionID}</span>
       </td>
 
       <td className="p-4">

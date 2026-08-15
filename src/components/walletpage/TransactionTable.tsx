@@ -102,7 +102,7 @@ export default function TransactionTable() {
                   key={transaction.id}
                   id={transaction.id}
                   onOpen={(id) => setSelectedId(id)}
-                  withdrawalID={transaction.transactionID}
+                  transactionID={transaction.transactionID}
                   title={transaction.title}
                   subtitle={transaction.subtitle}
                   date={date.toLocaleDateString("en-NG", {
@@ -132,7 +132,7 @@ export default function TransactionTable() {
               <TransactionCard
                 key={transaction.id}
                 id={transaction.id}
-                withdrawalID={transaction.transactionID}
+                transactionID={transaction.transactionID}
                 title={transaction.title}
                 subtitle={transaction.subtitle}
                 date={date.toLocaleDateString("en-NG", {

@@ -2,7 +2,7 @@ import React from "react";
 
 type Props = {
   id: string;
-  withdrawalID: string;
+  transactionID: string;
   title: string;
   subtitle: string;
   date: string;
@@ -15,7 +15,7 @@ type Props = {
 
 export default function TransactionCard({
   id,
-  withdrawalID,
+  transactionID,
   title,
   subtitle,
   date,
@@ -31,7 +31,7 @@ export default function TransactionCard({
       className="block md:hidden p-4 bg-white border border-[#e6f0e6] rounded-lg shadow-sm cursor-pointer"
     >
       <div className="flex items-center justify-between mb-2">
-        <div className="text-sm text-gray-600">{withdrawalID}</div>
+        <div className="text-sm text-gray-600">{transactionID}</div>
         <div
           className={`text-sm ${positive ? "text-green-600" : "text-gray-700"}`}
         >
