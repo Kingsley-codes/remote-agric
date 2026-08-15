@@ -7,6 +7,8 @@ type Props = {
   amount: string;
   positive?: boolean;
   withdrawalID: string;
+  id?: string;
+  onOpen?: (id: string) => void;
 };
 
 export default function TransactionRow({
@@ -18,15 +20,20 @@ export default function TransactionRow({
   status,
   amount,
   positive,
+  id,
+  onOpen,
 }: Props) {
   return (
-    <tr className="border-b last:border-b-0 border-[#d5e7cf] hover:bg-gray-50">
+    <tr
+      onClick={() => id && onOpen?.(id)}
+      className="border-b last:border-b-0 border-[#e6f0e6] hover:bg-gray-50 cursor-pointer"
+    >
       <td className="p-4">
         <span className="text-sm">{withdrawalID}</span>
       </td>
 
       <td className="p-4">
-        <p className="font-bold">{title}</p>
+        <p className="font-medium text-gray-800">{title}</p>
         <p className="text-sm text-gray-500">{subtitle}</p>
       </td>
 
@@ -36,11 +43,11 @@ export default function TransactionRow({
       </td>
 
       <td className="p-4">
-        <span className="text-sm">{status}</span>
+        <span className="text-sm text-gray-600">{status}</span>
       </td>
 
       <td
-        className={`p-4 text-right font-bold ${positive ? "text-green-600" : ""}`}
+        className={`p-4 text-right ${positive ? "text-green-600" : "text-gray-700"}`}
       >
         {amount}
       </td>
