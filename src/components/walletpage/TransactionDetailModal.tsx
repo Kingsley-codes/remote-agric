@@ -53,11 +53,6 @@ export default function TransactionDetailModal({
         {!loading && !error && data && (
           <div className="space-y-3 text-sm text-gray-700">
             <div className="flex justify-between">
-              <div className="text-gray-500">ID</div>
-              <div>{data._id}</div>
-            </div>
-
-            <div className="flex justify-between">
               <div className="text-gray-500">Transaction ID</div>
               <div>{data.transactionID}</div>
             </div>
