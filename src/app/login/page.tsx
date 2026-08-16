@@ -63,14 +63,17 @@ export default function LoginPage() {
       if (response.status === 200 && response.data.status === "success") {
         toast.success(response.data.message || "Login successful!");
 
+        const user = {
+          ...response.data.data.user,
+          role: "user",
+        };
+        const hasActiveInvestment = Boolean(user.hasActiveInvestment);
+
         localStorage.removeItem("admin"); // clear any stale admin session
-        localStorage.setItem(
-          "user",
-          JSON.stringify({ ...response.data.data.user, role: "user" }),
-        );
+        localStorage.setItem("user", JSON.stringify(user));
 
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push(hasActiveInvestment ? "/dashboard" : "/opportunities");
         }, 1500);
       } else {
         toast.error(response.data.message || "An error occurred during login.");
