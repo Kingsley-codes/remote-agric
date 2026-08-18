@@ -40,7 +40,6 @@ function StageLabel({ stage }: { stage: string }) {
     planting: "Planting",
     growing: "Growing",
     harvesting: "Harvesting",
-    "returns-to-investment": "Harvest Returns",
   };
   const colors: Record<string, string> = {
     "accepting-investments": "text-amber-700",
@@ -48,7 +47,6 @@ function StageLabel({ stage }: { stage: string }) {
     planting: "text-lime-700",
     growing: "text-green-700",
     harvesting: "text-blue-700",
-    "returns-to-investment": "text-purple-700",
   };
   return (
     <span

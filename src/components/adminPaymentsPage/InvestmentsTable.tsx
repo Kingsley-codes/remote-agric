@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
@@ -36,6 +37,9 @@ interface ApiInvestment {
   orderStatus: string;
   status?: string;
   stage?: string;
+  harvestChoice?: "physical-produce" | "cash-return" | null;
+  harvestFulfillmentStatus?: string;
+  cashReturnAmount?: number;
   duration: number;
   ROI: string;
   orderDate: string;
@@ -54,6 +58,9 @@ interface Investment {
   roi: string;
   duration: number;
   stage: string;
+  harvestChoice?: "physical-produce" | "cash-return" | null;
+  harvestFulfillmentStatus: string;
+  cashReturnAmount?: number;
   orderStatus: string;
   investmentStatus: string;
   orderDate: string;
@@ -106,6 +113,9 @@ function mapApiInvestment(i: ApiInvestment): Investment {
     roi: i.ROI,
     duration: i.duration,
     stage: i.stage ?? "—",
+    harvestChoice: i.harvestChoice,
+    harvestFulfillmentStatus: i.harvestFulfillmentStatus ?? "pending-selection",
+    cashReturnAmount: i.cashReturnAmount,
     orderStatus: i.orderStatus,
     investmentStatus: i.status ?? "—",
     orderDate: date,
@@ -146,7 +156,6 @@ function StageBadge({ stage }: { stage: string }) {
     planting: "bg-lime-50 text-lime-700 border border-lime-100",
     growing: "bg-green-50 text-green-700 border border-green-100",
     harvesting: "bg-blue-50 text-blue-700 border border-blue-100",
-    "returns-to-investment": "bg-purple-50 text-purple-700 border border-purple-100",
   };
   const key = stage?.toLowerCase();
   return (
@@ -160,10 +169,62 @@ function StageBadge({ stage }: { stage: string }) {
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
+function HarvestChoiceBadge({ choice }: { choice?: Investment["harvestChoice"] }) {
+  if (!choice) {
+    return (
+      <span className="text-xs font-semibold text-slate-400">
+        Not selected
+      </span>
+    );
+  }
+
+  const label =
+    choice === "physical-produce" ? "Physical produce" : "Cash return";
+  const styles =
+    choice === "physical-produce"
+      ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+      : "bg-sky-50 text-sky-700 border border-sky-100";
+
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${styles}`}
+    >
+      {label}
+    </span>
+  );
+}
+
+function FulfillmentBadge({ status }: { status: string }) {
+  const labels: Record<string, string> = {
+    "pending-selection": "Waiting for user",
+    "pending-delivery": "Pending delivery",
+    delivered: "Delivered",
+    "pending-approval": "Pending approval",
+    approved: "Cash credited",
+  };
+  const styles: Record<string, string> = {
+    "pending-selection": "bg-slate-100 text-slate-600",
+    "pending-delivery": "bg-amber-50 text-amber-700",
+    delivered: "bg-green-50 text-green-700",
+    "pending-approval": "bg-orange-50 text-orange-700",
+    approved: "bg-green-50 text-green-700",
+  };
+
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+        styles[status] ?? "bg-slate-100 text-slate-600"
+      }`}
+    >
+      {labels[status] ?? status}
+    </span>
+  );
+}
+
 function SkeletonRow() {
   return (
     <tr className="animate-pulse">
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 10 }).map((_, i) => (
         <td key={i} className="p-4 pl-6">
           <div className="h-4 bg-[#eaf3e7] rounded w-3/4" />
         </td>
@@ -174,7 +235,13 @@ function SkeletonRow() {
 
 // ── Mobile card ───────────────────────────────────────────────────────────────
 
-function InvestmentCard({ investment }: { investment: Investment }) {
+function InvestmentCard({
+  investment,
+  action,
+}: {
+  investment: Investment;
+  action: ReactNode;
+}) {
   return (
     <div className="flex items-start gap-3 p-4 border-b border-primary/10 last:border-0 hover:bg-[#f9fcf8] transition-colors">
       <Image
@@ -205,6 +272,8 @@ function InvestmentCard({ investment }: { investment: Investment }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <StageBadge stage={investment.stage} />
+          <HarvestChoiceBadge choice={investment.harvestChoice} />
+          <FulfillmentBadge status={investment.harvestFulfillmentStatus} />
           <span className="text-xs font-bold text-slate-900">
             {formatAmount(investment.amount)}
           </span>
@@ -216,6 +285,7 @@ function InvestmentCard({ investment }: { investment: Investment }) {
           {investment.orderDate}{" "}
           <span className="text-primary">· {investment.orderTime}</span>
         </p>
+        <div className="mt-3">{action}</div>
       </div>
     </div>
   );
@@ -237,6 +307,7 @@ export default function InvestmentsTable() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(1);
+  const [actionId, setActionId] = useState<string | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -291,6 +362,67 @@ export default function InvestmentsTable() {
   useEffect(() => {
     fetchInvestments(page, debouncedSearch, statusFilter);
   }, [page, debouncedSearch, statusFilter, fetchInvestments]);
+
+  const runHarvestAction = async (
+    investment: Investment,
+    action: "mark-delivered" | "approve-cash-return",
+  ) => {
+    setActionId(investment.id);
+    setError(null);
+
+    try {
+      const { data } = await axios.patch(
+        `${BACKEND_URL}/api/admin/dashboard/investments/${investment.id}/${action}`,
+        {},
+        { withCredentials: true },
+      );
+
+      if (!data.success) throw new Error(data.message ?? "Action failed");
+      await fetchInvestments(page, debouncedSearch, statusFilter);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message ?? "Action failed");
+      } else {
+        setError(err instanceof Error ? err.message : "Action failed");
+      }
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const renderHarvestAction = (investment: Investment) => {
+    if (
+      investment.harvestChoice === "physical-produce" &&
+      investment.harvestFulfillmentStatus === "pending-delivery"
+    ) {
+      return (
+        <button
+          onClick={() => runHarvestAction(investment, "mark-delivered")}
+          disabled={actionId === investment.id}
+          className="rounded-lg bg-primary px-3 py-2 text-xs font-bold text-white hover:bg-primary-dark disabled:opacity-60"
+        >
+          {actionId === investment.id ? "Saving..." : "Mark delivered"}
+        </button>
+      );
+    }
+
+    if (
+      investment.harvestChoice === "cash-return" &&
+      investment.harvestFulfillmentStatus === "pending-approval"
+    ) {
+      return (
+        <button
+          onClick={() => runHarvestAction(investment, "approve-cash-return")}
+          disabled={actionId === investment.id}
+          className="rounded-lg bg-primary px-3 py-2 text-xs font-bold text-white hover:bg-primary-dark disabled:opacity-60"
+        >
+          {actionId === investment.id ? "Crediting..." : "Approve cash"}
+        </button>
+      );
+    }
+
+    return <span className="text-xs font-semibold text-slate-400">No action</span>;
+  };
 
   return (
     <div className="mb-6">
@@ -373,12 +505,17 @@ export default function InvestmentsTable() {
                   "Amount",
                   "ROI / Duration",
                   "Stage",
+                  "Harvest Choice",
+                  "Fulfillment",
                   "Status",
+                  "Action",
                 ].map((col) => (
                   <th
                     key={col}
                     className={`p-4 text-xs font-bold text-slate-500 uppercase tracking-wider ${
-                      col === "Status" ? "text-right pr-6" : "pl-6"
+                      col === "Status" || col === "Action"
+                        ? "text-right pr-6"
+                        : "pl-6"
                     }`}
                   >
                     {col}
@@ -392,7 +529,7 @@ export default function InvestmentsTable() {
               ) : investments.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={10}
                     className="text-center py-12 text-primary text-sm"
                   >
                     No farm ownerships match your search.
@@ -472,9 +609,21 @@ export default function InvestmentsTable() {
                       <StageBadge stage={inv.stage} />
                     </td>
 
+                    <td className="p-4 pl-6 whitespace-nowrap">
+                      <HarvestChoiceBadge choice={inv.harvestChoice} />
+                    </td>
+
+                    <td className="p-4 pl-6 whitespace-nowrap">
+                      <FulfillmentBadge status={inv.harvestFulfillmentStatus} />
+                    </td>
+
                     {/* Status */}
                     <td className="p-4 pr-6 whitespace-nowrap text-right">
                       <OrderStatusBadge status={inv.orderStatus} />
+                    </td>
+
+                    <td className="p-4 pr-6 whitespace-nowrap text-right">
+                      {renderHarvestAction(inv)}
                     </td>
                   </tr>
                 ))
@@ -499,7 +648,11 @@ export default function InvestmentsTable() {
                 </div>
               ))
             : investments.map((inv) => (
-                <InvestmentCard key={inv.id} investment={inv} />
+                <InvestmentCard
+                  key={inv.id}
+                  investment={inv}
+                  action={renderHarvestAction(inv)}
+                />
               ))}
         </div>
 

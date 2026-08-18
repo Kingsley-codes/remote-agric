@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import InvestmentTable from "@/components/dashboardInvestmentPage/InvestmentTable";
 import PageHeader from "@/components/dashboardInvestmentPage/PageHeader";
 import StatsSection from "@/components/dashboardInvestmentPage/StatsSection";
@@ -21,6 +21,17 @@ export interface UserInvestment {
   ROI: string;
   status: string;
   stage: string;
+  harvestChoice?: "physical-produce" | "cash-return" | null;
+  harvestFulfillmentStatus?:
+    | "pending-selection"
+    | "pending-delivery"
+    | "delivered"
+    | "pending-approval"
+    | "approved";
+  harvestChoiceDate?: string;
+  harvestDeliveredAt?: string;
+  cashReturnApprovedAt?: string;
+  cashReturnAmount?: number;
   orderStatus: string;
   orderDate: string;
   customerEmail: string;
@@ -47,29 +58,32 @@ export default function InvestmentsPage() {
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchInvestments = useCallback(async () => {
+    try {
+      setFetchLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/investments`,
+        { credentials: "include" },
+      );
+      if (!res.ok) throw new Error("Failed to fetch your farms");
+      const json = await res.json();
+      if (json.success) {
+        setData(json.data);
+        setError(null);
+      } else {
+        throw new Error("Unexpected response format");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setFetchLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (loading) return;
-    const fetchInvestments = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/investments`,
-          { credentials: "include" },
-        );
-        if (!res.ok) throw new Error("Failed to fetch your farms");
-        const json = await res.json();
-        if (json.success) {
-          setData(json.data);
-        } else {
-          throw new Error("Unexpected response format");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong");
-      } finally {
-        setFetchLoading(false);
-      }
-    };
     fetchInvestments();
-  }, [loading]);
+  }, [loading, fetchInvestments]);
 
   if (loading || fetchLoading) {
     return (
@@ -96,7 +110,10 @@ export default function InvestmentsPage() {
           totalActiveInvestments={data?.totalActiveInvestments ?? 0}
           totalProjectedROI={data?.totalProjectedROI ?? 0}
         />
-        <InvestmentTable investments={data?.userInvestments ?? []} />
+        <InvestmentTable
+          investments={data?.userInvestments ?? []}
+          onHarvestChoiceUpdated={fetchInvestments}
+        />
       </div>
     </main>
   );

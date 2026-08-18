@@ -11,9 +11,13 @@ function getProduceImage(inv: UserInvestment): string {
 
 interface InvestmentTableProps {
   investments: UserInvestment[];
+  onHarvestChoiceUpdated?: () => void;
 }
 
-export default function InvestmentTable({ investments }: InvestmentTableProps) {
+export default function InvestmentTable({
+  investments,
+  onHarvestChoiceUpdated,
+}: InvestmentTableProps) {
   const [selected, setSelected] = useState<UserInvestment | null>(null);
 
   return (
@@ -76,6 +80,10 @@ export default function InvestmentTable({ investments }: InvestmentTableProps) {
       {selected && (
         <InvestmentDetailModal
           investment={selected}
+          onUpdated={() => {
+            onHarvestChoiceUpdated?.();
+            setSelected(null);
+          }}
           onClose={() => setSelected(null)}
         />
       )}

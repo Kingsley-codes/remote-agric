@@ -47,7 +47,13 @@ export default function InvestmentRow({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [stage, setStage] = useState(investment.stage);
   const [stageSaving, setStageSaving] = useState(false);
-  const stages = ["accepting-investments", "land-clearing", "planting", "growing", "harvesting", "returns-to-investment"];
+  const stages = [
+    "accepting-investments",
+    "land-clearing",
+    "planting",
+    "growing",
+    "harvesting",
+  ];
   const updateStage = async (nextStage: string) => {
     const previous = stage; setStage(nextStage); setStageSaving(true);
     try { await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${investment._id}/stage`, { stage: nextStage }, { withCredentials: true }); toast.success("Produce stage updated and remote farmers notified"); refreshInvestments?.(); }
