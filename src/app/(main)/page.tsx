@@ -1,6 +1,7 @@
 import HeroSection from "@/components/hompage/HeroSection";
 import HowItWorks from "@/components/hompage/HowItWorks";
 import FeaturedOpportunities from "@/components/hompage/FeaturedOpportunities";
+import FeaturedPosts from "@/components/hompage/FeaturedPosts";
 import SuccessStories from "@/components/hompage/SuccessStories";
 import About from "@/components/hompage/AboutSection";
 
@@ -11,6 +12,7 @@ export default function Home() {
       <About />
       <HowItWorks />
       <FeaturedOpportunities />
+      <FeaturedPosts />
       <SuccessStories />
     </>
   );
