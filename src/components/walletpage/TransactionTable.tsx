@@ -16,6 +16,11 @@ interface Transaction {
   createdAt: string;
 }
 
+const toNumber = (value: unknown) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
 const formatNaira = (amount: number) =>
   `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -40,7 +45,11 @@ export default function TransactionTable() {
         return response.json();
       })
       .then((payload) => {
-        setTransactions(payload.data?.transactions ?? []);
+        setTransactions(
+          Array.isArray(payload.data?.transactions)
+            ? payload.data.transactions
+            : [],
+        );
         const meta = payload.data?.meta;
         if (meta) setTotalPages(meta.totalPages ?? 1);
       })
@@ -115,7 +124,7 @@ export default function TransactionTable() {
                     minute: "2-digit",
                   })}
                   status={transaction.status}
-                  amount={`${positive ? "+" : "-"}${formatNaira(transaction.amount)}`}
+                  amount={`${positive ? "+" : "-"}${formatNaira(toNumber(transaction.amount))}`}
                   positive={positive}
                 />
               );
@@ -145,7 +154,7 @@ export default function TransactionTable() {
                   minute: "2-digit",
                 })}
                 status={transaction.status}
-                amount={`${positive ? "+" : "-"}${formatNaira(transaction.amount)}`}
+                amount={`${positive ? "+" : "-"}${formatNaira(toNumber(transaction.amount))}`}
                 positive={positive}
                 onOpen={(id) => setSelectedId(id)}
               />

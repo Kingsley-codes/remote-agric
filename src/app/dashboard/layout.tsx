@@ -13,10 +13,12 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [user, setUser] = useState<UserData | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.innerWidth >= 768; // open by default on md+, closed on mobile
-  });
+  // Keep the server and first browser render identical to avoid hydration errors.
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setSidebarOpen(window.innerWidth >= 768);
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {

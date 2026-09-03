@@ -8,6 +8,11 @@ interface InvestmentSummary {
   totalProjectedROI: number;
 }
 
+const toNumber = (value: unknown) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
 const formatNaira = (value: number) => `₦${value.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function WalletStats() {
@@ -18,7 +23,21 @@ export default function WalletStats() {
     const base = process.env.NEXT_PUBLIC_BACKEND_URL;
     fetch(`${base}/api/user/dashboard/overview`, { credentials: "include" })
       .then((response) => response.ok ? response.json() : Promise.reject())
-      .then((payload) => setOverview(payload.data))
+      .then((payload) => {
+        const data = payload?.data ?? {};
+        setOverview({
+          walletBalance: toNumber(data.walletBalance),
+          totalActiveInvestments: toNumber(data.totalActiveInvestments),
+          totalProjectedROI: toNumber(data.totalProjectedROI),
+        });
+      })
+      .catch(() => {
+        setOverview({
+          walletBalance: 0,
+          totalActiveInvestments: 0,
+          totalProjectedROI: 0,
+        });
+      })
       .finally(() => setLoading(false));
   }, []);
 

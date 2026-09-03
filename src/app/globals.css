@@ -22,6 +22,9 @@
   --font-sans: var(--font-dm-sans), "DM Sans", sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-montserrat: var(--font-montserrat), "Montserrat", sans-serif;
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-black: 600;
 
   /* Extend colors */
   --color-primary: var(--primary);
