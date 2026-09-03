@@ -228,12 +228,12 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
         {/* Bottom: settings + user */}
         <div className="flex flex-col gap-4 w-full">
           <Link
-            href="/settings"
+            href="/dashboard/settings"
             title={!isOpen ? "Settings" : undefined}
             className={`flex items-center gap-3 rounded-xl text-sm transition-colors whitespace-nowrap
               ${isOpen ? "px-4 py-3" : "p-3 justify-center"}
               ${
-                pathname === "/settings"
+                pathname === "/dashboard/settings"
                   ? "bg-primary text-white font-bold shadow-sm"
                   : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               }

@@ -12,6 +12,8 @@ import {
 
 interface Props {
   onClose: () => void;
+  account?: { accountName: string; accountNumber: string; bankCode: string } | null;
+  onSaved?: () => void;
 }
 
 interface Bank {
@@ -22,10 +24,11 @@ interface Bank {
 
 type Step = "form" | "loading" | "success" | "error";
 
-export default function AddAccountModal({ onClose }: Props) {
-  const [accountName, setAccountName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [bankCode, setBankCode] = useState("");
+export default function AddAccountModal({ onClose, account, onSaved }: Props) {
+  const editing = Boolean(account);
+  const [accountName, setAccountName] = useState(account?.accountName ?? "");
+  const [accountNumber, setAccountNumber] = useState(account?.accountNumber ?? "");
+  const [bankCode, setBankCode] = useState(account?.bankCode ?? "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState<Step>("form");
@@ -99,9 +102,9 @@ export default function AddAccountModal({ onClose }: Props) {
     setStep("loading");
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/add-account`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/${editing ? "bank-account" : "add-account"}`,
         {
-          method: "POST",
+          method: editing ? "PUT" : "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -117,6 +120,7 @@ export default function AddAccountModal({ onClose }: Props) {
         setErrorMsg(json.message ?? "Failed to add account. Please try again.");
         setStep("error");
       } else {
+        onSaved?.();
         setStep("success");
       }
     } catch {
@@ -157,10 +161,10 @@ export default function AddAccountModal({ onClose }: Props) {
                 </div>
                 <div>
                   <h2 className="font-bold text-gray-800 text-lg leading-tight">
-                    Add Withdrawal Account
+                    {editing ? "Update Withdrawal Account" : "Add Withdrawal Account"}
                   </h2>
                   <p className="text-xs text-gray-400">
-                    Link a bank account for payouts
+                    {editing ? "Replace your payout bank details" : "Link a bank account for payouts"}
                   </p>
                 </div>
                 <button
@@ -360,7 +364,7 @@ export default function AddAccountModal({ onClose }: Props) {
                   disabled={!isValid}
                   className="flex-1 h-12 bg-[#2d6a27] text-white rounded-xl font-bold text-sm hover:bg-[#245720] active:bg-[#1e4b1b] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  Add Account
+                  {editing ? "Update Account" : "Add Account"}
                 </button>
               </div>
             </>
@@ -380,7 +384,7 @@ export default function AddAccountModal({ onClose }: Props) {
               </div>
               <div>
                 <h3 className="font-bold text-gray-800 text-lg">
-                  Account Added!
+                  {editing ? "Account Updated!" : "Account Added!"}
                 </h3>
                 <p className="text-sm text-gray-400 mt-1">
                   <span className="font-semibold text-gray-600">
