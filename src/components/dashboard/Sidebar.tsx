@@ -35,7 +35,7 @@ interface SidebarProps {
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: FiGrid },
   { href: "/dashboard/investments", label: "My Farms", icon: FiPieChart },
-  { href: "/opportunities", label: "Own a New Farm", icon: FiShoppingBag },
+  { href: "/dashboard/opportunities", label: "Own a New Farm", icon: FiShoppingBag },
   { href: "/dashboard/wallet", label: "Wallet", icon: FiCreditCard },
   { href: "/dashboard/support", label: "Support", icon: IoIosChatboxes },
   { href: "/dashboard/referrals", label: "Referrals", icon: FiGift },

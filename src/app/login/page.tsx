@@ -73,7 +73,9 @@ export default function LoginPage() {
         localStorage.setItem("user", JSON.stringify(user));
 
         setTimeout(() => {
-          router.push(hasActiveInvestment ? "/dashboard" : "/opportunities");
+          router.push(
+            hasActiveInvestment ? "/dashboard" : "/dashboard/opportunities",
+          );
         }, 1500);
       } else {
         toast.error(response.data.message || "An error occurred during login.");

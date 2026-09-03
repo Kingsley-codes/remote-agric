@@ -8,9 +8,13 @@ import { TbCurrencyNaira } from "react-icons/tb";
 
 interface OpportunityCardProps {
   opportunity: ApiProduce;
+  detailsHref?: string;
 }
 
-export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
+export default function OpportunityCard({
+  opportunity,
+  detailsHref = `/opportunities/${opportunity._id}`,
+}: OpportunityCardProps) {
   const router = useRouter();
 
   const getTypeColor = (category: string) => {
@@ -129,7 +133,7 @@ export default function OpportunityCard({ opportunity }: OpportunityCardProps) {
               Own This Farm
             </button>
             <button className="flex-1 mt-3 rounded-lg bg-white border border-primary py-2.5 text-sm font-bold text-gray-700 hover:bg-primary/50 hover:text-primary transition-colors">
-              <Link href={`/opportunities/${opportunity._id}`}>Details</Link>
+              <Link href={detailsHref}>Details</Link>
             </button>
           </div>
         </div>
