@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { FiArrowRight, FiLock } from "react-icons/fi";
 
 type ProduceType = {
@@ -150,15 +151,7 @@ export default function OrderSummary({
               I agree to the Farm Ownership Terms
             </label>
             <p>
-              By continuing, you agree to Agrofund&apos;s{" "}
-              <a className="text-primary hover:underline" href="#">
-                Conditions of Use
-              </a>{" "}
-              and{" "}
-              <a className="text-primary hover:underline" href="#">
-                Privacy Notice
-              </a>
-              .
+              By continuing, you agree to Remote Agric&apos;s <Link className="text-primary hover:underline" href="/terms">Terms of Service</Link>, <Link className="text-primary hover:underline" href="/privacy">Privacy Policy</Link>, and acknowledge the <Link className="text-primary hover:underline" href="/risk-disclosure">Risk Disclosure</Link>.
             </p>
           </div>
         </div>

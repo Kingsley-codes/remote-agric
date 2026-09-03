@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function FAQSection() {
   return (
     <section className="mt-20 max-w-7xl mx-auto px-6 lg:px-20">
@@ -34,6 +36,9 @@ export default function FAQSection() {
             </div>
           </details>
         </div>
+      </div>
+      <div className="mt-8 text-center">
+        <Link href="/faqs" className="inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark">View all FAQs</Link>
       </div>
     </section>
   );

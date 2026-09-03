@@ -79,7 +79,7 @@ export default function Footer() {
                   <Link href="/careers">Careers</Link>
                 </li>
                 <li>
-                  <Link href="/blog">Blog</Link>
+                  <Link href="/agri-learn">Blog</Link>
                 </li>
                 <li>
                   <Link href="/press">Press</Link>
@@ -100,6 +100,9 @@ export default function Footer() {
                 <li>
                   <Link href="/risk-disclosure">Risk Disclosure</Link>
                 </li>
+                <li>
+                  <Link href="/cookie-policy">Cookie Policy</Link>
+                </li>
               </ul>
             </div>
 
@@ -108,7 +111,7 @@ export default function Footer() {
               <h4 className="text-white font-bold mb-4">Support</h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="/help">Help Center</Link>
+                  <Link href="/faqs">Help Center</Link>
                 </li>
                 <li>
                   <Link href="/contact">Contact Us</Link>
