@@ -16,7 +16,8 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formStep, setFormStep] = useState(1); // 1 for personal info, 2 for password
+  const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
+  const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -143,13 +144,9 @@ export default function SignUpPage() {
         },
       );
 
-      if (response.status === 201 && response.data.status === "success") {
-        toast.success(response.data.message || "Registration successful!");
-
-        // Redirect to login page after a short delay
-        setTimeout(() => {
-          router.push("/login");
-        }, 1500); // 1.5 second delay to show the toast
+      if (response.status === 202 && response.data.status === "success") {
+        setFormStep(3);
+        toast.success(response.data.message || "A verification code has been sent.");
       } else {
         // Handle unexpected response format
         toast.error(
@@ -171,6 +168,30 @@ export default function SignUpPage() {
       } else {
         toast.error("Something went wrong");
       }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) return;
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/auth/register/verify-otp`,
+        { email: formData.email, otp },
+        { withCredentials: true },
+      );
+      if (response.data.status === "success") {
+        toast.success("Email verified. You can now log in.");
+        router.push("/login");
+      }
+    } catch (error: unknown) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Unable to verify your code";
+      toast.error(message || "Unable to verify your code");
     } finally {
       setIsLoading(false);
     }
@@ -298,12 +319,12 @@ export default function SignUpPage() {
               {/* Heading */}
               <div className="text-center">
                 <h2 className="text-xl text-center md:text-2xl font-semibold text-slate-900 tracking-tight mb-1 md:mb-2">
-                  {formStep === 1 ? "Create your account" : "Set your password"}
+                  {formStep === 1 ? "Create your account" : formStep === 2 ? "Set your password" : "Verify your email"}
                 </h2>
                 <p className="text-xs text-center md:text-sm text-slate-500">
                   {formStep === 1
                     ? "Begin your journey as a remote farmer with Remote Agric."
-                    : "Secure your account with a strong password."}
+                    : formStep === 2 ? "Secure your account with a strong password." : `Enter the code we sent to ${formData.email}.`}
                 </p>
               </div>
 
@@ -333,6 +354,8 @@ export default function SignUpPage() {
                   >
                     2
                   </div>
+                  <div className={`w-10 md:w-12 h-1 mx-2 ${formStep === 3 ? "bg-primary" : "bg-slate-200"}`} />
+                  <div className={`flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full ${formStep === 3 ? "bg-primary text-white" : "bg-slate-200 text-slate-400"}`}>3</div>
                 </div>
               </div>
 
@@ -360,7 +383,7 @@ export default function SignUpPage() {
 
               {/* Form */}
               <form
-                onSubmit={formStep === 1 ? handleContinue : handleSubmit}
+                onSubmit={formStep === 1 ? handleContinue : formStep === 2 ? handleSubmit : handleVerifyOtp}
                 className="flex flex-col gap-3 md:gap-5"
               >
                 {formStep === 1 ? (
@@ -442,7 +465,7 @@ export default function SignUpPage() {
                       <FaArrowRight className="text-sm md:text-md" />
                     </button>
                   </>
-                ) : (
+                ) : formStep === 2 ? (
                   <>
                     {/* Password Field */}
                     <div className="flex flex-col gap-1 md:gap-1.5">
@@ -600,6 +623,17 @@ export default function SignUpPage() {
                           <FaArrowRight className="text-sm md:text-md" />
                         </>
                       )}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="otp" className="text-xs md:text-sm font-semibold text-slate-700">Six-digit verification code</label>
+                      <input id="otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))} placeholder="000000" className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-primary py-3 px-4 text-center text-xl tracking-[0.45em] text-slate-900 placeholder:tracking-normal placeholder:text-sm" required />
+                      <p className="text-xs text-slate-500">The code expires after 10 minutes.</p>
+                    </div>
+                    <button type="submit" disabled={otp.length !== 6 || isLoading} className="mt-2 md:mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-primary text-white font-semibold text-sm md:text-base py-3 md:py-3.5 disabled:bg-green-200 disabled:cursor-not-allowed">
+                      {isLoading ? <><FaSpinner className="animate-spin" /> Verifying...</> : <>Verify email <FaArrowRight /></>}
                     </button>
                   </>
                 )}

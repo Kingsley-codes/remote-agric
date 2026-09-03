@@ -22,7 +22,7 @@ interface Bank {
   code: string;
 }
 
-type Step = "form" | "loading" | "success" | "error";
+type Step = "form" | "otp" | "loading" | "success" | "error";
 
 export default function AddAccountModal({ onClose, account, onSaved }: Props) {
   const editing = Boolean(account);
@@ -33,6 +33,7 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState<Step>("form");
   const [errorMsg, setErrorMsg] = useState("");
+  const [otp, setOtp] = useState("");
 
   const [banks, setBanks] = useState<Bank[]>([]);
   const [banksLoading, setBanksLoading] = useState(true);
@@ -101,6 +102,21 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
     if (!isValid) return;
     setStep("loading");
     try {
+      if (!editing) {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/add-account/request-otp`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ accountName, accountNumber, bankCode, password }),
+          },
+        );
+        const json = await res.json();
+        if (!res.ok || !json.success) throw new Error(json.message ?? "Unable to send a verification code.");
+        setStep("otp");
+        return;
+      }
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/${editing ? "bank-account" : "add-account"}`,
         {
@@ -116,15 +132,29 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
         },
       );
       const json = await res.json();
-      if (!res.ok || !json.success) {
-        setErrorMsg(json.message ?? "Failed to add account. Please try again.");
-        setStep("error");
-      } else {
-        onSaved?.();
-        setStep("success");
-      }
-    } catch {
-      setErrorMsg("Network error. Please check your connection.");
+      if (!res.ok || !json.success) throw new Error(json.message ?? "Failed to update account. Please try again.");
+      onSaved?.();
+      setStep("success");
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : "Network error. Please check your connection.");
+      setStep("error");
+    }
+  };
+
+  const verifyOtp = async () => {
+    if (otp.length !== 6) return;
+    setStep("loading");
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/add-account`,
+        { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ otp }) },
+      );
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message ?? "Unable to verify the code.");
+      onSaved?.();
+      setStep("success");
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : "Network error. Please check your connection.");
       setStep("error");
     }
   };
@@ -368,6 +398,32 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
                 </button>
               </div>
             </>
+          )}
+
+          {step === "otp" && (
+            <div className="flex flex-col gap-5 py-4">
+              <div className="text-center">
+                <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-[#eaf2e8] text-[#2d6a27]">
+                  <FaLock size={16} />
+                </div>
+                <h2 className="text-lg font-bold text-gray-800">Verify your email</h2>
+                <p className="mt-1 text-sm text-gray-500">Enter the six-digit code sent to your email to link this withdrawal account.</p>
+              </div>
+              <input
+                autoFocus
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={otp}
+                onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))}
+                placeholder="000000"
+                className="w-full rounded-xl border border-[#d5e7cf] px-4 py-3 text-center text-xl tracking-[0.45em] text-gray-800 outline-none focus:border-[#2d6a27] focus:ring-2 focus:ring-[#2d6a27]/30"
+              />
+              <div className="flex gap-3">
+                <button onClick={() => setStep("form")} className="flex-1 rounded-xl border border-[#d5e7cf] py-3 text-sm font-bold text-gray-600">Back</button>
+                <button onClick={verifyOtp} disabled={otp.length !== 6} className="flex-1 rounded-xl bg-[#2d6a27] py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">Verify &amp; Add</button>
+              </div>
+            </div>
           )}
 
           {step === "loading" && (
