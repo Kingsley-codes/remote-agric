@@ -13,6 +13,7 @@ import {
   getYouTubeThumbnail,
   LearnPost,
 } from "@/lib/agriLearn";
+import LearnSidebar from "@/components/agrilearn/LearnSidebar";
 import { toast } from "react-toastify";
 
 const formatDate = (date?: string) =>
@@ -30,19 +31,36 @@ const postLabel = (post: LearnPost) =>
 
 export default function BlogDetailsPage() {
   const { slug } = useParams<{ slug: string }>();
+  return <BlogArticle key={slug} slug={slug} />;
+}
+
+function BlogArticle({ slug }: { slug: string }) {
   const [post, setPost] = useState<LearnPost | null>(null);
   const [related, setRelated] = useState<LearnPost[]>([]);
+  const [allPosts, setAllPosts] = useState<LearnPost[]>([]);
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agri-learn/${slug}`)
+    let active = true;
+    axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agri-learn/${slug}`)
       .then(({ data }) => {
+        if (!active) return;
         setPost(data.data.post);
         setRelated(data.data.relatedPosts ?? []);
       })
-      .finally(() => setLoading(false));
+      .catch((err) => { if (active) setError(!axios.isAxiosError(err) || err.response?.status !== 404); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [slug]);
+
+  useEffect(() => {
+    let active = true;
+    axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agri-learn`)
+      .then(({ data }) => { if (active) setAllPosts(data.data.posts); })
+      .catch(() => { /* The article and its related posts remain available. */ });
+    return () => { active = false; };
+  }, []);
 
   const paragraphs = useMemo(
     () => post?.content?.split(/\n\s*\n/).map((text) => text.trim()).filter(Boolean) ?? [],
@@ -60,7 +78,8 @@ export default function BlogDetailsPage() {
   if (!post) {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center bg-[#f6f8f6] px-5 text-center">
-        <h1 className="text-2xl font-medium">Post not found</h1>
+        <h1 className="text-2xl font-medium">{error ? "Unable to load this post" : "Post not found"}</h1>
+        {error && <button onClick={() => window.location.reload()} className="mt-4 text-sm text-primary underline">Try again</button>}
         <Link href="/agri-learn" className="mt-5 inline-flex items-center gap-2 text-sm text-primary">
           <ArrowLeft size={16} />
           Back to Agri-Learn
@@ -75,7 +94,7 @@ export default function BlogDetailsPage() {
   const embedUrl = getYouTubeEmbedUrl(post.videoUrl);
   const mediaPosition = Math.max(1, Math.ceil(paragraphs.length / 2));
   const share = () =>
-    navigator.clipboard.writeText(window.location.href).then(() => toast.success("Post link copied"));
+    navigator.clipboard.writeText(window.location.href).then(() => toast.success("Post link copied")).catch(() => toast.error("Could not copy the link. Please copy it from your address bar."));
 
   return (
     <main className="min-h-screen bg-[#f6f8f6] text-[#0f1a0b]">
@@ -92,10 +111,10 @@ export default function BlogDetailsPage() {
               className="object-cover"
             />
           ) : thumbnail ? (
-            <img src={thumbnail} alt={post.title} className="absolute inset-0 h-full w-full object-cover" />
+            <Image src={thumbnail} alt={post.title} fill unoptimized priority sizes="100vw" className="object-cover" />
           ) : null}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/20" />
-          <div className="relative z-10 mx-auto flex min-h-[520px] max-w-6xl flex-col justify-between px-5 py-7 sm:min-h-[600px] sm:px-8 sm:py-10">
+          <div className="relative z-10 mx-auto flex min-h-[520px] max-w-[1360px] flex-col justify-between px-5 py-7 sm:min-h-[600px] sm:px-8 sm:py-10">
             <div className="flex items-center justify-between gap-4">
               <Link
                 href="/agri-learn"
@@ -121,8 +140,6 @@ export default function BlogDetailsPage() {
                 {post.title}
               </h1>
               <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-white/80">
-                <span>By Remote Agric team</span>
-                <span aria-hidden>/</span>
                 <time>{formatDate(post.publishedAt ?? post.createdAt)}</time>
                 <span aria-hidden>/</span>
                 <span>{postLabel(post)}</span>
@@ -131,8 +148,22 @@ export default function BlogDetailsPage() {
           </div>
         </header>
 
-        <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8 lg:py-16">
-          <p className="mb-9 text-xl leading-9 text-[#3d4b36]">{post.excerpt}</p>
+        <div className="mx-auto grid max-w-[1440px] items-start gap-8 px-5 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:px-10 lg:py-12 xl:grid-cols-[160px_minmax(0,1fr)_300px]">
+          <nav aria-label="On this page" className="hidden xl:sticky xl:top-28 xl:block">
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">On this page</p>
+            <div className="space-y-1 border-l border-[#d5dfd0] text-sm text-[#52604c]">
+              <a href="#overview" className="block border-l-2 border-primary py-2 pl-4 text-primary hover:underline">Overview</a>
+              <a href="#article-content" className="block py-2 pl-4 hover:text-primary">{post.postType === "podcast" ? "Watch episode" : "Read the guide"}</a>
+              {related.length > 0 && <a href="#related-posts" className="block py-2 pl-4 hover:text-primary">Related posts</a>}
+            </div>
+            <div className="mt-8 border-t border-[#d5dfd0] pt-5"><p className="text-xs text-[#52604c]">Found this helpful?</p><button onClick={share} className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-primary"><Share2 size={15} /> Share this post</button></div>
+          </nav>
+          <div className="min-w-0 overflow-hidden rounded-2xl border border-[#dfe7dc] bg-white p-6 sm:p-8">
+          <div id="overview" className="scroll-mt-28 border-b border-[#e8eee7] pb-7">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">{post.postType === "podcast" ? "In this episode" : "The overview"}</p>
+            <p className="text-lg leading-8 text-[#3d4b36]">{post.excerpt}</p>
+          </div>
+          <div id="article-content" className="scroll-mt-28 pt-8 [overflow-wrap:anywhere]">
 
           {post.postType === "podcast" ? (
             embedUrl ? (
@@ -155,7 +186,7 @@ export default function BlogDetailsPage() {
             <div className="space-y-7 text-[17px] leading-8 text-[#263322]">
               {paragraphs.map((paragraph, index) => (
                 <div key={index}>
-                  <p>{paragraph}</p>
+                  <p className="whitespace-pre-line">{paragraph}</p>
                   {bodyMedia && index + 1 === mediaPosition && (
                     <figure className="my-10 overflow-hidden rounded-2xl bg-[#e0e8df]">
                       {bodyMedia.type === "image" ? (
@@ -179,12 +210,19 @@ export default function BlogDetailsPage() {
               ))}
             </div>
           )}
+          </div>
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#e8eee7] pt-6">
+            <Link href={`/agri-learn?category=${encodeURIComponent(post.category)}`} className="rounded-full bg-[#edf3e9] px-4 py-2 text-xs font-medium text-primary"># {post.category}</Link>
+            <button onClick={share} className="inline-flex items-center gap-2 text-sm text-primary"><Share2 size={16} /> Share article</button>
+          </div>
+          </div>
+          <LearnSidebar posts={allPosts.length ? allPosts : [post, ...related.filter((item) => item._id !== post._id)]} currentSlug={post.slug} category={post.category} />
         </div>
       </article>
 
       {related.length > 0 && (
-        <section className="bg-[#e8eee7] px-5 py-14 sm:px-8 lg:py-16">
-          <div className="mx-auto max-w-6xl">
+        <section id="related-posts" className="scroll-mt-24 bg-[#e8eee7] px-5 py-14 sm:px-8 lg:py-16">
+          <div className="mx-auto max-w-[1360px]">
             <div className="flex items-end justify-between gap-5">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-primary">Keep exploring</p>
@@ -216,7 +254,7 @@ export default function BlogDetailsPage() {
                           className="object-cover transition duration-500 group-hover:scale-[1.03]"
                         />
                       ) : itemThumbnail ? (
-                        <img src={itemThumbnail} alt={item.title} className="h-full w-full object-cover" />
+                        <Image src={itemThumbnail} alt={item.title} fill unoptimized sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
                       ) : null}
                     </div>
                     <div className="p-5">
