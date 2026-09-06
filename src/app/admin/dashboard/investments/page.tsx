@@ -4,7 +4,7 @@ import SummaryBar from "@/components/adminPaymentsPage/SummaryBar";
 
 export default function Home() {
   return (
-    <main className="flex-1 ml-4 p-8">
+    <main className="mx-auto w-full max-w-7xl min-w-0 p-4 sm:p-6 lg:p-8">
       <PageHeader />
       <SummaryBar />
       <InvestmentsTable />

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 interface InvestmentCardProps {
   produceId: string;
+  status: string;
   unitPrice: number;
   fundedPercent: number;
   soldUnits: number;
@@ -15,6 +16,7 @@ interface InvestmentCardProps {
 
 export function InvestmentCard({
   produceId,
+  status,
   unitPrice,
   fundedPercent,
   soldUnits,
@@ -26,6 +28,8 @@ export function InvestmentCard({
   const [units, setUnits] = useState(minimumUnit);
 
   const total = useMemo(() => units * unitPrice, [units, unitPrice]);
+
+  const available = status === "active" && remainingUnits >= minimumUnit;
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 flex flex-col gap-6">
@@ -112,12 +116,13 @@ export function InvestmentCard({
       {/* Action */}
       <div className="flex flex-col gap-3 mt-2">
         <button
+          disabled={!available}
           onClick={() => {
             router.push(`/checkout?produceId=${produceId}&units=${units}`);
           }}
-          className="w-full h-12 bg-primary text-gray-100 font-bold rounded-xl text-lg hover:bg-primary-dark transition-all flex items-center justify-center gap-2"
+          className="disabled:cursor-not-allowed disabled:bg-slate-300 w-full h-12 bg-primary text-gray-100 font-bold rounded-xl text-lg hover:bg-primary-dark transition-all flex items-center justify-center gap-2"
         >
-          Own This Farm <FaMoneyBillWave />
+          {available ? "Own This Farm" : status === "closed" ? "Investment period closed" : "Currently unavailable"} <FaMoneyBillWave />
         </button>
 
         <p className="text-xs text-center text-gray-500">

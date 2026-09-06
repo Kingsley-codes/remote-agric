@@ -6,7 +6,6 @@ import {
   FiPieChart,
   FiShoppingBag,
   FiCreditCard,
-  FiSettings,
   FiChevronUp,
   FiLogOut,
 } from "react-icons/fi";
@@ -225,25 +224,9 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
           </nav>
         </div>
 
-        {/* Bottom: settings + user */}
+        {/* User menu */}
         <div className="flex flex-col gap-4 w-full">
-          <Link
-            href="/dashboard/settings"
-            title={!isOpen ? "Settings" : undefined}
-            className={`flex items-center gap-3 rounded-xl text-sm transition-colors whitespace-nowrap
-              ${isOpen ? "px-4 py-3" : "p-3 justify-center"}
-              ${
-                pathname === "/dashboard/settings"
-                  ? "bg-primary text-white font-bold shadow-sm"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }
-            `}
-          >
-            <FiSettings size={18} />
-            {isOpen && "Settings"}
-          </Link>
-
-          <div
+<div
             ref={menuRef}
             className={`flex relative  items-center gap-3 border-t border-gray-400 pt-4 ${isOpen ? "px-2 py-2" : "justify-center"}`}
           >

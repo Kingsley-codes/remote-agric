@@ -1,3 +1,5 @@
+import InvestmentCountdown from "./InvestmentCountdown";
+import { stageLabel } from "@/lib/farmProgress";
 import { useEffect, useState } from "react";
 import { UserInvestment } from "@/app/dashboard/investments/page";
 import Link from "next/link";
@@ -16,7 +18,7 @@ function getStageLabel(stage: string): string {
     growing: "Growing",
     harvesting: "Harvesting",
   };
-  return labels[stage] ?? stage;
+  return labels[stage] ?? stageLabel(stage);
 }
 
 function StageChip({ stage }: { stage: string }) {
@@ -145,7 +147,7 @@ export default function InvestmentDetailModal({
   const projectedReturn =
     investment.totalPrice * (1 + parseFloat(investment.ROI) / 100);
   const canChooseHarvestReturn =
-    investment.stage === "harvesting" &&
+    ["harvesting", "ready-for-sale"].includes(investment.stage) &&
     investment.orderStatus === "confirmed" &&
     investment.status === "ongoing" &&
     !investment.harvestChoice;
@@ -243,6 +245,7 @@ export default function InvestmentDetailModal({
             </span>
           </div>
 
+          <InvestmentCountdown orderDate={investment.orderDate} duration={investment.duration} status={investment.status} orderStatus={investment.orderStatus} />
           {/* Detail rows */}
           <div className="bg-[#f6f8f6] rounded-xl px-4 py-1 mb-4">
             <DetailRow label="Order ID" value={investment.orderID} />
@@ -264,7 +267,7 @@ export default function InvestmentDetailModal({
               value={`₦${Math.round(projectedReturn).toLocaleString()}`}
               accent
             />
-            <DetailRow label="Harvest Choice" value={harvestChoiceLabel} />
+            <DetailRow label="Return Choice" value={harvestChoiceLabel} />
             <DetailRow
               label="Fulfillment"
               value={
@@ -278,7 +281,7 @@ export default function InvestmentDetailModal({
           {canChooseHarvestReturn && (
             <div className="bg-white border border-[#d5e7cf] rounded-xl p-4 mb-4">
               <p className="text-sm font-bold text-gray-800">
-                Choose your harvest return
+                Choose your farm return
               </p>
               <p className="mt-1 text-xs leading-5 text-gray-500">
                 Pick physical produce for delivery, or cash return for admin

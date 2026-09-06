@@ -1,3 +1,4 @@
+import { stageLabel } from "@/lib/farmProgress";
 type Props = {
   id: string;
   orderID: string;
@@ -52,7 +53,7 @@ function StageLabel({ stage }: { stage: string }) {
     <span
       className={`text-sm font-semibold ${colors[stage] ?? "text-gray-600"}`}
     >
-      {labels[stage] ?? stage}
+      {labels[stage] ?? stageLabel(stage)}
     </span>
   );
 }

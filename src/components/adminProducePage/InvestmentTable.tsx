@@ -24,16 +24,13 @@ interface Produce {
   createdAt: string;
   updatedAt: string;
   stage: string;
+  status: string;
 }
 
 export default function InvestmentTable() {
   const [investments, setInvestments] = useState<Produce[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    fetchInvestments();
-  }, []);
 
   const fetchInvestments = async () => {
     try {
@@ -52,6 +49,27 @@ export default function InvestmentTable() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce`,
+      { withCredentials: true, signal: controller.signal },
+    )
+      .then((response) => {
+        if (response.data.produce) setInvestments(response.data.produce);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          console.error("Error fetching investments:", error);
+          toast.error("Failed to load farm listings");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
   const handleEditSuccess = () => {
     toast.success("Farm listing updated successfully!");
@@ -100,7 +118,7 @@ export default function InvestmentTable() {
       ) : (
         <>
           {/* MOBILE CARDS */}
-          <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+          <div className="xl:hidden divide-y divide-slate-100 dark:divide-slate-800">
             {filteredInvestments.map((investment) => (
               <InvestmentRow
                 key={investment._id}
@@ -114,16 +132,18 @@ export default function InvestmentTable() {
           </div>
 
           {/* DESKTOP TABLE */}
-          <div className="hidden md:block overflow-x-auto">
+          <div className="hidden xl:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead className="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase text-slate-500 dark:text-slate-400 font-semibold">
                 <tr>
-                  <th className="px-6 py-4">Farm Listing</th>
-                  <th className="px-6 py-4">Category</th>
-                  <th className="px-6 py-4 text-right">ROI</th>
-                  <th className="px-6 py-4 text-right">Duration</th>
-                  <th className="px-6 py-4 text-right">Total Units</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-3 py-4">Farm Listing</th>
+                  <th className="px-3 py-4">Category</th>
+                  <th className="px-3 py-4">Stage</th>
+                  <th className="px-3 py-4">Status</th>
+                  <th className="px-3 py-4 text-right">ROI</th>
+                  <th className="px-3 py-4 text-right">Duration</th>
+                  <th className="px-3 py-4 text-right">Total Units</th>
+                  <th className="px-3 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">

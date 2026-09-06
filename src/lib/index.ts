@@ -27,6 +27,7 @@ export interface Logo {
 
 // API response type
 export interface ApiProduce {
+  status: string;
   _id: string;
   produceName: string;
   title: string;

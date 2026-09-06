@@ -6,7 +6,7 @@ import InvestmentRow from "./InvestmentRow";
 import InvestmentDetailModal from "./Investmentdetailmodal";
 
 function getProduceImage(inv: UserInvestment): string {
-  return inv.produce.image1!.url;
+  return inv.produce?.image1?.url ?? "";
 }
 
 interface InvestmentTableProps {
