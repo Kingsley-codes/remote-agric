@@ -95,8 +95,8 @@ export default function WithdrawalDashboard() {
           </select>
         </div>
         <div className="hidden grid-cols-[1fr_130px_1fr_140px_110px] gap-3 border-t border-gray-100 bg-gray-50 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500 md:grid">
-          <span>User</span>
           <span>User ID</span>
+          <span>User</span>
           <span>Reference / requested</span>
           <span>Amount</span>
           <span>Status</span>

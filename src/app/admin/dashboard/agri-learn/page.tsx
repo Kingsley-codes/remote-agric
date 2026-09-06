@@ -41,7 +41,19 @@ export default function ManageLearn() {
   const [tagDraft, setTagDraft] = useState("");
   const [tagSaving, setTagSaving] = useState(false);
   const [editingPost, setEditingPost] = useState<LearnPost | null>(null);
+  const [heroPreview, setHeroPreview] = useState<string>();
+  const [bodyPreview, setBodyPreview] = useState<string>();
+  const heroPreviewRef = useRef<string>();
+  const bodyPreviewRef = useRef<string>();
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(
+    () => () => {
+      if (heroPreviewRef.current) URL.revokeObjectURL(heroPreviewRef.current);
+      if (bodyPreviewRef.current) URL.revokeObjectURL(bodyPreviewRef.current);
+    },
+    [],
+  );
 
   const load = useCallback(async () => {
     const response = await axios.get(`${API}/api/admin/agri-learn`, {
@@ -57,6 +69,12 @@ export default function ManageLearn() {
   }, []);
 
   function resetForm() {
+    if (heroPreviewRef.current) URL.revokeObjectURL(heroPreviewRef.current);
+    if (bodyPreviewRef.current) URL.revokeObjectURL(bodyPreviewRef.current);
+    heroPreviewRef.current = undefined;
+    bodyPreviewRef.current = undefined;
+    setHeroPreview(undefined);
+    setBodyPreview(undefined);
     setPostType("blog");
     setHeroFile(undefined);
     setBodyFile(undefined);
@@ -81,6 +99,24 @@ export default function ManageLearn() {
     if (saving) return;
     setOpen(false);
     resetForm();
+  }
+
+  function selectHeroImage(file?: File) {
+    if (heroPreviewRef.current) URL.revokeObjectURL(heroPreviewRef.current);
+    const preview = file ? URL.createObjectURL(file) : undefined;
+    heroPreviewRef.current = preview;
+    setHeroPreview(preview);
+    setHeroFile(file);
+  }
+
+  function selectBodyMedia(file?: File) {
+    if (bodyPreviewRef.current) URL.revokeObjectURL(bodyPreviewRef.current);
+    const preview = file?.type.startsWith("image/")
+      ? URL.createObjectURL(file)
+      : undefined;
+    bodyPreviewRef.current = preview;
+    setBodyPreview(preview);
+    setBodyFile(file);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -154,6 +190,15 @@ export default function ManageLearn() {
       .toLowerCase()
       .includes(query.toLowerCase()),
   );
+  const currentHero = editingPost ? getHeroImage(editingPost) : undefined;
+  const currentBodyMedia = editingPost ? getBodyMedia(editingPost) : undefined;
+  const heroPreviewUrl =
+    heroPreview ?? (currentHero?.type === "image" ? currentHero.url : undefined);
+  const bodyPreviewUrl =
+    bodyPreview ??
+    (!bodyFile && currentBodyMedia?.type === "image"
+      ? currentBodyMedia.url
+      : undefined);
 
   return (
     <section className="min-h-full bg-slate-50 p-6 lg:p-10">
@@ -449,7 +494,22 @@ export default function ManageLearn() {
                         </p>
                         <div className="mt-4 grid gap-4 sm:grid-cols-2">
                           <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-7 text-center transition hover:border-primary hover:bg-green-50/40">
-                            <UploadCloud className="text-primary" size={25} />
+                            {heroPreviewUrl ? (
+                              <span className="relative h-32 w-full overflow-hidden rounded-lg bg-slate-100">
+                                <Image
+                                  src={heroPreviewUrl}
+                                  alt="Hero image preview"
+                                  fill
+                                  unoptimized
+                                  className="object-cover"
+                                />
+                                <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/70 px-2 py-1 text-[10px] font-medium text-white">
+                                  {heroFile ? "New image selected" : "Current image"}
+                                </span>
+                              </span>
+                            ) : (
+                              <UploadCloud className="text-primary" size={25} />
+                            )}
                             <span className="mt-3 text-sm font-medium text-slate-700">Hero image *</span>
                             <span className="mt-1 max-w-full truncate text-xs text-slate-400">
                               {heroFile?.name ?? (editingPost && getHeroImage(editingPost) ? "Keep current image" : "JPG, PNG or WEBP")}
@@ -460,11 +520,25 @@ export default function ManageLearn() {
                               type="file"
                               accept="image/jpeg,image/png,image/webp"
                               className="hidden"
-                              onChange={(event) => setHeroFile(event.target.files?.[0])}
+                              onChange={(event) => selectHeroImage(event.target.files?.[0])}
                             />
                           </label>
                           <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-7 text-center transition hover:border-primary hover:bg-green-50/40">
-                            {bodyFile?.type.startsWith("video/") ? (
+                            {bodyPreviewUrl ? (
+                              <span className="relative h-32 w-full overflow-hidden rounded-lg bg-slate-100">
+                                <Image
+                                  src={bodyPreviewUrl}
+                                  alt="Body image preview"
+                                  fill
+                                  unoptimized
+                                  className="object-cover"
+                                />
+                                <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/70 px-2 py-1 text-[10px] font-medium text-white">
+                                  {bodyFile ? "New image selected" : "Current image"}
+                                </span>
+                              </span>
+                            ) : bodyFile?.type.startsWith("video/") ||
+                              (!bodyFile && currentBodyMedia?.type === "video") ? (
                               <Video className="text-primary" size={25} />
                             ) : (
                               <FileImage className="text-primary" size={25} />
@@ -478,7 +552,7 @@ export default function ManageLearn() {
                               type="file"
                               accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
                               className="hidden"
-                              onChange={(event) => setBodyFile(event.target.files?.[0])}
+                              onChange={(event) => selectBodyMedia(event.target.files?.[0])}
                             />
                           </label>
                         </div>
