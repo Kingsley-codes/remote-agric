@@ -10,15 +10,18 @@ interface Props {
   currentSlug?: string;
   query?: string;
   category?: string;
+  tag?: string;
   onSearch?: (query: string) => void;
   onCategory?: (category: string) => void;
+  onTag?: (tag: string) => void;
 }
 
 const panel = "rounded-2xl border border-[#dfe7dc] bg-white p-6";
 const heading = "mb-5 text-base font-semibold tracking-tight text-[#0f1a0b]";
 
-export default function LearnSidebar({ posts, currentSlug, query = "", category = "", onSearch, onCategory }: Props) {
+export default function LearnSidebar({ posts, currentSlug, query = "", category = "", tag = "", onSearch, onCategory, onTag }: Props) {
   const categories = Array.from(new Set(posts.map((post) => post.category).filter(Boolean))).sort();
+  const tags = Array.from(new Set(posts.flatMap((post) => post.tags ?? []))).sort();
   const recent = [...posts]
     .filter((post) => post.slug !== currentSlug)
     .sort((a, b) => new Date(b.publishedAt ?? b.createdAt).getTime() - new Date(a.publishedAt ?? a.createdAt).getTime())
@@ -48,6 +51,22 @@ export default function LearnSidebar({ posts, currentSlug, query = "", category 
           })}
         </nav>
       </section>
+
+      {tags.length > 0 && <section className={panel}>
+        <h2 className={heading}>Popular tags</h2>
+        <div className="flex flex-wrap gap-2">
+          {tags.map((item) => {
+            const count = posts.filter((post) => post.tags?.includes(item)).length;
+            const styles = `inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition ${tag === item ? "border-primary bg-primary text-white" : "border-[#dfe7dc] bg-[#f6f8f6] text-[#52604c] hover:border-primary hover:text-primary"}`;
+            const content = <><span># {item}</span><span className="opacity-60">{count}</span></>;
+            return onTag ? (
+              <button key={item} type="button" onClick={() => onTag(tag === item ? "" : item)} aria-pressed={tag === item} className={styles}>{content}</button>
+            ) : (
+              <Link key={item} href={`/agri-learn?tag=${encodeURIComponent(item)}`} className={styles}>{content}</Link>
+            );
+          })}
+        </div>
+      </section>}
 
       {recent.length > 0 && <section className={panel}>
         <h2 className={heading}>Recent posts</h2>

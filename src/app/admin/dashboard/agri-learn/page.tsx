@@ -11,6 +11,7 @@ import {
   MoreHorizontal,
   Plus,
   Search,
+  Tags,
   Trash2,
   UploadCloud,
   Video,
@@ -36,6 +37,9 @@ export default function ManageLearn() {
   const [heroFile, setHeroFile] = useState<File>();
   const [bodyFile, setBodyFile] = useState<File>();
   const [submitStatus, setSubmitStatus] = useState<"draft" | "published">("published");
+  const [tagEditor, setTagEditor] = useState<LearnPost | null>(null);
+  const [tagDraft, setTagDraft] = useState("");
+  const [tagSaving, setTagSaving] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   const load = useCallback(async () => {
@@ -95,8 +99,37 @@ export default function ManageLearn() {
     await load();
   }
 
+  function editTags(post: LearnPost) {
+    setTagEditor(post);
+    setTagDraft((post.tags ?? []).join(", "));
+  }
+
+  async function saveTags(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!tagEditor) return;
+    setTagSaving(true);
+    try {
+      await axios.patch(
+        `${API}/api/admin/agri-learn/${tagEditor._id}`,
+        { tags: tagDraft },
+        { withCredentials: true },
+      );
+      toast.success("Post tags updated");
+      setTagEditor(null);
+      await load();
+    } catch (error) {
+      toast.error(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message ?? "Unable to update tags"
+          : "Unable to update tags",
+      );
+    } finally {
+      setTagSaving(false);
+    }
+  }
+
   const filtered = posts.filter((post) =>
-    `${post.title} ${post.category} ${post.postType ?? "blog"}`
+    `${post.title} ${post.category} ${(post.tags ?? []).join(" ")} ${post.postType ?? "blog"}`
       .toLowerCase()
       .includes(query.toLowerCase()),
   );
@@ -175,7 +208,7 @@ export default function ManageLearn() {
                           className="h-full w-full object-cover"
                         />
                       ) : thumbnail ? (
-                        <img src={thumbnail} alt="" className="h-full w-full object-cover" />
+                        <Image src={thumbnail} alt="" width={144} height={112} unoptimized className="h-full w-full object-cover" />
                       ) : (
                         <span className="flex h-full items-center justify-center text-primary">
                           {post.postType === "podcast" ? <Video size={20} /> : <BookOpen size={20} />}
@@ -185,6 +218,13 @@ export default function ManageLearn() {
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-slate-800">{post.title}</p>
                       <p className="mt-1 line-clamp-1 text-xs text-slate-400">{post.excerpt}</p>
+                      {post.tags && post.tags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {post.tags.slice(0, 4).map((tag) => (
+                            <span key={tag} className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500"># {tag}</span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <span className="w-fit rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-600">
                       {post.postType ?? "blog"}
@@ -200,7 +240,14 @@ export default function ManageLearn() {
                       <button className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
                         <MoreHorizontal size={18} />
                       </button>
-                      <div className="invisible absolute right-0 top-9 z-10 w-32 rounded-lg bg-white p-1 opacity-0 shadow-lg ring-1 ring-slate-900/10 transition group-focus-within:visible group-focus-within:opacity-100">
+                      <div className="invisible absolute right-0 top-9 z-10 w-36 rounded-lg bg-white p-1 opacity-0 shadow-lg ring-1 ring-slate-900/10 transition group-focus-within:visible group-focus-within:opacity-100">
+                        <button
+                          onClick={() => editTags(post)}
+                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                        >
+                          <Tags size={14} />
+                          Edit tags
+                        </button>
                         <button
                           onClick={() => remove(post._id)}
                           className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50"
@@ -318,6 +365,16 @@ export default function ManageLearn() {
                           className="mt-1.5 w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm leading-6 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                         />
                       </label>
+
+                      <label className="block">
+                        <span className="text-sm text-slate-600">Tags</span>
+                        <input
+                          name="tags"
+                          placeholder="maize, marketing, farm management"
+                          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        />
+                        <span className="mt-1.5 block text-xs text-slate-400">Separate tags with commas. Add up to 10 tags.</span>
+                      </label>
                     </div>
                   </fieldset>
 
@@ -429,6 +486,30 @@ export default function ManageLearn() {
               </form>
             </div>
           </div>
+        </div>
+      )}
+
+      {tagEditor && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/45 px-4 backdrop-blur-sm">
+          <form onSubmit={saveTags} className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-primary">Organize content</p>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">Edit post tags</h2>
+                <p className="mt-1 line-clamp-1 text-sm text-slate-500">{tagEditor.title}</p>
+              </div>
+              <button type="button" onClick={() => setTagEditor(null)} disabled={tagSaving} aria-label="Close" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
+            </div>
+            <label className="mt-6 block">
+              <span className="text-sm text-slate-600">Tags</span>
+              <input autoFocus value={tagDraft} onChange={(event) => setTagDraft(event.target.value)} placeholder="maize, marketing, farm management" className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
+              <span className="mt-2 block text-xs leading-5 text-slate-400">Separate tags with commas. Tags are saved in lowercase, with a maximum of 10.</span>
+            </label>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setTagEditor(null)} disabled={tagSaving} className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">Cancel</button>
+              <button disabled={tagSaving} className="inline-flex min-w-28 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50">{tagSaving ? <Loader2 size={17} className="animate-spin" /> : "Save tags"}</button>
+            </div>
+          </form>
         </div>
       )}
     </section>

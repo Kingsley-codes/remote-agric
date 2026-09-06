@@ -12,6 +12,7 @@ export interface LearnPost {
   content?: string;
   videoUrl?: string;
   category: string;
+  tags?: string[];
   heroImage?: LearnMedia;
   bodyMedia?: LearnMedia;
   /** Legacy media, used only for articles published before the media update. */
@@ -19,6 +20,26 @@ export interface LearnPost {
   status: "draft" | "published";
   publishedAt?: string;
   createdAt: string;
+}
+
+export interface LearnCommentAuthor {
+  _id: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  profilePhoto?: {
+    url?: string;
+  };
+}
+
+export interface LearnComment {
+  _id: string;
+  post: string;
+  author: LearnCommentAuthor;
+  body: string;
+  isMine?: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const getHeroImage = (post: LearnPost) => post.heroImage ?? post.media?.[0];

@@ -60,6 +60,7 @@ export default function AgriLearnPage() {
   const [posts, setPosts] = useState<LearnPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("");
+  const [tag, setTag] = useState("");
   const [query, setQuery] = useState("");
   const [error, setError] = useState(false);
   const [postType, setPostType] = useState<"all" | "blog" | "podcast">("all");
@@ -68,6 +69,7 @@ export default function AgriLearnPage() {
       const params = new URLSearchParams(window.location.search);
       setQuery(params.get("q") ?? "");
       setCategory(params.get("category") ?? "");
+      setTag(params.get("tag")?.toLowerCase() ?? "");
       const type = params.get("type");
       setPostType(type === "podcast" || type === "blog" ? type : "all");
     };
@@ -80,12 +82,24 @@ export default function AgriLearnPage() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; window.removeEventListener("popstate", syncFilters); };
   }, []);
+  const updateUrlFilter = (name: string, value: string) => {
+    const params = new URLSearchParams(window.location.search);
+    if (value) params.set(name, value);
+    else params.delete(name);
+    const search = params.toString();
+    window.history.replaceState(null, "", search ? `/agri-learn?${search}` : "/agri-learn");
+  };
+  const changeQuery = (value: string) => { setQuery(value); updateUrlFilter("q", value); };
+  const changeCategory = (value: string) => { setCategory(value); updateUrlFilter("category", value); };
+  const changeTag = (value: string) => { setTag(value); updateUrlFilter("tag", value); };
+  const changePostType = (value: "all" | "blog" | "podcast") => { setPostType(value); updateUrlFilter("type", value === "all" ? "" : value); };
   const filtered = posts.filter((post) =>
     (postType === "all" || (post.postType ?? "blog") === postType) &&
     (!category || post.category === category) &&
-    `${post.title} ${post.excerpt} ${post.category} ${post.content ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())
+    (!tag || post.tags?.some((item) => item.toLowerCase() === tag)) &&
+    `${post.title} ${post.excerpt} ${post.category} ${(post.tags ?? []).join(" ")} ${post.content ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())
   );
-  const isFiltered = Boolean(query.trim() || category || postType !== "all");
+  const isFiltered = Boolean(query.trim() || category || tag || postType !== "all");
   const featured = !isFiltered ? filtered[0] : undefined;
   const articles = featured ? filtered.slice(1) : filtered;
 
@@ -104,13 +118,14 @@ export default function AgriLearnPage() {
 
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_300px] xl:gap-10 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0">
-        <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:hidden">
-          <div><label htmlFor="mobile-learn-search" className="mb-2 block text-xs font-medium text-[#52604c]">Search Agri-Learn</label><input id="mobile-learn-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search articles" className="w-full rounded-xl border border-[#dfe7dc] bg-white px-4 py-3 text-sm focus:ring-2 focus:ring-primary" /></div>
-          <div><label htmlFor="mobile-learn-category" className="mb-2 block text-xs font-medium text-[#52604c]">Browse categories</label><select id="mobile-learn-category" value={category} onChange={(event) => setCategory(event.target.value)} className="w-full rounded-xl border border-[#dfe7dc] bg-white px-4 py-3 text-sm focus:ring-2 focus:ring-primary"><option value="">All topics</option>{Array.from(new Set(posts.map((post) => post.category))).sort().map((item) => <option key={item} value={item}>{item}</option>)}</select></div>
+        <div className="mb-5 grid gap-3 sm:grid-cols-3 lg:hidden">
+          <div><label htmlFor="mobile-learn-search" className="mb-2 block text-xs font-medium text-[#52604c]">Search Agri-Learn</label><input id="mobile-learn-search" type="search" value={query} onChange={(event) => changeQuery(event.target.value)} placeholder="Search articles" className="w-full rounded-xl border border-[#dfe7dc] bg-white px-4 py-3 text-sm focus:ring-2 focus:ring-primary" /></div>
+          <div><label htmlFor="mobile-learn-category" className="mb-2 block text-xs font-medium text-[#52604c]">Browse categories</label><select id="mobile-learn-category" value={category} onChange={(event) => changeCategory(event.target.value)} className="w-full rounded-xl border border-[#dfe7dc] bg-white px-4 py-3 text-sm focus:ring-2 focus:ring-primary"><option value="">All topics</option>{Array.from(new Set(posts.map((post) => post.category))).sort().map((item) => <option key={item} value={item}>{item}</option>)}</select></div>
+          <div><label htmlFor="mobile-learn-tag" className="mb-2 block text-xs font-medium text-[#52604c]">Filter by tag</label><select id="mobile-learn-tag" value={tag} onChange={(event) => changeTag(event.target.value)} className="w-full rounded-xl border border-[#dfe7dc] bg-white px-4 py-3 text-sm focus:ring-2 focus:ring-primary"><option value="">All tags</option>{Array.from(new Set(posts.flatMap((post) => post.tags ?? []))).sort().map((item) => <option key={item} value={item}>{item}</option>)}</select></div>
         </div>
         <nav className="mb-6 flex flex-wrap gap-2" aria-label="Post formats">
           {([["all", "All posts"], ["blog", "Articles"], ["podcast", "Podcasts"]] as const).map(([value, label]) => (
-            <button key={value} onClick={() => setPostType(value)} aria-pressed={postType === value} className={`rounded-full px-5 py-2.5 text-sm transition ${postType === value ? "bg-[#0f1a0b] text-white" : "border border-[#dfe7dc] bg-white text-[#52604c] hover:bg-[#e8eee7]"}`}>{label}</button>
+            <button key={value} onClick={() => changePostType(value)} aria-pressed={postType === value} className={`rounded-full px-5 py-2.5 text-sm transition ${postType === value ? "bg-[#0f1a0b] text-white" : "border border-[#dfe7dc] bg-white text-[#52604c] hover:bg-[#e8eee7]"}`}>{label}</button>
           ))}
         </nav>
         {loading ? (
@@ -136,6 +151,7 @@ export default function AgriLearnPage() {
                 <p className="text-xs uppercase tracking-[0.16em] text-primary">
                   {featured.category}
                 </p>
+                {featured.tags && featured.tags.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{featured.tags.slice(0, 3).map((item) => <span key={item} className="text-xs text-[#52604c]"># {item}</span>)}</div>}
                 <h2 className="mt-4 text-2xl font-medium leading-tight md:text-3xl">
                   {featured.title}
                 </h2>
@@ -158,7 +174,7 @@ export default function AgriLearnPage() {
             <div className="mb-6 mt-9 flex flex-wrap items-center justify-between gap-3 border-b border-[#dfe7dc] pb-5">
               <div><p className="text-xs uppercase tracking-[0.16em] text-primary">The learning journal</p><h2 className="mt-2 text-2xl font-medium">{isFiltered ? "Your search results" : "Latest articles & episodes"}</h2></div>
               <span className="text-sm text-[#52604c]">{filtered.length} {filtered.length === 1 ? "post" : "posts"}</span>
-              {isFiltered && <button onClick={() => { setQuery(""); setCategory(""); setPostType("all"); window.history.replaceState(null, "", "/agri-learn"); }} className="text-sm font-medium text-primary underline underline-offset-4">Clear filters</button>}
+              {isFiltered && <button onClick={() => { setQuery(""); setCategory(""); setTag(""); setPostType("all"); window.history.replaceState(null, "", "/agri-learn"); }} className="text-sm font-medium text-primary underline underline-offset-4">Clear filters</button>}
             </div>
 
             {articles.length > 0 ? (
@@ -185,6 +201,7 @@ export default function AgriLearnPage() {
                       <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#3d4b36]">
                         {post.excerpt}
                       </p>
+                      {post.tags && post.tags.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{post.tags.slice(0, 3).map((item) => <span key={item} className="rounded-full bg-[#f0f4ee] px-2.5 py-1 text-[11px] text-[#52604c]"># {item}</span>)}</div>}
                       <div className="mt-6 flex items-center justify-between border-t border-primary/10 pt-5">
                         <span className="text-xs text-[#3d4b36]/70">
                           {post.postType === "podcast" ? "Podcast" : "Blog"}
@@ -218,7 +235,7 @@ export default function AgriLearnPage() {
           </div>
         )}
         </div>
-        <LearnSidebar posts={posts} query={query} category={category} onSearch={setQuery} onCategory={setCategory} />
+        <LearnSidebar posts={posts} query={query} category={category} tag={tag} onSearch={changeQuery} onCategory={changeCategory} onTag={changeTag} />
         </div>
       </div>
     </main>

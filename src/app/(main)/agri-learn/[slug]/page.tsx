@@ -14,6 +14,7 @@ import {
   LearnPost,
 } from "@/lib/agriLearn";
 import LearnSidebar from "@/components/agrilearn/LearnSidebar";
+import PostComments from "@/components/agrilearn/PostComments";
 import { toast } from "react-toastify";
 
 const formatDate = (date?: string) =>
@@ -154,6 +155,7 @@ function BlogArticle({ slug }: { slug: string }) {
             <div className="space-y-1 border-l border-[#d5dfd0] text-sm text-[#52604c]">
               <a href="#overview" className="block border-l-2 border-primary py-2 pl-4 text-primary hover:underline">Overview</a>
               <a href="#article-content" className="block py-2 pl-4 hover:text-primary">{post.postType === "podcast" ? "Watch episode" : "Read the guide"}</a>
+              <a href="#comments" className="block py-2 pl-4 hover:text-primary">Comments</a>
               {related.length > 0 && <a href="#related-posts" className="block py-2 pl-4 hover:text-primary">Related posts</a>}
             </div>
             <div className="mt-8 border-t border-[#d5dfd0] pt-5"><p className="text-xs text-[#52604c]">Found this helpful?</p><button onClick={share} className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-primary"><Share2 size={15} /> Share this post</button></div>
@@ -212,9 +214,13 @@ function BlogArticle({ slug }: { slug: string }) {
           )}
           </div>
           <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#e8eee7] pt-6">
-            <Link href={`/agri-learn?category=${encodeURIComponent(post.category)}`} className="rounded-full bg-[#edf3e9] px-4 py-2 text-xs font-medium text-primary"># {post.category}</Link>
+            <div className="flex flex-wrap gap-2">
+              <Link href={`/agri-learn?category=${encodeURIComponent(post.category)}`} className="rounded-full bg-[#edf3e9] px-4 py-2 text-xs font-medium text-primary">{post.category}</Link>
+              {post.tags?.map((tag) => <Link key={tag} href={`/agri-learn?tag=${encodeURIComponent(tag)}`} className="rounded-full border border-[#dfe7dc] px-4 py-2 text-xs text-[#52604c] transition hover:border-primary hover:text-primary"># {tag}</Link>)}
+            </div>
             <button onClick={share} className="inline-flex items-center gap-2 text-sm text-primary"><Share2 size={16} /> Share article</button>
           </div>
+          <PostComments slug={post.slug} />
           </div>
           <LearnSidebar posts={allPosts.length ? allPosts : [post, ...related.filter((item) => item._id !== post._id)]} currentSlug={post.slug} category={post.category} />
         </div>
