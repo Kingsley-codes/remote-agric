@@ -1,7 +1,6 @@
 "use client";
 
 import DashboardNav from "@/components/dashboard/DashboardNav";
-import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import Sidebar, { UserData } from "@/components/dashboard/Sidebar";
 import { useEffect, useCallback, useState } from "react";
 import PushNotifications from "@/components/support/PushNotifications";
@@ -51,7 +50,6 @@ export default function DashboardLayout({
         <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         <NotificationBell />
         <PushNotifications />
-        <DashboardFooter />
       </main>
     </div>
   );

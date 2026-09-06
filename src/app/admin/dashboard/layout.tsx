@@ -1,6 +1,5 @@
 "use client";
 
-import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import AdminSidebar, { UserData } from "@/components/adminDashboard/Sidebar";
 import { useEffect, useCallback, useState } from "react";
 import AdminDashboardNav from "@/components/adminDashboard/DashboardNav";
@@ -50,7 +49,6 @@ export default function DashboardLayout({
         />
         <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
         <PushNotifications admin />
-        <DashboardFooter />
       </main>
     </div>
   );

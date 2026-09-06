@@ -188,7 +188,16 @@ export default function ManageLearn() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div>
+              <div className="hidden grid-cols-[72px_1fr_100px_130px_150px_50px] items-center gap-4 border-b border-slate-100 bg-slate-50/80 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 md:grid">
+                <span>Preview</span>
+                <span>Post</span>
+                <span>Type</span>
+                <span>Category</span>
+                <span>Published</span>
+                <span className="sr-only">Actions</span>
+              </div>
+              <div className="divide-y divide-slate-100">
               {filtered.map((post) => {
                 const cover = getHeroImage(post);
                 const thumbnail = getYouTubeThumbnail(post.videoUrl);
@@ -260,6 +269,7 @@ export default function ManageLearn() {
                   </div>
                 );
               })}
+              </div>
             </div>
           )}
         </div>
