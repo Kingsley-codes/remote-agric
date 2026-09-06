@@ -18,7 +18,7 @@ import {
   Video,
   X,
 } from "lucide-react";
-import { getHeroImage, getYouTubeThumbnail, LearnPost } from "@/lib/agriLearn";
+import { getBodyMedia, getHeroImage, getYouTubeThumbnail, LearnPost } from "@/lib/agriLearn";
 import { toast } from "react-toastify";
 
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -37,7 +37,6 @@ export default function ManageLearn() {
   const [postType, setPostType] = useState<"blog" | "podcast">("blog");
   const [heroFile, setHeroFile] = useState<File>();
   const [bodyFile, setBodyFile] = useState<File>();
-  const [submitStatus, setSubmitStatus] = useState<"draft" | "published">("published");
   const [tagEditor, setTagEditor] = useState<LearnPost | null>(null);
   const [tagDraft, setTagDraft] = useState("");
   const [tagSaving, setTagSaving] = useState(false);
@@ -61,7 +60,6 @@ export default function ManageLearn() {
     setPostType("blog");
     setHeroFile(undefined);
     setBodyFile(undefined);
-    setSubmitStatus("published");
     setEditingPost(null);
     formRef.current?.reset();
   }
@@ -74,7 +72,6 @@ export default function ManageLearn() {
   function editPost(post: LearnPost) {
     setEditingPost(post);
     setPostType(post.postType ?? "blog");
-    setSubmitStatus(post.status);
     setHeroFile(undefined);
     setBodyFile(undefined);
     setOpen(true);
@@ -86,10 +83,12 @@ export default function ManageLearn() {
     resetForm();
   }
 
-  async function submit(event: FormEvent<HTMLFormElement>, status: "draft" | "published") {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
     const form = new FormData(event.currentTarget);
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const status: "draft" | "published" = submitter?.value === "draft" ? "draft" : "published";
     form.set("status", status);
     form.set("postType", postType);
 
@@ -315,10 +314,10 @@ export default function ManageLearn() {
               <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900">
-                    Create an Agri-Learn post
+                    {editingPost ? "Edit Agri-Learn post" : "Create an Agri-Learn post"}
                   </h2>
                   <p className="mt-1 text-sm text-slate-500">
-                    Add a clear title, useful summary and the right content format.
+                    {editingPost ? "Correct the post, change its format, or update its publication status." : "Add a clear title, useful summary and the right content format."}
                   </p>
                 </div>
                 <button
@@ -332,8 +331,9 @@ export default function ManageLearn() {
               </div>
 
               <form
+                key={editingPost?._id ?? "new-post"}
                 ref={formRef}
-                onSubmit={(event) => submit(event, submitStatus)}
+                onSubmit={submit}
                 className="max-h-[calc(100vh-150px)] overflow-y-auto"
               >
                 <div className="space-y-7 px-6 py-6">
@@ -372,6 +372,7 @@ export default function ManageLearn() {
                         <span className="text-sm text-slate-600">Title</span>
                         <input
                           name="title"
+                          defaultValue={editingPost?.title}
                           required
                           maxLength={180}
                           placeholder="e.g. Preparing maize fields for the rainy season"
@@ -384,6 +385,7 @@ export default function ManageLearn() {
                           <span className="text-sm text-slate-600">Category</span>
                           <input
                             name="category"
+                            defaultValue={editingPost?.category}
                             required
                             placeholder="Farming guide"
                             className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -401,6 +403,7 @@ export default function ManageLearn() {
                         <span className="text-sm text-slate-600">Summary</span>
                         <textarea
                           name="excerpt"
+                          defaultValue={editingPost?.excerpt}
                           required
                           rows={3}
                           maxLength={320}
@@ -413,6 +416,7 @@ export default function ManageLearn() {
                         <span className="text-sm text-slate-600">Tags</span>
                         <input
                           name="tags"
+                          defaultValue={(editingPost?.tags ?? []).join(", ")}
                           placeholder="maize, marketing, farm management"
                           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                         />
@@ -430,6 +434,7 @@ export default function ManageLearn() {
                         </p>
                         <textarea
                           name="content"
+                          defaultValue={editingPost?.content}
                           required
                           rows={11}
                           placeholder="Write the full article here..."
@@ -447,11 +452,11 @@ export default function ManageLearn() {
                             <UploadCloud className="text-primary" size={25} />
                             <span className="mt-3 text-sm font-medium text-slate-700">Hero image *</span>
                             <span className="mt-1 max-w-full truncate text-xs text-slate-400">
-                              {heroFile?.name ?? "JPG, PNG or WEBP"}
+                              {heroFile?.name ?? (editingPost && getHeroImage(editingPost) ? "Keep current image" : "JPG, PNG or WEBP")}
                             </span>
                             <input
                               name="heroImage"
-                              required
+                              required={!editingPost || !getHeroImage(editingPost)}
                               type="file"
                               accept="image/jpeg,image/png,image/webp"
                               className="hidden"
@@ -466,7 +471,7 @@ export default function ManageLearn() {
                             )}
                             <span className="mt-3 text-sm font-medium text-slate-700">Body media (optional)</span>
                             <span className="mt-1 max-w-full truncate text-xs text-slate-400">
-                              {bodyFile?.name ?? "One image or video"}
+                              {bodyFile?.name ?? (editingPost && getBodyMedia(editingPost) ? "Keep current media" : "One image or video")}
                             </span>
                             <input
                               name="bodyMedia"
@@ -489,6 +494,7 @@ export default function ManageLearn() {
                         <span className="text-sm text-slate-600">YouTube video link</span>
                         <input
                           name="videoUrl"
+                          defaultValue={editingPost?.videoUrl}
                           required
                           type="url"
                           placeholder="https://www.youtube.com/watch?v=..."
@@ -508,22 +514,20 @@ export default function ManageLearn() {
                     Cancel
                   </button>
                   <button
-                    type="button"
+                    type="submit"
+                    value="draft"
                     disabled={saving}
-                    onClick={() => {
-                      setSubmitStatus("draft");
-                      window.setTimeout(() => formRef.current?.requestSubmit(), 0);
-                    }}
                     className="rounded-lg border border-primary px-4 py-2.5 text-sm font-medium text-primary hover:bg-green-50"
                   >
-                    Save as draft
+                    {editingPost ? "Save draft" : "Save as draft"}
                   </button>
                   <button
+                    type="submit"
+                    value="published"
                     disabled={saving}
-                    onClick={() => setSubmitStatus("published")}
                     className="inline-flex min-w-32 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50"
                   >
-                    {saving ? <Loader2 size={17} className="animate-spin" /> : "Publish post"}
+                    {saving ? <Loader2 size={17} className="animate-spin" /> : editingPost ? "Save & publish" : "Publish post"}
                   </button>
                 </div>
               </form>
