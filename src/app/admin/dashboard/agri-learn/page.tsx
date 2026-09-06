@@ -9,6 +9,7 @@ import {
   FileImage,
   Loader2,
   MoreHorizontal,
+  Pencil,
   Plus,
   Search,
   Tags,
@@ -40,6 +41,7 @@ export default function ManageLearn() {
   const [tagEditor, setTagEditor] = useState<LearnPost | null>(null);
   const [tagDraft, setTagDraft] = useState("");
   const [tagSaving, setTagSaving] = useState(false);
+  const [editingPost, setEditingPost] = useState<LearnPost | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const load = useCallback(async () => {
@@ -59,7 +61,23 @@ export default function ManageLearn() {
     setPostType("blog");
     setHeroFile(undefined);
     setBodyFile(undefined);
+    setSubmitStatus("published");
+    setEditingPost(null);
     formRef.current?.reset();
+  }
+
+  function createNewPost() {
+    resetForm();
+    setOpen(true);
+  }
+
+  function editPost(post: LearnPost) {
+    setEditingPost(post);
+    setPostType(post.postType ?? "blog");
+    setSubmitStatus(post.status);
+    setHeroFile(undefined);
+    setBodyFile(undefined);
+    setOpen(true);
   }
 
   function close() {
@@ -76,8 +94,12 @@ export default function ManageLearn() {
     form.set("postType", postType);
 
     try {
-      await axios.post(`${API}/api/admin/agri-learn`, form, { withCredentials: true });
-      toast.success(status === "published" ? "Post published" : "Draft saved");
+      if (editingPost) {
+        await axios.patch(`${API}/api/admin/agri-learn/${editingPost._id}`, form, { withCredentials: true });
+      } else {
+        await axios.post(`${API}/api/admin/agri-learn`, form, { withCredentials: true });
+      }
+      toast.success(status === "published" ? (editingPost ? "Post updated and published" : "Post published") : (editingPost ? "Draft updated" : "Draft saved"));
       setOpen(false);
       resetForm();
       await load();
@@ -150,7 +172,7 @@ export default function ManageLearn() {
             </p>
           </div>
           <button
-            onClick={() => setOpen(true)}
+            onClick={createNewPost}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary-dark"
           >
             <Plus size={17} />
@@ -161,7 +183,7 @@ export default function ManageLearn() {
         <div className="mt-8 rounded-2xl bg-white shadow-sm ring-1 ring-slate-900/5">
           <div className="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-base font-medium text-slate-800">Published content</h2>
+              <h2 className="text-base font-medium text-slate-800">Content library</h2>
               <p className="mt-1 text-xs text-slate-400">
                 {posts.length} post{posts.length === 1 ? "" : "s"} in your library
               </p>
@@ -189,11 +211,12 @@ export default function ManageLearn() {
             </div>
           ) : (
             <div>
-              <div className="hidden grid-cols-[72px_1fr_100px_130px_150px_50px] items-center gap-4 border-b border-slate-100 bg-slate-50/80 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 md:grid">
+              <div className="hidden grid-cols-[72px_1fr_90px_110px_100px_140px_50px] items-center gap-4 border-b border-slate-100 bg-slate-50/80 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 md:grid">
                 <span>Preview</span>
                 <span>Post</span>
                 <span>Type</span>
                 <span>Category</span>
+                <span>Status</span>
                 <span>Published</span>
                 <span className="sr-only">Actions</span>
               </div>
@@ -204,7 +227,7 @@ export default function ManageLearn() {
                 return (
                   <div
                     key={post._id}
-                    className="grid items-center gap-4 p-5 transition hover:bg-slate-50/70 md:grid-cols-[72px_1fr_100px_130px_150px_50px]"
+                    className="grid items-center gap-4 p-5 transition hover:bg-slate-50/70 md:grid-cols-[72px_1fr_90px_110px_100px_140px_50px]"
                   >
                     <div className="h-14 w-[72px] overflow-hidden rounded-lg bg-[#e9f0e7]">
                       {cover?.type === "image" ? (
@@ -241,15 +264,25 @@ export default function ManageLearn() {
                     <span className="w-fit rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-primary">
                       {post.category}
                     </span>
+                    <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-medium capitalize ${post.status === "published" ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+                      {post.status}
+                    </span>
                     <span className="flex items-center gap-2 text-xs text-slate-400">
                       <CalendarDays size={14} />
-                      {formatDate(post.publishedAt ?? post.createdAt)}
+                      {post.publishedAt ? formatDate(post.publishedAt) : "Not published"}
                     </span>
                     <div className="relative group">
                       <button className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
                         <MoreHorizontal size={18} />
                       </button>
                       <div className="invisible absolute right-0 top-9 z-10 w-36 rounded-lg bg-white p-1 opacity-0 shadow-lg ring-1 ring-slate-900/10 transition group-focus-within:visible group-focus-within:opacity-100">
+                        <button
+                          onClick={() => editPost(post)}
+                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                        >
+                          <Pencil size={14} />
+                          Edit post
+                        </button>
                         <button
                           onClick={() => editTags(post)}
                           className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
