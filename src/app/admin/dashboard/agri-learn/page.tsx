@@ -493,68 +493,85 @@ export default function ManageLearn() {
                           Every article needs one hero image. You may also add one image or video inside the article body.
                         </p>
                         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                          <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-7 text-center transition hover:border-primary hover:bg-green-50/40">
-                            {heroPreviewUrl ? (
-                              <span className="relative h-32 w-full overflow-hidden rounded-lg bg-slate-100">
-                                <Image
+                          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-3">
+                            <div className="relative flex h-40 items-center justify-center overflow-hidden rounded-lg bg-slate-100">
+                              {heroPreviewUrl ? (
+                                // A native image reliably supports both saved URLs and local blob URLs.
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
                                   src={heroPreviewUrl}
                                   alt="Hero image preview"
-                                  fill
-                                  unoptimized
-                                  className="object-cover"
+                                  className="h-full w-full object-cover"
                                 />
-                                <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/70 px-2 py-1 text-[10px] font-medium text-white">
-                                  {heroFile ? "New image selected" : "Current image"}
+                              ) : (
+                                <FileImage className="text-slate-300" size={34} />
+                              )}
+                              {heroPreviewUrl && (
+                                <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/75 px-2 py-1 text-[10px] font-medium text-white">
+                                  {heroFile ? "New image preview" : "Existing image"}
+                                </span>
+                              )}
+                            </div>
+                            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-center transition hover:border-primary hover:bg-green-50/40">
+                              <UploadCloud className="text-primary" size={20} />
+                              <span className="min-w-0">
+                                <span className="block text-sm font-medium text-slate-700">Choose hero image *</span>
+                                <span className="block max-w-full truncate text-xs text-slate-400">
+                                  {heroFile?.name ?? (heroPreviewUrl ? "Choose a new image to replace it" : "JPG, PNG or WEBP")}
                                 </span>
                               </span>
-                            ) : (
-                              <UploadCloud className="text-primary" size={25} />
-                            )}
-                            <span className="mt-3 text-sm font-medium text-slate-700">Hero image *</span>
-                            <span className="mt-1 max-w-full truncate text-xs text-slate-400">
-                              {heroFile?.name ?? (editingPost && getHeroImage(editingPost) ? "Keep current image" : "JPG, PNG or WEBP")}
-                            </span>
-                            <input
-                              name="heroImage"
-                              required={!editingPost || !getHeroImage(editingPost)}
-                              type="file"
-                              accept="image/jpeg,image/png,image/webp"
-                              className="hidden"
-                              onChange={(event) => selectHeroImage(event.target.files?.[0])}
-                            />
-                          </label>
-                          <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-7 text-center transition hover:border-primary hover:bg-green-50/40">
-                            {bodyPreviewUrl ? (
-                              <span className="relative h-32 w-full overflow-hidden rounded-lg bg-slate-100">
-                                <Image
+                              <input
+                                name="heroImage"
+                                required={!editingPost || !getHeroImage(editingPost)}
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                className="hidden"
+                                onChange={(event) => selectHeroImage(event.target.files?.[0])}
+                              />
+                            </label>
+                          </div>
+
+                          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-3">
+                            <div className="relative flex h-40 items-center justify-center overflow-hidden rounded-lg bg-slate-100">
+                              {bodyPreviewUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
                                   src={bodyPreviewUrl}
                                   alt="Body image preview"
-                                  fill
-                                  unoptimized
-                                  className="object-cover"
+                                  className="h-full w-full object-cover"
                                 />
-                                <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/70 px-2 py-1 text-[10px] font-medium text-white">
-                                  {bodyFile ? "New image selected" : "Current image"}
+                              ) : bodyFile?.type.startsWith("video/") ||
+                                (!bodyFile && currentBodyMedia?.type === "video") ? (
+                                <div className="flex flex-col items-center gap-2 text-slate-400">
+                                  <Video size={34} />
+                                  <span className="text-xs">Video selected</span>
+                                </div>
+                              ) : (
+                                <FileImage className="text-slate-300" size={34} />
+                              )}
+                              {bodyPreviewUrl && (
+                                <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/75 px-2 py-1 text-[10px] font-medium text-white">
+                                  {bodyFile ? "New image preview" : "Existing image"}
+                                </span>
+                              )}
+                            </div>
+                            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-center transition hover:border-primary hover:bg-green-50/40">
+                              <UploadCloud className="text-primary" size={20} />
+                              <span className="min-w-0">
+                                <span className="block text-sm font-medium text-slate-700">Choose body media</span>
+                                <span className="block max-w-full truncate text-xs text-slate-400">
+                                  {bodyFile?.name ?? (currentBodyMedia ? "Choose new media to replace it" : "One image or video")}
                                 </span>
                               </span>
-                            ) : bodyFile?.type.startsWith("video/") ||
-                              (!bodyFile && currentBodyMedia?.type === "video") ? (
-                              <Video className="text-primary" size={25} />
-                            ) : (
-                              <FileImage className="text-primary" size={25} />
-                            )}
-                            <span className="mt-3 text-sm font-medium text-slate-700">Body media (optional)</span>
-                            <span className="mt-1 max-w-full truncate text-xs text-slate-400">
-                              {bodyFile?.name ?? (editingPost && getBodyMedia(editingPost) ? "Keep current media" : "One image or video")}
-                            </span>
-                            <input
-                              name="bodyMedia"
-                              type="file"
-                              accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
-                              className="hidden"
-                              onChange={(event) => selectBodyMedia(event.target.files?.[0])}
-                            />
-                          </label>
+                              <input
+                                name="bodyMedia"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+                                className="hidden"
+                                onChange={(event) => selectBodyMedia(event.target.files?.[0])}
+                              />
+                            </label>
+                          </div>
                         </div>
                       </fieldset>
                     </>

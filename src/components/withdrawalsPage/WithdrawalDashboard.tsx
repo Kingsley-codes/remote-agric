@@ -94,10 +94,11 @@ export default function WithdrawalDashboard() {
             <option value="failed">Failed</option>
           </select>
         </div>
-        <div className="hidden grid-cols-[1fr_130px_1fr_140px_110px] gap-3 border-t border-gray-100 bg-gray-50 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500 md:grid">
+        <div className="overflow-x-auto">
+        <div className="hidden grid-cols-[140px_minmax(220px,1.4fr)_minmax(220px,1fr)_140px_110px] gap-4 border-t border-gray-100 bg-gray-50 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500 md:grid md:min-w-[930px]">
           <span>User ID</span>
-          <span>User</span>
-          <span>Reference / requested</span>
+          <span>User Name</span>
+          <span>Reference / Requested</span>
           <span>Amount</span>
           <span>Status</span>
         </div>
@@ -113,7 +114,7 @@ export default function WithdrawalDashboard() {
           items.map((w) => (
             <div
               key={w._id}
-              className="grid gap-3 border-t border-gray-100 p-5 md:grid-cols-[1fr_130px_1fr_140px_110px]"
+              className="grid gap-4 border-t border-gray-100 p-5 md:min-w-[930px] md:grid-cols-[140px_minmax(220px,1.4fr)_minmax(220px,1fr)_140px_110px]"
             >
               <p className="font-mono text-xs font-medium text-primary">
                 {w.user?.farmerID ?? "Unavailable"}
@@ -140,6 +141,7 @@ export default function WithdrawalDashboard() {
             </div>
           ))
         )}
+        </div>
       </div>
     </section>
   );
