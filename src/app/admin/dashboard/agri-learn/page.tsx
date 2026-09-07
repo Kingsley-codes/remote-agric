@@ -18,7 +18,15 @@ import {
   Video,
   X,
 } from "lucide-react";
-import { getBodyMedia, getHeroImage, getYouTubeThumbnail, LearnPost } from "@/lib/agriLearn";
+import {
+  articleContentToHtml,
+  articleContentToText,
+  getBodyMedia,
+  getHeroImage,
+  getYouTubeThumbnail,
+  LearnPost,
+} from "@/lib/agriLearn";
+import RichTextEditor from "@/components/agrilearn/RichTextEditor";
 import { toast } from "react-toastify";
 
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -35,6 +43,8 @@ export default function ManageLearn() {
   const [saving, setSaving] = useState(false);
   const [query, setQuery] = useState("");
   const [postType, setPostType] = useState<"blog" | "podcast">("blog");
+  const [articleContent, setArticleContent] = useState("");
+  const [articleIsEmpty, setArticleIsEmpty] = useState(true);
   const [heroFile, setHeroFile] = useState<File>();
   const [bodyFile, setBodyFile] = useState<File>();
   const [tagEditor, setTagEditor] = useState<LearnPost | null>(null);
@@ -43,8 +53,8 @@ export default function ManageLearn() {
   const [editingPost, setEditingPost] = useState<LearnPost | null>(null);
   const [heroPreview, setHeroPreview] = useState<string>();
   const [bodyPreview, setBodyPreview] = useState<string>();
-  const heroPreviewRef = useRef<string>();
-  const bodyPreviewRef = useRef<string>();
+  const heroPreviewRef = useRef<string | undefined>(undefined);
+  const bodyPreviewRef = useRef<string | undefined>(undefined);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(
@@ -76,6 +86,8 @@ export default function ManageLearn() {
     setHeroPreview(undefined);
     setBodyPreview(undefined);
     setPostType("blog");
+    setArticleContent("");
+    setArticleIsEmpty(true);
     setHeroFile(undefined);
     setBodyFile(undefined);
     setEditingPost(null);
@@ -90,6 +102,8 @@ export default function ManageLearn() {
   function editPost(post: LearnPost) {
     setEditingPost(post);
     setPostType(post.postType ?? "blog");
+    setArticleContent(articleContentToHtml(post.content));
+    setArticleIsEmpty(!articleContentToText(post.content));
     setHeroFile(undefined);
     setBodyFile(undefined);
     setOpen(true);
@@ -127,6 +141,14 @@ export default function ManageLearn() {
     const status: "draft" | "published" = submitter?.value === "draft" ? "draft" : "published";
     form.set("status", status);
     form.set("postType", postType);
+    if (postType === "blog") {
+      if (articleIsEmpty) {
+        toast.error("Article content is required");
+        setSaving(false);
+        return;
+      }
+      form.set("content", articleContent);
+    }
 
     try {
       if (editingPost) {
@@ -475,15 +497,14 @@ export default function ManageLearn() {
                       <fieldset className="border-t border-slate-100 pt-6">
                         <legend className="text-sm font-medium text-slate-800">Article body</legend>
                         <p className="mt-1 text-xs text-slate-400">
-                          Use short paragraphs and clear spacing to make the article easy to read.
+                          Structure the article with headings, lists, quotes, links and text formatting.
                         </p>
-                        <textarea
-                          name="content"
-                          defaultValue={editingPost?.content}
-                          required
-                          rows={11}
-                          placeholder="Write the full article here..."
-                          className="mt-4 w-full resize-y rounded-lg border border-slate-200 px-4 py-3 text-sm leading-7 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                        <RichTextEditor
+                          initialContent={articleContent}
+                          onChange={(html, isEmpty) => {
+                            setArticleContent(html);
+                            setArticleIsEmpty(isEmpty);
+                          }}
                         />
                       </fieldset>
 

@@ -6,7 +6,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Share2, Video } from "lucide-react";
+import DOMPurify from "dompurify";
 import {
+  articleContentToHtml,
+  articleContentToText,
   getBodyMedia,
   getHeroImage,
   getYouTubeEmbedUrl,
@@ -26,7 +29,7 @@ const formatDate = (date?: string) =>
       }).format(new Date(date))
     : "Recently published";
 const readTime = (content?: string) =>
-  Math.max(1, Math.ceil((content?.trim().split(/\s+/).length ?? 0) / 220));
+  Math.max(1, Math.ceil((articleContentToText(content).split(/\s+/).filter(Boolean).length) / 220));
 const postLabel = (post: LearnPost) =>
   post.postType === "podcast" ? "Podcast" : `${readTime(post.content)} min read`;
 
@@ -63,11 +66,6 @@ function BlogArticle({ slug }: { slug: string }) {
     return () => { active = false; };
   }, []);
 
-  const paragraphs = useMemo(
-    () => post?.content?.split(/\n\s*\n/).map((text) => text.trim()).filter(Boolean) ?? [],
-    [post?.content],
-  );
-
   if (loading) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center bg-[#f6f8f6]">
@@ -93,7 +91,6 @@ function BlogArticle({ slug }: { slug: string }) {
   const thumbnail = getYouTubeThumbnail(post.videoUrl);
   const bodyMedia = getBodyMedia(post);
   const embedUrl = getYouTubeEmbedUrl(post.videoUrl);
-  const mediaPosition = Math.max(1, Math.ceil(paragraphs.length / 2));
   const share = () =>
     navigator.clipboard.writeText(window.location.href).then(() => toast.success("Post link copied")).catch(() => toast.error("Could not copy the link. Please copy it from your address bar."));
 
@@ -185,32 +182,7 @@ function BlogArticle({ slug }: { slug: string }) {
               </div>
             )
           ) : (
-            <div className="space-y-7 text-[17px] leading-8 text-[#263322]">
-              {paragraphs.map((paragraph, index) => (
-                <div key={index}>
-                  <p className="whitespace-pre-line">{paragraph}</p>
-                  {bodyMedia && index + 1 === mediaPosition && (
-                    <figure className="my-10 overflow-hidden rounded-2xl bg-[#e0e8df]">
-                      {bodyMedia.type === "image" ? (
-                        <Image
-                          src={bodyMedia.url}
-                          alt={`Supporting visual for ${post.title}`}
-                          width={1400}
-                          height={900}
-                          unoptimized
-                          className="h-auto w-full object-cover"
-                        />
-                      ) : (
-                        <video src={bodyMedia.url} controls playsInline className="w-full" />
-                      )}
-                      <figcaption className="px-5 py-3 text-xs text-[#3d4b36]/70">
-                        Supporting media - Remote Agric
-                      </figcaption>
-                    </figure>
-                  )}
-                </div>
-              ))}
-            </div>
+            <ArticleBody content={post.content} bodyMedia={bodyMedia} title={post.title} />
           )}
           </div>
           <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#e8eee7] pt-6">
@@ -279,5 +251,48 @@ function BlogArticle({ slug }: { slug: string }) {
         </section>
       )}
     </main>
+  );
+}
+
+function ArticleBody({
+  content,
+  bodyMedia,
+  title,
+}: {
+  content?: string;
+  bodyMedia?: ReturnType<typeof getBodyMedia>;
+  title: string;
+}) {
+  const safeHtml = useMemo(
+    () => DOMPurify.sanitize(articleContentToHtml(content)),
+    [content],
+  );
+
+  return (
+    <div className="text-[17px] leading-8 text-[#263322]">
+      <div
+        className="[&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_blockquote]:my-7 [&_blockquote]:border-l-4 [&_blockquote]:border-primary/35 [&_blockquote]:pl-5 [&_blockquote]:italic [&_code]:rounded [&_code]:bg-[#edf3e9] [&_code]:px-1.5 [&_h1]:mb-4 [&_h1]:mt-10 [&_h1]:text-4xl [&_h1]:font-bold [&_h1]:leading-tight [&_h2]:mb-3 [&_h2]:mt-9 [&_h2]:text-3xl [&_h2]:font-semibold [&_h2]:leading-tight [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:text-2xl [&_h3]:font-semibold [&_hr]:my-10 [&_hr]:border-[#dfe7dc] [&_ol]:my-6 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-7 [&_p]:my-5 [&_pre]:my-7 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:bg-[#172116] [&_pre]:p-5 [&_pre]:text-sm [&_pre]:text-white [&_ul]:my-6 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-7"
+        dangerouslySetInnerHTML={{ __html: safeHtml }}
+      />
+      {bodyMedia && (
+        <figure className="my-10 overflow-hidden rounded-2xl bg-[#e0e8df]">
+          {bodyMedia.type === "image" ? (
+            <Image
+              src={bodyMedia.url}
+              alt={`Supporting visual for ${title}`}
+              width={1400}
+              height={900}
+              unoptimized
+              className="h-auto w-full object-cover"
+            />
+          ) : (
+            <video src={bodyMedia.url} controls playsInline className="w-full" />
+          )}
+          <figcaption className="px-5 py-3 text-xs text-[#3d4b36]/70">
+            Supporting media - Remote Agric
+          </figcaption>
+        </figure>
+      )}
+    </div>
   );
 }

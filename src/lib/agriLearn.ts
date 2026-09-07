@@ -45,6 +45,38 @@ export interface LearnComment {
 export const getHeroImage = (post: LearnPost) => post.heroImage ?? post.media?.[0];
 export const getBodyMedia = (post: LearnPost) => post.bodyMedia ?? post.media?.[1];
 
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+/** Converts legacy plain-text articles to the HTML format used by the editor. */
+export const articleContentToHtml = (content?: string) => {
+  const value = content?.trim() ?? "";
+  if (!value) return "";
+  if (/<\/?(?:p|h[1-6]|ul|ol|li|blockquote|pre|hr)\b/i.test(value)) return value;
+  return value
+    .split(/\n\s*\n/)
+    .filter(Boolean)
+    .map((paragraph) => `<p>${escapeHtml(paragraph.trim()).replaceAll("\n", "<br>")}</p>`)
+    .join("");
+};
+
+export const articleContentToText = (content?: string) =>
+  (content ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0?39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+
 export const getYouTubeId = (url?: string) => {
   if (!url) return undefined;
   try {
