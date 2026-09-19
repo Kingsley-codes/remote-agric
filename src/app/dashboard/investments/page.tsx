@@ -102,7 +102,9 @@ export default function InvestmentsPage() {
   }
 
   const totalProjectedROI = data?.totalProjectedROI ??
-    data?.userInvestments.reduce(
+    data?.userInvestments
+      .filter((investment) => investment.status === "ongoing")
+      .reduce(
       (total, investment) =>
         total + investment.totalPrice * Number(investment.ROI) / 100,
       0,
