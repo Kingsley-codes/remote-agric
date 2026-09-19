@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FiArrowRight, FiLock } from "react-icons/fi";
 
 type ProduceType = {
@@ -25,8 +26,8 @@ type Props = {
   produce: ProduceType | null;
   units: number;
   billingData: BillingData;
-  paymentMethod: "card" | "bank" | "wallet";
-  userId?: string;
+  paymentMethod: "card" | "wallet";
+  isAuthenticated: boolean;
 };
 
 export default function OrderSummary({
@@ -34,8 +35,9 @@ export default function OrderSummary({
   units,
   billingData,
   paymentMethod,
-  userId,
+  isAuthenticated,
 }: Props) {
+  const router = useRouter();
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,12 +59,16 @@ export default function OrderSummary({
       return;
     }
 
+    if (paymentMethod === "wallet" && !isAuthenticated) {
+      setError("Please sign in to pay with your Agro Wallet.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       const payload = {
-        userId,
         produceId: produce._id,
         units,
         unitPrice,
@@ -91,7 +97,9 @@ export default function OrderSummary({
 
       const data = await res.json();
 
-      if (data.data?.authorization_url) {
+      if (paymentMethod === "wallet" && data.success) {
+        router.push("/dashboard/investments");
+      } else if (data.data?.authorization_url) {
         window.location.href = data.data.authorization_url;
       } else {
         throw new Error("No payment URL received");

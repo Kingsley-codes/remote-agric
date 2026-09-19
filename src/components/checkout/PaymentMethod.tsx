@@ -1,20 +1,22 @@
 "use client";
 
 import { FiLock, FiCheckCircle } from "react-icons/fi";
-import { FaUniversity, FaWallet, FaCreditCard } from "react-icons/fa";
+import { FaWallet, FaCreditCard } from "react-icons/fa";
 
-type Method = "card" | "bank" | "wallet";
+type Method = "card" | "wallet";
 
 type Props = {
   method: Method;
   onMethodChange: (m: Method) => void;
   walletBalance: number | null;
+  isAuthenticated: boolean;
 };
 
 export default function PaymentMethod({
   method,
   onMethodChange,
   walletBalance,
+  isAuthenticated,
 }: Props) {
   const box =
     "p-4 rounded-xl border-2 border-gray-200 hover:border-primary/50 transition-all h-full flex flex-col items-center justify-center gap-2 bg-background-light cursor-pointer relative";
@@ -34,30 +36,24 @@ export default function PaymentMethod({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div onClick={() => onMethodChange("card")} className={box}>
+      <div className={`grid grid-cols-1 gap-4 mb-6 ${isAuthenticated ? "sm:grid-cols-2" : ""}`}>
+        <button type="button" onClick={() => onMethodChange("card")} className={box}>
           <FaCreditCard size={26} className="text-gray-600" />
           <span className="font-bold text-sm">Credit Card</span>
           {method === "card" && (
             <FiCheckCircle className="absolute top-2 right-2 text-primary" />
           )}
-        </div>
+        </button>
 
-        <div onClick={() => onMethodChange("bank")} className={box}>
-          <FaUniversity size={26} className="text-gray-600" />
-          <span className="font-bold text-sm">Bank Transfer</span>
-          {method === "bank" && (
-            <FiCheckCircle className="absolute top-2 right-2 text-primary" />
-          )}
-        </div>
-
-        <div onClick={() => onMethodChange("wallet")} className={box}>
-          <FaWallet size={26} className="text-gray-600" />
-          <span className="font-bold text-sm">Agro Wallet</span>
-          {method === "wallet" && (
-            <FiCheckCircle className="absolute top-2 right-2 text-primary" />
-          )}
-        </div>
+        {isAuthenticated && (
+          <button type="button" onClick={() => onMethodChange("wallet")} className={box}>
+            <FaWallet size={26} className="text-gray-600" />
+            <span className="font-bold text-sm">Agro Wallet</span>
+            {method === "wallet" && (
+              <FiCheckCircle className="absolute top-2 right-2 text-primary" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Wallet balance badge — shown whenever balance is available */}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-export interface ActiveInvestment { _id: string; title: string; totalPrice: number; duration: number; stage?: string; orderDate?: string; produce?: { image1?: { url?: string } } }
+export interface ActiveInvestment { _id: string; title: string; totalPrice: number; duration: number; ROI?: string | number; stage?: string; orderDate?: string; produce?: { image1?: { url?: string } } }
 
 const stageLabel = (stage?: string) => (stage ?? "in progress").replaceAll("-", " ");
 

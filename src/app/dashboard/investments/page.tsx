@@ -101,6 +101,13 @@ export default function InvestmentsPage() {
     );
   }
 
+  const totalProjectedROI = data?.totalProjectedROI ??
+    data?.userInvestments.reduce(
+      (total, investment) =>
+        total + investment.totalPrice * Number(investment.ROI) / 100,
+      0,
+    ) ?? 0;
+
   return (
     <main className="bg-[#f6f8f6]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -108,7 +115,7 @@ export default function InvestmentsPage() {
         <StatsSection
           totalInvestedAmount={data?.totalInvestedAmount ?? 0}
           totalActiveInvestments={data?.totalActiveInvestments ?? 0}
-          totalProjectedROI={data?.totalProjectedROI ?? 0}
+          totalProjectedROI={totalProjectedROI}
         />
         <InvestmentTable
           investments={data?.userInvestments ?? []}

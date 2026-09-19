@@ -9,6 +9,18 @@ function getProduceImage(inv: UserInvestment): string {
   return inv.produce?.image1?.url ?? "";
 }
 
+function getRoiAmount(inv: UserInvestment): number {
+  return inv.totalPrice * Number(inv.ROI) / 100;
+}
+
+function formatNaira(amount: number): string {
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
 interface InvestmentTableProps {
   investments: UserInvestment[];
   onHarvestChoiceUpdated?: () => void;
@@ -49,7 +61,8 @@ export default function InvestmentTable({
                 invested={`₦${inv.totalPrice.toLocaleString()}`}
                 stage={inv.stage}
                 status={inv.status}
-                roi={`+${inv.ROI}%`}
+                roiAmount={formatNaira(getRoiAmount(inv))}
+                roiPercentage={`+${inv.ROI}%`}
                 onDetails={() => setSelected(inv)}
               />
             ))}
@@ -69,7 +82,8 @@ export default function InvestmentTable({
               invested={`₦${inv.totalPrice.toLocaleString()}`}
               stage={inv.stage}
               status={inv.status}
-              roi={`+${inv.ROI}%`}
+              roiAmount={formatNaira(getRoiAmount(inv))}
+              roiPercentage={`+${inv.ROI}%`}
               mobileCard
               onDetails={() => setSelected(inv)}
             />

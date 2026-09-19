@@ -47,6 +47,12 @@ export default function DashboardPage() {
   }, [loading]);
 
   const firstName = user?.firstName ?? user?.name?.split(" ")[0] ?? "there";
+  const projectedRoi = dashboard?.totalProjectedROI ??
+    dashboard?.userInvestments.filter((investment) => investment.status === "ongoing").reduce(
+      (total, investment) =>
+        total + investment.totalPrice * Number(investment.ROI ?? 0) / 100,
+      0,
+    ) ?? 0;
 
   if (loading || dashboardLoading) {
     return (
@@ -74,10 +80,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <StatsGrid totalFarmValue={dashboard?.totalInvestedAmount ?? 0} activeProjects={dashboard?.totalActiveInvestments ?? 0} projectedRoi={dashboard?.totalProjectedROI ?? 0} nextPayout={dashboard?.totalActiveInvestments ? "At harvest" : "No upcoming payout"} />
+          <StatsGrid totalFarmValue={dashboard?.totalInvestedAmount ?? 0} activeProjects={dashboard?.totalActiveInvestments ?? 0} projectedRoi={projectedRoi} nextPayout={dashboard?.totalActiveInvestments ? "At harvest" : "No upcoming payout"} />
 
           <div className="flex flex-col gap-8 mb-8">
-              <YieldChart projectedRoi={dashboard?.totalProjectedROI ?? 0} investments={dashboard?.userInvestments ?? []} />
+              <YieldChart projectedRoi={projectedRoi} investments={dashboard?.userInvestments ?? []} />
               <ActiveInvestments investments={(dashboard?.userInvestments ?? []).filter((investment) => investment.status === "ongoing").slice(0, 5)} />
           </div>
     </div>

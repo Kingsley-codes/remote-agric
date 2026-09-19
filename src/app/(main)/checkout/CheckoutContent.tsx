@@ -50,7 +50,7 @@ export default function CheckoutContent() {
     address: "",
   });
   const [paymentMethod, setPaymentMethod] = useState<
-    "card" | "bank" | "wallet"
+    "card" | "wallet"
   >("card");
 
   const [produceLoading, setProduceLoading] = useState(true);
@@ -155,6 +155,7 @@ export default function CheckoutContent() {
               method={paymentMethod}
               onMethodChange={setPaymentMethod}
               walletBalance={walletBalance}
+              isAuthenticated={Boolean(user)}
             />
             <TrustBadges />
           </div>
@@ -165,7 +166,7 @@ export default function CheckoutContent() {
               units={units}
               billingData={billingData}
               paymentMethod={paymentMethod}
-              userId={user?._id}
+              isAuthenticated={Boolean(user)}
             />
           </div>
         </div>
