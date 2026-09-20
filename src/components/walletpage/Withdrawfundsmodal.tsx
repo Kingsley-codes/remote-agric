@@ -15,6 +15,47 @@ interface Props {
 
 type Step = "form" | "loading" | "success" | "error";
 
+const WITHDRAWAL_INTENT_STORAGE_KEY = "remote-agric-withdrawal-intent";
+
+type StoredWithdrawalIntent = {
+  amount: number;
+  key: string;
+};
+
+function getWithdrawalIdempotencyKey(amount: number) {
+  try {
+    const stored = sessionStorage.getItem(WITHDRAWAL_INTENT_STORAGE_KEY);
+    if (stored) {
+      const intent = JSON.parse(stored) as StoredWithdrawalIntent;
+      if (intent.amount === amount && intent.key) return intent.key;
+    }
+  } catch {
+    // Storage can be unavailable in hardened browser environments.
+  }
+
+  const key = crypto.randomUUID();
+  try {
+    sessionStorage.setItem(
+      WITHDRAWAL_INTENT_STORAGE_KEY,
+      JSON.stringify({ amount, key } satisfies StoredWithdrawalIntent),
+    );
+  } catch {
+    // The request can still proceed with the newly generated key.
+  }
+  return key;
+}
+
+function clearWithdrawalIntent(key: string) {
+  try {
+    const stored = sessionStorage.getItem(WITHDRAWAL_INTENT_STORAGE_KEY);
+    if (!stored || (JSON.parse(stored) as StoredWithdrawalIntent).key === key) {
+      sessionStorage.removeItem(WITHDRAWAL_INTENT_STORAGE_KEY);
+    }
+  } catch {
+    // There is nothing else to clear when storage is unavailable.
+  }
+}
+
 export default function WithdrawFundsModal({ onClose }: Props) {
   const [amount, setAmount] = useState("");
   const [password, setPassword] = useState("");
@@ -49,21 +90,36 @@ export default function WithdrawFundsModal({ onClose }: Props) {
   const handleSubmit = async () => {
     if (!amount || !password) return;
     setStep("loading");
+    const numericAmount = Number(amount);
+    const idempotencyKey = getWithdrawalIdempotencyKey(numericAmount);
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/withdraw`,
         {
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: Number(amount), password }),
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": idempotencyKey,
+          },
+          body: JSON.stringify({ amount: numericAmount, password }),
         },
       );
       const json = await res.json();
       if (!res.ok || !json.success) {
+        if (json.retryableWithNewKey) {
+          clearWithdrawalIntent(idempotencyKey);
+        }
         setErrorMsg(json.message ?? "Withdrawal failed. Please try again.");
         setStep("error");
       } else {
+        if (
+          !["processing", "uncertain"].includes(
+            String(json.data?.initiationStatus ?? ""),
+          )
+        ) {
+          clearWithdrawalIntent(idempotencyKey);
+        }
         setStep("success");
       }
     } catch {

@@ -30,6 +30,47 @@ type Props = {
   isAuthenticated: boolean;
 };
 
+const PAYMENT_INTENT_STORAGE_KEY = "remote-agric-payment-intent";
+
+type StoredPaymentIntent = {
+  fingerprint: string;
+  key: string;
+};
+
+function getPaymentIdempotencyKey(fingerprint: string) {
+  try {
+    const stored = sessionStorage.getItem(PAYMENT_INTENT_STORAGE_KEY);
+    if (stored) {
+      const intent = JSON.parse(stored) as StoredPaymentIntent;
+      if (intent.fingerprint === fingerprint && intent.key) return intent.key;
+    }
+  } catch {
+    // A malformed or unavailable session store should not block checkout.
+  }
+
+  const key = crypto.randomUUID();
+  try {
+    sessionStorage.setItem(
+      PAYMENT_INTENT_STORAGE_KEY,
+      JSON.stringify({ fingerprint, key } satisfies StoredPaymentIntent),
+    );
+  } catch {
+    // Storage can be unavailable in hardened browser environments.
+  }
+  return key;
+}
+
+function clearPaymentIntent(key: string) {
+  try {
+    const stored = sessionStorage.getItem(PAYMENT_INTENT_STORAGE_KEY);
+    if (!stored || (JSON.parse(stored) as StoredPaymentIntent).key === key) {
+      sessionStorage.removeItem(PAYMENT_INTENT_STORAGE_KEY);
+    }
+  } catch {
+    // There is nothing else to clear when storage is unavailable.
+  }
+}
+
 export default function OrderSummary({
   produce,
   units,
@@ -79,12 +120,17 @@ export default function OrderSummary({
         email: billingData.email,
         address: billingData.address,
       };
+      const fingerprint = JSON.stringify(payload);
+      const idempotencyKey = getPaymentIdempotencyKey(fingerprint);
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/paystack/payment`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": idempotencyKey,
+          },
           credentials: "include",
           body: JSON.stringify(payload),
         },
@@ -92,10 +138,12 @@ export default function OrderSummary({
 
       if (!res.ok) {
         const errData = await res.json();
+        if (errData.retryableWithNewKey) clearPaymentIntent(idempotencyKey);
         throw new Error(errData.message || "Payment failed");
       }
 
       const data = await res.json();
+      clearPaymentIntent(idempotencyKey);
 
       if (paymentMethod === "wallet" && data.success) {
         router.push("/dashboard/investments");
