@@ -32,6 +32,8 @@ jobs:
         env:
           NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ vars.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
+          NEXT_PUBLIC_CLOUDINARY_BASE_URL: ${{ vars.NEXT_PUBLIC_CLOUDINARY_BASE_URL }}
         run: pnpm run build
 
       - name: Configure SSH
