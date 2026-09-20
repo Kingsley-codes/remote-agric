@@ -1,0 +1,60 @@
+name: Deploy Frontend to Namecheap
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        env:
+          NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ vars.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
+        run: pnpm run build
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.NAMECHEAP_SSH_KEY }}" > ~/.ssh/namecheap_deploy
+          chmod 600 ~/.ssh/namecheap_deploy
+          ssh-keyscan -p "${{ secrets.NAMECHEAP_PORT }}" "${{ secrets.NAMECHEAP_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy frontend
+        run: |
+          scp -P "${{ secrets.NAMECHEAP_PORT }}" \
+            -i ~/.ssh/namecheap_deploy \
+            -r .next \
+            public \
+            server.js \
+            package.json \
+            pnpm-lock.yaml \
+            "${{ secrets.NAMECHEAP_USER }}@${{ secrets.NAMECHEAP_HOST }}:/home/remobmwu/remote-agric-frontend/"
+
+      - name: Install production dependencies and restart
+        run: |
+          ssh -p "${{ secrets.NAMECHEAP_PORT }}" \
+            -i ~/.ssh/namecheap_deploy \
+            "${{ secrets.NAMECHEAP_USER }}@${{ secrets.NAMECHEAP_HOST }}" \
+            'source /home/remobmwu/nodevenv/remote-agric-frontend/22/bin/activate && cd /home/remobmwu/remote-agric-frontend && npm install --omit=dev && cloudlinux-selector restart --interpreter nodejs --user remobmwu --app-root remote-agric-frontend --json'
