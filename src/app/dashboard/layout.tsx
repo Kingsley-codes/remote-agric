@@ -1,42 +1,30 @@
 "use client";
 
 import DashboardNav from "@/components/dashboard/DashboardNav";
-import Sidebar, { UserData } from "@/components/dashboard/Sidebar";
-import { useEffect, useCallback, useState } from "react";
+import Sidebar from "@/components/dashboard/Sidebar";
+import { useCallback, useState } from "react";
 import PushNotifications from "@/components/support/PushNotifications";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<UserData | null>(null);
-  // Keep the server and first browser render identical to avoid hydration errors.
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    setSidebarOpen(window.innerWidth >= 768);
-  }, []);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const stored = localStorage.getItem("user");
-        if (stored) setUser(JSON.parse(stored));
-      } catch {
-        // ignore parse errors
-      }
-    };
-
-    fetchUser();
-  }, []);
+  const { loading, user } = useAuth({ allowedRoles: ["user"] });
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth >= 768;
+  });
 
   // Replace the inline arrow function:
   const handleSidebarToggle = useCallback(
     () => setSidebarOpen((prev) => !prev),
     [],
   );
+
+  if (loading) return null;
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-gray-50">

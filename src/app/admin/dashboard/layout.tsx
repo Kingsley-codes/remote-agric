@@ -1,39 +1,31 @@
 "use client";
 
-import AdminSidebar, { UserData } from "@/components/adminDashboard/Sidebar";
-import { useEffect, useCallback, useState } from "react";
+import AdminSidebar from "@/components/adminDashboard/Sidebar";
+import { useCallback, useState } from "react";
 import AdminDashboardNav from "@/components/adminDashboard/DashboardNav";
 import PushNotifications from "@/components/support/PushNotifications";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<UserData | null>(null);
+  const { loading, user } = useAuth({
+    allowedRoles: ["admin", "super-admin"],
+  });
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.innerWidth >= 768; // open by default on md+, closed on mobile
   });
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const stored = localStorage.getItem("admin");
-        if (stored) setUser(JSON.parse(stored));
-      } catch {
-        // ignore parse errors
-      }
-    };
-
-    fetchUser();
-  }, []);
 
   // Replace the inline arrow function:
   const handleSidebarToggle = useCallback(
     () => setSidebarOpen((prev) => !prev),
     [],
   );
+
+  if (loading) return null;
 
   return (
     <div className="flex h-dvh bg-gray-50 w-full overflow-hidden">
