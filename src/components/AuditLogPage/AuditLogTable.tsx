@@ -506,7 +506,7 @@ function AuditLogDetailModal({
                   <label className="text-xs text-gray-500 uppercase tracking-wider">
                     Role
                   </label>
-                  <p className="text-gray-800">{log.userRole}</p>
+                  <p className="text-gray-800">{log.actorType}</p>
                 </div>
               </div>
             </div>

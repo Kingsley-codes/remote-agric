@@ -9,7 +9,8 @@ export interface AuditLog {
     | "FUNDING_UPDATE"
     | "YIELD_MARKED"
     | "LOGIN"
-    | "LOGOUT";
+    | "LOGOUT"
+    | "PAYMENT_SETTLED";
   entityType:
     | "FARMER"
     | "PRODUCT"
@@ -17,12 +18,16 @@ export interface AuditLog {
     | "USER"
     | "PAYMENT"
     | "WITHDRAWAL"
-    | "ADMIN";
+    | "ADMIN"
+    | "TICKET"
+    | "NOTIFICATION"
+    | "POST"
+    | "SYSTEM";
   entityId: string;
   userId: string;
   userName: string;
   userEmail: string;
-  userRole: "ADMIN" | "SUPER_ADMIN" | "FARMER" | "BUYER";
+  actorType: "ADMIN" | "USER" | "SYSTEM";
   changes: {
     before?: Record<string, any>;
     after?: Record<string, any>;

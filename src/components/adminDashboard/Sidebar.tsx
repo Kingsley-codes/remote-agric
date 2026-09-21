@@ -7,7 +7,7 @@ import { PiPlantDuotone } from "react-icons/pi";
 import { FaMoneyBills } from "react-icons/fa6";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { IoIosChatboxes } from "react-icons/io";
-import { FiBookOpen, FiGift } from "react-icons/fi";
+import { FiBookOpen, FiGift, FiClipboard } from "react-icons/fi";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { FiLogOut, FiChevronUp } from "react-icons/fi";
@@ -21,7 +21,6 @@ export interface UserData {
   name?: string;
   profilePhoto?: string;
   email?: string;
-  role?: string;
 }
 
 interface SidebarProps {
@@ -50,6 +49,7 @@ const navLinks = [
   { href: "/admin/dashboard/referrals", label: "Referrals", icon: FiGift },
   { href: "/admin/dashboard/agri-learn", label: "Agri-Learn", icon: FiBookOpen },
   { href: "/admin/dashboard/notifications", label: "Notifications", icon: FiBell },
+  { href: "/admin/dashboard/audit-logs", label: "Audit Logs", icon: FiClipboard },
 ];
 
 function getInitials(user: UserData | null): string {
@@ -263,9 +263,7 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
                 <>
                   <div className="flex-1">
                     <p className="text-sm font-bold">{displayName}</p>
-                    <p className="text-xs text-gray-500 capitalize">
-                      {user?.role ?? "Admin"}
-                    </p>
+                    <p className="text-xs text-gray-500">Administrator</p>
                   </div>
                   <FiChevronUp
                     className={`transition-transform ${

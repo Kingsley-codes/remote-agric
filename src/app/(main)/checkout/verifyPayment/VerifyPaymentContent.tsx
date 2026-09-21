@@ -97,32 +97,33 @@ export default function VerifyPaymentContent() {
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payment/paystack/verify/${reference}`,
-          { credentials: "include" },
+          { method: "POST", credentials: "include" },
         );
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message || "Verification failed");
 
         const payload = data.data;
+        const investment = payload.newInvestment ?? payload.investment;
 
         setDetails({
-          reference: payload.investment?.transactionRef ?? reference,
+          reference: investment?.transactionRef ?? reference,
           amount: payload.amount,
-          produce: payload.investment?.title ?? "Remote farm",
-          units: payload.investment?.units ?? 1,
+          produce: investment?.title ?? "Remote farm",
+          units: investment?.units ?? 1,
           paymentMethod: payload.paymentMethod ?? "—",
-          date: payload.investment?.orderDate
-            ? new Date(payload.investment.orderDate).toLocaleString()
+          date: investment?.orderDate
+            ? new Date(investment.orderDate).toLocaleString()
             : new Date().toLocaleString(),
           transactionId: payload.paymentID ?? "—",
-          produceId: payload.investment?.produce ?? null,
+          produceId: investment?.produce ?? null,
           userEmail: payload.userEmail ?? "—",
         });
 
         setStatus(
           data.success
             ? "success"
-            : payload.investment?.orderStatus === "pending"
+            : investment?.orderStatus === "pending"
               ? "pending"
               : "failed",
         );
