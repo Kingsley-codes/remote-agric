@@ -39,6 +39,7 @@ export default function TrackManager({ produceId, duration, category, initialTra
   const [endMonth, setEndMonth] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const stages = stagesByCategory[category] ?? stagesByCategory.crops;
   const span = useMemo(() => monthSpan(startMonth, endMonth), [startMonth, endMonth]);
   const valid = Number.isInteger(duration) && duration >= 1 && duration <= 12 && span === duration;
@@ -46,6 +47,7 @@ export default function TrackManager({ produceId, duration, category, initialTra
   const addTrack = async () => {
     if (!valid || busy) return;
     setBusy("add");
+    setErrorMessage("");
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${produceId}/tracks`,
@@ -60,7 +62,9 @@ export default function TrackManager({ produceId, duration, category, initialTra
       toast.success("Track added successfully");
       onChanged?.();
     } catch (error) {
-      toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to add track" : error instanceof Error ? error.message : "Unable to add track");
+      const message = axios.isAxiosError(error) ? error.response?.data?.message ?? `Unable to add track (${error.response?.status ?? "network error"})` : error instanceof Error ? error.message : "Unable to add track";
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setBusy(null);
     }
@@ -69,6 +73,7 @@ export default function TrackManager({ produceId, duration, category, initialTra
   const deleteTrack = async (track: ProduceTrack) => {
     if (busy || !window.confirm(`Delete ?${track.name}?? This is only allowed when the track has no investments.`)) return;
     setBusy(track._id);
+    setErrorMessage("");
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${produceId}/tracks/${track._id}`,
@@ -78,7 +83,9 @@ export default function TrackManager({ produceId, duration, category, initialTra
       toast.success("Track deleted successfully");
       onChanged?.();
     } catch (error) {
-      toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to delete track" : "Unable to delete track");
+      const message = axios.isAxiosError(error) ? error.response?.data?.message ?? `Unable to delete track (${error.response?.status ?? "network error"})` : "Unable to delete track";
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setBusy(null);
     }
@@ -87,6 +94,7 @@ export default function TrackManager({ produceId, duration, category, initialTra
   const updateStage = async (trackId: string, stage: string) => {
     if (busy) return;
     setBusy(trackId);
+    setErrorMessage("");
     try {
       await axios.patch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${produceId}/tracks/${trackId}/stage`,
@@ -97,7 +105,9 @@ export default function TrackManager({ produceId, duration, category, initialTra
       toast.success("Track stage updated and its farm owners notified");
       onChanged?.();
     } catch (error) {
-      toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to update track" : "Unable to update track");
+      const message = axios.isAxiosError(error) ? error.response?.data?.message ?? `Unable to update track (${error.response?.status ?? "network error"})` : "Unable to update track";
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setBusy(null);
     }
@@ -114,6 +124,10 @@ export default function TrackManager({ produceId, duration, category, initialTra
           <IoIosAdd className="h-5 w-5" /> Add track
         </button>
       </div>
+
+      {errorMessage && (
+        <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">{errorMessage}</p>
+      )}
 
       {showForm && (
         <div className="mb-4 space-y-3 rounded-xl border border-primary/20 bg-green-50/50 p-4 dark:bg-slate-900/40">
