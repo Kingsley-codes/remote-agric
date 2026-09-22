@@ -1,14 +1,14 @@
 "use client";
 
-import { stagesByCategory, stageLabel } from "@/lib/farmProgress";
+import { stageLabel } from "@/lib/farmProgress";
 import { useState } from "react";
 import { MdDelete } from "react-icons/md";
-import { TbEdit } from "react-icons/tb";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { GiGoat, GiDoubleFish, GiGrass } from "react-icons/gi";
 import EditOpportunityModal from "./EditOpportunityModal";
 import ConfirmModal from "./ConfirmModal";
+import ProduceDetailsModal from "./ProduceDetailsModal";
 
 interface Investment {
   _id: string;
@@ -47,10 +47,10 @@ export default function InvestmentRow({
   mobileCard = false,
 }: InvestmentRowProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [saving, setSaving] = useState<string | null>(null);
-  const stages = stagesByCategory[investment.category] ?? stagesByCategory.crops;
   const updateStatus = async (value: string) => {
     setSaving("status");
     try {
@@ -69,9 +69,6 @@ export default function InvestmentRow({
     } catch (error) { toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to update track" : "Unable to update track"); }
     finally { setSaving(null); }
   };
-  const selectClass = "w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-primary/30 disabled:opacity-50";
-  const trackControls = <div className="min-w-44 space-y-2">{investment.tracks.map((track) => <label key={track._id} className="block"><span className="mb-1 block text-[10px] font-bold text-slate-500">{track.name}</span><select aria-label={`Stage for ${track.name}`} value={track.stage} disabled={saving !== null} onChange={(event) => void updateTrackStage(track._id, event.target.value)} className={selectClass}>{!stages.includes(track.stage) && <option value={track.stage}>{stageLabel(track.stage)}</option>}{stages.map((item) => <option key={item} value={item}>{stageLabel(item)}</option>)}</select></label>)}</div>;
-  const statusSelect = <select aria-label={`Status for ${investment.title}`} value={investment.status} disabled={saving !== null} onChange={(event) => void updateStatus(event.target.value)} className={selectClass}>{!["active", "closed"].includes(investment.status) && <option value={investment.status}>{stageLabel(investment.status)}</option>}<option value="active">Active</option><option value="closed">Closed</option></select>;
   const getCategoryStyles = (category: string) => {
     switch (category.toLowerCase()) {
       case "crops":
@@ -133,6 +130,19 @@ export default function InvestmentRow({
 
   const modals = (
     <>
+      {isDetailsModalOpen && (
+        <ProduceDetailsModal
+          produce={investment}
+          onClose={() => setIsDetailsModalOpen(false)}
+          onEdit={() => {
+            setIsDetailsModalOpen(false);
+            setIsEditModalOpen(true);
+          }}
+          onStatusChange={(status) => void updateStatus(status)}
+          onTrackStageChange={(trackId, stage) => void updateTrackStage(trackId, stage)}
+          saving={saving}
+        />
+      )}
       {isEditModalOpen && (
         <EditOpportunityModal
           isOpen={isEditModalOpen}
@@ -159,7 +169,19 @@ export default function InvestmentRow({
   if (mobileCard) {
     return (
       <>
-        <div className="p-4 space-y-3">
+        <div
+          className="cursor-pointer space-y-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+          role="button"
+          tabIndex={0}
+          onClick={() => setIsDetailsModalOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              setIsDetailsModalOpen(true);
+            }
+          }}
+          aria-label={`View details for ${investment.title}`}
+        >
           {/* Top row: image + title + actions */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
@@ -181,15 +203,10 @@ export default function InvestmentRow({
             {/* Actions — always visible on mobile (no hover gate) */}
             <div className="flex items-center gap-1 shrink-0">
               <button
-                onClick={() => setIsEditModalOpen(true)}
-                className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
-                title="Edit"
-                disabled={isDeleting}
-              >
-                <TbEdit className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setIsConfirmModalOpen(true)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setIsConfirmModalOpen(true);
+                }}
                 className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors disabled:opacity-50"
                 title="Delete"
                 disabled={isDeleting}
@@ -242,7 +259,16 @@ export default function InvestmentRow({
               <span className="capitalize">{investment.category}</span>
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-3"><label className="text-xs font-medium text-slate-500">Stage<div className="mt-1">{trackControls}</div></label><label className="text-xs font-medium text-slate-500">Status<div className="mt-1">{statusSelect}</div></label></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/50">
+              <p className="text-[10px] uppercase tracking-wide text-slate-400">Tracks</p>
+              <p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">{(investment.tracks ?? []).length}</p>
+            </div>
+            <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/50">
+              <p className="text-[10px] uppercase tracking-wide text-slate-400">Status</p>
+              <p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">{stageLabel(investment.status)}</p>
+            </div>
+          </div>
         </div>
         {modals}
       </>
@@ -252,7 +278,18 @@ export default function InvestmentRow({
   /* •”€•”€ DESKTOP TABLE ROW •”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€ */
   return (
     <>
-      <tr className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+      <tr
+        className="group cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+        tabIndex={0}
+        onClick={() => setIsDetailsModalOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setIsDetailsModalOpen(true);
+          }
+        }}
+        aria-label={`View details for ${investment.title}`}
+      >
         <td className="px-3 py-4">
           <div className="flex items-center gap-3 min-w-0">
             <div
@@ -282,8 +319,14 @@ export default function InvestmentRow({
           </span>
         </td>
 
-        <td className="px-3 py-4">{trackControls}</td>
-        <td className="px-3 py-4">{statusSelect}</td>
+        <td className="px-3 py-4 text-center font-semibold text-slate-700 dark:text-slate-300">
+          {(investment.tracks ?? []).length}
+        </td>
+        <td className="px-3 py-4">
+          <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            {stageLabel(investment.status)}
+          </span>
+        </td>
 
         <td className="px-3 py-4 text-right font-bold text-slate-900 dark:text-white">
           {investment.profit}%
@@ -300,15 +343,10 @@ export default function InvestmentRow({
         <td className="px-3 py-4">
           <div className="flex items-center justify-end gap-1 opacity-100 transition-opacity">
             <button
-              onClick={() => setIsEditModalOpen(true)}
-              className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
-              title="Edit"
-              disabled={isDeleting}
-            >
-              <TbEdit className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setIsConfirmModalOpen(true)}
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsConfirmModalOpen(true);
+              }}
               className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors disabled:opacity-50"
               title="Delete"
               disabled={isDeleting}

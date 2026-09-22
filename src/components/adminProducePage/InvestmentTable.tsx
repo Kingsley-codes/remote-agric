@@ -140,7 +140,7 @@ export default function InvestmentTable() {
                 <tr>
                   <th className="px-3 py-4">Farm Listing</th>
                   <th className="px-3 py-4">Category</th>
-                  <th className="px-3 py-4">Track stages</th>
+                  <th className="px-3 py-4 text-center">Tracks</th>
                   <th className="px-3 py-4">Status</th>
                   <th className="px-3 py-4 text-right">profit</th>
                   <th className="px-3 py-4 text-right">Duration</th>
