@@ -4,6 +4,7 @@ type Props = {
   orderID: string;
   image: string;
   name: string;
+  track: string;
   farm: string;
   invested: string;
   stage: string;
@@ -63,6 +64,7 @@ export default function InvestmentRow({
   orderID,
   image,
   name,
+  track,
   farm,
   invested,
   stage,
@@ -89,6 +91,9 @@ export default function InvestmentRow({
                   {name}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5 truncate">{farm}</p>
+                <p className="mt-1 text-xs font-semibold text-primary">
+                  Track: {track}
+                </p>
                 <p className="text-xs text-gray-400 mt-0.5 font-bold">
                   {orderID}
                 </p>
@@ -139,6 +144,9 @@ export default function InvestmentRow({
       <td className="px-6 py-4">
         <p className="font-bold text-gray-700 text-sm">{name}</p>
         <p className="text-xs text-gray-500 mt-0.5">{farm}</p>
+      </td>
+      <td className="px-6 py-4 text-sm font-semibold text-gray-700">
+        {track}
       </td>
       <td className="px-6 py-4 text-gray-700 text-sm font-medium">
         {invested}

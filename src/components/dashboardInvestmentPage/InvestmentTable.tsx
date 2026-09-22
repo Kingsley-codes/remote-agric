@@ -44,6 +44,7 @@ export default function InvestmentTable({
               <th className="px-6 py-4">Order ID</th>
               <th className="px-6 py-4">Asset</th>
               <th className="px-6 py-4">Name</th>
+              <th className="px-6 py-4">Track</th>
               <th className="px-6 py-4">Farm Value</th>
               <th className="px-6 py-4">Stage</th>
               <th className="px-6 py-4">Status</th>
@@ -59,6 +60,7 @@ export default function InvestmentTable({
                 orderID={inv.orderID}
                 image={getProduceImage(inv)}
                 name={inv.title}
+                track={inv.track?.name ?? "Unavailable"}
                 farm={`${inv.units} unit${inv.units !== 1 ? "s" : ""} · ${inv.duration} months`}
                 invested={`₦${inv.totalPrice.toLocaleString()}`}
                 stage={inv.stage}
@@ -80,6 +82,7 @@ export default function InvestmentTable({
               orderID={inv.orderID}
               image={getProduceImage(inv)}
               name={inv.title}
+              track={inv.track?.name ?? "Unavailable"}
               farm={`${inv.units} unit${inv.units !== 1 ? "s" : ""} · ${inv.duration} months`}
               invested={`₦${inv.totalPrice.toLocaleString()}`}
               stage={inv.stage}

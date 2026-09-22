@@ -21,7 +21,7 @@ export interface UserInvestment {
   profit: string;
   startsAt: string;
   endsAt: string;
-  track: { id: string; name: string; startMonth: number; endMonth: number };
+  track?: { id: string; name: string; startMonth: number; endMonth: number };
   isRollover?: boolean;
   rolledOverTo?: string;
   status: string;
