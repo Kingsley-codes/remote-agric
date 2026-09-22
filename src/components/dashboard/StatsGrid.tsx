@@ -3,6 +3,7 @@ import StatCard from "./StatCard";
 interface StatsGridProps {
   totalFarmValue: number;
   activeProjects: number;
+  projectedReturn: number;
   projectedProfit: number;
   nextPayout: string;
 }
@@ -13,6 +14,7 @@ const formatNaira = (amount: number) =>
 export default function StatsGrid({
   totalFarmValue,
   activeProjects,
+  projectedReturn,
   projectedProfit,
   nextPayout,
 }: StatsGridProps) {
@@ -22,7 +24,11 @@ export default function StatsGrid({
 
       <StatCard title="Active Projects" value={String(activeProjects)} />
 
-      <StatCard title="Projected profit" value={formatNaira(projectedProfit)} />
+      <StatCard
+        title="Projected total return"
+        value={formatNaira(projectedReturn)}
+        subtext={`${formatNaira(projectedProfit)} projected profit`}
+      />
 
       <StatCard title="Next Payout" value={nextPayout} />
     </div>

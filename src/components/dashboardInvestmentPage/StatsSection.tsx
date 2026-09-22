@@ -3,6 +3,7 @@ import { FaWallet } from "react-icons/fa";
 interface StatsSectionProps {
   totalInvestedAmount: number;
   totalActiveInvestments: number;
+  totalProjectedReturn: number;
   totalProjectedProfit: number;
 }
 
@@ -17,6 +18,7 @@ function formatCurrency(amount: number): string {
 export default function StatsSection({
   totalInvestedAmount,
   totalActiveInvestments,
+  totalProjectedReturn,
   totalProjectedProfit,
 }: StatsSectionProps) {
   // Compute a rough progress bar: cap at 100%
@@ -44,13 +46,16 @@ export default function StatsSection({
         </p>
       </div>
 
-      {/* Projected profit */}
+      {/* Projected total return */}
       <div className="flex flex-col gap-1 rounded-xl p-5 bg-white border border-[#d5e7cf] shadow-sm">
         <div className="flex justify-between items-start">
-          <p className="text-gray-400 text-sm font-medium">Projected profit</p>
+          <p className="text-gray-400 text-sm font-medium">Projected total return</p>
         </div>
         <p className="text-[#111b0d] text-3xl font-bold tracking-tight mt-2">
-          +{formatCurrency(totalProjectedProfit)}
+          {formatCurrency(totalProjectedReturn)}
+        </p>
+        <p className="mt-1 text-xs font-medium text-green-600">
+          +{formatCurrency(totalProjectedProfit)} projected profit
         </p>
         <div className="w-full bg-gray-200 rounded-full h-1.5 mt-3">
           <div

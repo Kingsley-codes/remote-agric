@@ -262,9 +262,9 @@ export default function InvestmentDetailModal({
               label="Farm Value"
               value={`₦${investment.totalPrice.toLocaleString()}`}
             />
-            <DetailRow label="profit" value={`+${investment.profit}%`} accent />
+            <DetailRow label="Profit" value={`+${investment.profit}%`} accent />
             <DetailRow
-              label="Projected Return"
+              label="Projected Total Return"
               value={`₦${Math.round(projectedReturn).toLocaleString()}`}
               accent
             />

@@ -13,6 +13,7 @@ interface DashboardData {
   totalInvestedAmount: number;
   totalActiveInvestments: number;
   totalProjectedProfit: number;
+  totalProjectedReturn?: number;
 }
 
 export default function DashboardPage() {
@@ -47,12 +48,21 @@ export default function DashboardPage() {
   }, [loading]);
 
   const firstName = user?.firstName ?? user?.name?.split(" ")[0] ?? "there";
+  const activeInvestments = dashboard?.userInvestments.filter(
+    (investment) => investment.status === "ongoing",
+  ) ?? [];
   const projectedProfit = dashboard?.totalProjectedProfit ??
-    dashboard?.userInvestments.filter((investment) => investment.status === "ongoing").reduce(
+    activeInvestments.reduce(
       (total, investment) =>
         total + investment.totalPrice * Number(investment.profit ?? 0) / 100,
       0,
-    ) ?? 0;
+    );
+  const projectedReturn = dashboard?.totalProjectedReturn ??
+    activeInvestments.reduce(
+      (total, investment) =>
+        total + investment.totalPrice * (1 + Number(investment.profit ?? 0) / 100),
+      0,
+    );
 
   if (loading || dashboardLoading) {
     return (
@@ -80,10 +90,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <StatsGrid totalFarmValue={dashboard?.totalInvestedAmount ?? 0} activeProjects={dashboard?.totalActiveInvestments ?? 0} projectedProfit={projectedProfit} nextPayout={dashboard?.totalActiveInvestments ? "At harvest" : "No upcoming payout"} />
+          <StatsGrid totalFarmValue={dashboard?.totalInvestedAmount ?? 0} activeProjects={dashboard?.totalActiveInvestments ?? 0} projectedReturn={projectedReturn} projectedProfit={projectedProfit} nextPayout={dashboard?.totalActiveInvestments ? "At harvest" : "No upcoming payout"} />
 
           <div className="flex flex-col gap-8 mb-8">
-              <YieldChart projectedProfit={projectedProfit} investments={dashboard?.userInvestments ?? []} />
+              <YieldChart projectedReturn={projectedReturn} projectedProfit={projectedProfit} investments={dashboard?.userInvestments ?? []} />
               <ActiveInvestments investments={(dashboard?.userInvestments ?? []).filter((investment) => investment.status === "ongoing").slice(0, 5)} />
           </div>
     </div>

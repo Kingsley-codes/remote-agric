@@ -9,8 +9,8 @@ function getProduceImage(inv: UserInvestment): string {
   return inv.produce?.image1?.url ?? "";
 }
 
-function getProfitAmount(inv: UserInvestment): number {
-  return inv.totalPrice * Number(inv.profit) / 100;
+function getProjectedReturn(inv: UserInvestment): number {
+  return inv.totalPrice * (1 + Number(inv.profit) / 100);
 }
 
 function formatNaira(amount: number): string {
@@ -48,7 +48,7 @@ export default function InvestmentTable({
               <th className="px-6 py-4">Farm Value</th>
               <th className="px-6 py-4">Stage</th>
               <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4">profit</th>
+              <th className="px-6 py-4">Projected return</th>
               <th className="px-6 py-4 text-right">Action</th>
             </tr>
           </thead>
@@ -65,7 +65,7 @@ export default function InvestmentTable({
                 invested={`₦${inv.totalPrice.toLocaleString()}`}
                 stage={inv.stage}
                 status={inv.status}
-                profitAmount={formatNaira(getProfitAmount(inv))}
+                returnAmount={formatNaira(getProjectedReturn(inv))}
                 profitPercentage={`+${inv.profit}%`}
                 onDetails={() => setSelected(inv)}
               />
@@ -87,7 +87,7 @@ export default function InvestmentTable({
               invested={`₦${inv.totalPrice.toLocaleString()}`}
               stage={inv.stage}
               status={inv.status}
-              profitAmount={formatNaira(getProfitAmount(inv))}
+              returnAmount={formatNaira(getProjectedReturn(inv))}
               profitPercentage={`+${inv.profit}%`}
               mobileCard
               onDetails={() => setSelected(inv)}

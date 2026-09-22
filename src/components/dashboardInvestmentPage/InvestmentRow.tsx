@@ -9,7 +9,7 @@ type Props = {
   invested: string;
   stage: string;
   status: string;
-  profitAmount: string;
+  returnAmount: string;
   profitPercentage: string;
   mobileCard?: boolean;
   onDetails: () => void;
@@ -69,7 +69,7 @@ export default function InvestmentRow({
   invested,
   stage,
   status,
-  profitAmount,
+  returnAmount,
   profitPercentage,
   mobileCard = false,
   onDetails,
@@ -99,8 +99,8 @@ export default function InvestmentRow({
                 </p>
               </div>
               <span className="shrink-0 text-right">
-                <span className="block text-sm font-bold text-green-600">{profitAmount}</span>
-                <span className="block text-xs text-gray-500">{profitPercentage}</span>
+                <span className="block text-sm font-bold text-green-600">{returnAmount}</span>
+                <span className="block text-xs text-gray-500">{profitPercentage} profit</span>
               </span>
             </div>
 
@@ -158,8 +158,8 @@ export default function InvestmentRow({
         <StatusBadge status={status} />
       </td>
       <td className="px-6 py-4">
-        <span className="block text-green-600 font-bold text-sm">{profitAmount}</span>
-        <span className="block text-xs text-gray-500">{profitPercentage}</span>
+        <span className="block text-green-600 font-bold text-sm">{returnAmount}</span>
+        <span className="block text-xs text-gray-500">{profitPercentage} profit</span>
       </td>
       <td className="px-6 py-4 text-right">
         <button

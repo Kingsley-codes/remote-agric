@@ -2,9 +2,10 @@ interface Props {
   title: string;
   value: string;
   badge?: string;
+  subtext?: string;
 }
 
-export default function StatCard({ title, value, badge }: Props) {
+export default function StatCard({ title, value, badge, subtext }: Props) {
   return (
     <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-4">
       <div className="flex justify-between">
@@ -19,6 +20,11 @@ export default function StatCard({ title, value, badge }: Props) {
 
       <div>
         <h3 className="text-2xl pl-3 text-gray-800 font-bold">{value}</h3>
+        {subtext && (
+          <p className="mt-1 pl-3 text-xs font-medium text-green-600">
+            {subtext}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -56,6 +56,7 @@ export interface InvestmentDashboardData {
   totalInvestedAmount: number;
   totalActiveInvestments: number;
   totalProjectedProfit: number;
+  totalProjectedReturn?: number;
 }
 
 export default function InvestmentsPage() {
@@ -115,6 +116,14 @@ export default function InvestmentsPage() {
         total + investment.totalPrice * Number(investment.profit) / 100,
       0,
     ) ?? 0;
+  const totalProjectedReturn = data?.totalProjectedReturn ??
+    (data?.userInvestments ?? [])
+      .filter((investment) => investment.status === "ongoing")
+      .reduce(
+        (total, investment) =>
+          total + investment.totalPrice * (1 + Number(investment.profit) / 100),
+        0,
+      );
 
   return (
     <main className="bg-[#f6f8f6]">
@@ -123,6 +132,7 @@ export default function InvestmentsPage() {
         <StatsSection
           totalInvestedAmount={data?.totalInvestedAmount ?? 0}
           totalActiveInvestments={data?.totalActiveInvestments ?? 0}
+          totalProjectedReturn={totalProjectedReturn}
           totalProjectedProfit={totalProjectedProfit}
         />
         <InvestmentTable
