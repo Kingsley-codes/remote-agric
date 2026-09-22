@@ -34,9 +34,9 @@ export default function InvestmentTable() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const fetchInvestments = async () => {
+  const fetchInvestments = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce`,
         { withCredentials: true },
@@ -48,7 +48,7 @@ export default function InvestmentTable() {
       console.error("Error fetching investments:", error);
       toast.error("Failed to load farm listings");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
@@ -127,7 +127,7 @@ export default function InvestmentTable() {
                 investment={investment}
                 onEditSuccess={handleEditSuccess}
                 onDeleteSuccess={handleDeleteSuccess}
-                refreshInvestments={fetchInvestments}
+                refreshInvestments={() => void fetchInvestments(false)}
                 mobileCard
               />
             ))}
@@ -155,7 +155,7 @@ export default function InvestmentTable() {
                     investment={investment}
                     onEditSuccess={handleEditSuccess}
                     onDeleteSuccess={handleDeleteSuccess}
-                    refreshInvestments={fetchInvestments}
+                    refreshInvestments={() => void fetchInvestments(false)}
                   />
                 ))}
               </tbody>

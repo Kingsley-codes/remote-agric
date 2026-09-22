@@ -5,6 +5,7 @@ import { MdDriveFolderUpload } from "react-icons/md";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import TrackManager, { type ProduceTrack } from "./TrackManager";
 
 interface EditOpportunityModalProps {
   isOpen: boolean;
@@ -20,8 +21,10 @@ interface EditOpportunityModalProps {
     category: string;
     duration: number;
     profit: number;
+    tracks: ProduceTrack[];
   };
   onSuccess: () => void;
+  onTracksChanged?: () => void;
 }
 
 export default function EditOpportunityModal({
@@ -29,6 +32,7 @@ export default function EditOpportunityModal({
   onClose,
   investment,
   onSuccess,
+  onTracksChanged,
 }: EditOpportunityModalProps) {
   const [formData, setFormData] = useState({
     title: investment.title,
@@ -357,6 +361,14 @@ export default function EditOpportunityModal({
                   </div>
                 </div>
               </div>
+
+              <TrackManager
+                produceId={investment._id}
+                duration={investment.duration}
+                category={investment.category}
+                initialTracks={investment.tracks ?? []}
+                onChanged={onTracksChanged}
+              />
 
               <div>
                 <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-4">

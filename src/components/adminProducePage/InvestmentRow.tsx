@@ -60,15 +60,6 @@ export default function InvestmentRow({
     } catch (error) { toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to update status" : "Unable to update status"); }
     finally { setSaving(null); }
   };
-  const updateTrackStage = async (trackId: string, stage: string) => {
-    setSaving(trackId);
-    try {
-      await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${investment._id}/tracks/${trackId}/stage`, { stage }, { withCredentials: true });
-      toast.success("Track stage updated and its farm owners notified");
-      refreshInvestments?.();
-    } catch (error) { toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to update track" : "Unable to update track"); }
-    finally { setSaving(null); }
-  };
   const getCategoryStyles = (category: string) => {
     switch (category.toLowerCase()) {
       case "crops":
@@ -139,7 +130,7 @@ export default function InvestmentRow({
             setIsEditModalOpen(true);
           }}
           onStatusChange={(status) => void updateStatus(status)}
-          onTrackStageChange={(trackId, stage) => void updateTrackStage(trackId, stage)}
+          onTracksChanged={refreshInvestments}
           saving={saving}
         />
       )}
@@ -149,6 +140,7 @@ export default function InvestmentRow({
           onClose={() => setIsEditModalOpen(false)}
           investment={investment}
           onSuccess={handleEditSuccess}
+          onTracksChanged={refreshInvestments}
         />
       )}
       <ConfirmModal

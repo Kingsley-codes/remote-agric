@@ -1,10 +1,10 @@
 "use client";
 
 import DetailDialog from "@/components/ui/DetailDialog";
-import { stageLabel, stagesByCategory } from "@/lib/farmProgress";
+import { stageLabel } from "@/lib/farmProgress";
 import { TbEdit } from "react-icons/tb";
+import TrackManager, { type ProduceTrack } from "./TrackManager";
 
-interface Track { _id: string; name: string; startMonth: number; endMonth: number; stage: string }
 interface Produce {
   _id: string;
   produceName: string;
@@ -22,7 +22,7 @@ interface Produce {
   image3: { url: string };
   status: string;
   rolloverProfit: number;
-  tracks: Track[];
+  tracks: ProduceTrack[];
 }
 
 interface Props {
@@ -30,7 +30,7 @@ interface Props {
   onClose: () => void;
   onEdit: () => void;
   onStatusChange: (status: string) => void;
-  onTrackStageChange: (trackId: string, stage: string) => void;
+  onTracksChanged?: () => void;
   saving: string | null;
 }
 
@@ -38,9 +38,8 @@ const currency = (value: number) => new Intl.NumberFormat("en-NG", {
   style: "currency", currency: "NGN", maximumFractionDigits: 0,
 }).format(value);
 
-export default function ProduceDetailsModal({ produce, onClose, onEdit, onStatusChange, onTrackStageChange, saving }: Props) {
+export default function ProduceDetailsModal({ produce, onClose, onEdit, onStatusChange, onTracksChanged, saving }: Props) {
   const tracks = produce.tracks ?? [];
-  const stages = stagesByCategory[produce.category] ?? stagesByCategory.crops;
   const images = [produce.image1, produce.image2, produce.image3].filter((image) => image?.url);
   const selectClass = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary/30 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200";
   const facts = [
@@ -101,32 +100,13 @@ export default function ProduceDetailsModal({ produce, onClose, onEdit, onStatus
           </select>
         </div>
 
-        <section>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h3 className="font-bold text-slate-900 dark:text-white">Tracks</h3>
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-              {tracks.length} {tracks.length === 1 ? "track" : "tracks"}
-            </span>
-          </div>
-          {tracks.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-slate-200 p-5 text-center text-sm text-slate-500 dark:border-slate-700">No tracks are available for this produce.</p>
-          ) : (
-            <div className="space-y-3">
-              {tracks.map((track) => (
-                <div key={track._id} className="grid gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700 sm:grid-cols-[1fr_12rem] sm:items-center">
-                  <div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">{track.name}</p>
-                    <p className="mt-1 text-xs text-slate-500">Month {track.startMonth} to {track.endMonth}</p>
-                  </div>
-                  <select aria-label={`Stage for ${track.name}`} value={track.stage} disabled={saving !== null} onChange={(event) => onTrackStageChange(track._id, event.target.value)} className={selectClass}>
-                    {!stages.includes(track.stage) && <option value={track.stage}>{stageLabel(track.stage)}</option>}
-                    {stages.map((stage) => <option key={stage} value={stage}>{stageLabel(stage)}</option>)}
-                  </select>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        <TrackManager
+          produceId={produce._id}
+          duration={produce.duration}
+          category={produce.category}
+          initialTracks={tracks}
+          onChanged={onTracksChanged}
+        />
         <p className="break-all text-xs text-slate-400">Produce ID: {produce._id}</p>
       </div>
     </DetailDialog>
