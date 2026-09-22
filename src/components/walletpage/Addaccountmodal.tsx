@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   FaPlusCircle,
   FaLock,
@@ -37,9 +37,11 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
 
   const [banks, setBanks] = useState<Bank[]>([]);
   const [banksLoading, setBanksLoading] = useState(true);
+  const [banksSearching, setBanksSearching] = useState(false);
   const [banksError, setBanksError] = useState(false);
   const [bankSearch, setBankSearch] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const hasLoadedBanks = useRef(false);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -56,14 +58,20 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  const fetchBanks = useCallback(async () => {
-    setBanksLoading(true);
+  const fetchBanks = useCallback(async (search: string, signal: AbortSignal) => {
+    const initialRequest = !hasLoadedBanks.current;
+    if (initialRequest) setBanksLoading(true);
+    else setBanksSearching(true);
     setBanksError(false);
     try {
+      const query = search.trim()
+        ? `?search=${encodeURIComponent(search.trim())}`
+        : "";
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/get-banks`,
-        { credentials: "include" },
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/get-banks${query}`,
+        { credentials: "include", signal },
       );
+      if (!res.ok) throw new Error("Failed to load banks");
       const json = await res.json();
       const list: Bank[] = (json.data ?? json).map((b: Bank) => ({
         id: b.id,
@@ -71,20 +79,27 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
         code: b.code,
       }));
       setBanks(list);
-    } catch {
+      hasLoadedBanks.current = true;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
       setBanksError(true);
     } finally {
-      setBanksLoading(false);
+      if (initialRequest) setBanksLoading(false);
+      else setBanksSearching(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchBanks();
-  }, [fetchBanks]);
-
-  const filteredBanks = banks.filter((b) =>
-    b.name.toLowerCase().includes(bankSearch.toLowerCase()),
-  );
+    const controller = new AbortController();
+    const timer = window.setTimeout(
+      () => void fetchBanks(bankSearch, controller.signal),
+      bankSearch.trim() ? 300 : 0,
+    );
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [bankSearch, fetchBanks]);
 
   const selectedBank = banks.find((b) => b.code === bankCode);
 
@@ -254,7 +269,10 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
                   <div className="w-full px-4 py-3.5 border border-red-200 rounded-xl flex items-center justify-between text-sm">
                     <span className="text-red-500">Failed to load banks</span>
                     <button
-                      onClick={fetchBanks}
+                      onClick={() => {
+                        const controller = new AbortController();
+                        void fetchBanks(bankSearch, controller.signal);
+                      }}
                       className="text-[#2d6a27] font-bold text-xs underline"
                     >
                       Retry
@@ -305,15 +323,18 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
                             autoFocus
                             className="w-full px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-700 focus:outline-none placeholder:text-gray-300"
                           />
+                          {banksSearching && (
+                            <FaSpinner className="absolute right-6 top-5 animate-spin text-gray-400" size={13} />
+                          )}
                         </div>
                         {/* List */}
                         <div className="overflow-y-auto max-h-48">
-                          {filteredBanks.length === 0 ? (
+                          {banks.length === 0 ? (
                             <p className="px-4 py-3 text-sm text-gray-400 text-center">
                               No banks found
                             </p>
                           ) : (
-                            filteredBanks.map((bank) => (
+                            banks.map((bank) => (
                               <button
                                 key={bank.code}
                                 type="button"
