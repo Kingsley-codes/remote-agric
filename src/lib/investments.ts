@@ -6,7 +6,7 @@ export const investments: Investment[] = [
     investorName: "Sarah Williams",
     investorImage:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDYiBc-wIro2yDUOMR4nRgGPQ5R9Coal7nK5l11h-N5RQInt4XsbwsTWNYPLlyMkLaLp4PhgTEgiK4WVakDmGr4DlI7nJrEMvjUS9w9kFWI1k5wNp4VFKnALBtB67dJLs1t1X3M4w5ht9l8ZxFR_UoHcG7xaUs6jRB5yh54-5HZkeKURc4PYWQIBBb6gLY5P2UFcWtbi96NkIc37fOIFuGlrFH1Yf9utixbgPjlF2eaL-sPoSg8z8EUYbwcQ_lbsRX8GvB0-BGrll0",
-    projectName: "Broiler Phase 2",
+    projectName: "Bprofitler Phase 2",
     produceType: "Animal",
     amount: 12500,
     investmentDate: "Oct 24, 2023",
@@ -39,7 +39,7 @@ export const investments: Investment[] = [
     investorName: "David Okoro",
     investorImage:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuD2ddB5afMCpl2LeRo_i1exPu_VhA0LFft4wzivbuIThZPvfkjQSIusZ1JiOxclhJzxNPRHXZXpBeX_xgiiK2eqVn3noflFeF6YV8q_En6ASPJwh7ZSqXbcdESfy--XQc84HH493tldwz1ULct6HIzfFNsNZun0HiVZjAAS2aHe-k6c2dBDpbVL9_1uZvLWg-1gmG5rE2cNtcPo8UhVBM49th7-qfQkyoVPh4mgorQqQmq_u1vo-M36_w03orCheqnW576a5aitgSs",
-    projectName: "Broiler Phase 2",
+    projectName: "Bprofitler Phase 2",
     produceType: "Animal",
     amount: 4500,
     investmentDate: "Oct 29, 2023",

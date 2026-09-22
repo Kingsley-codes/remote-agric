@@ -16,7 +16,7 @@ interface Produce {
   price: number;
   category: string;
   duration: number;
-  ROI: number;
+  profit: number;
   remainingUnit: number;
   image1: { url: string };
   image2: { url: string };
@@ -25,6 +25,8 @@ interface Produce {
   updatedAt: string;
   stage: string;
   status: string;
+  rolloverProfit: number;
+  tracks: Array<{ _id: string; name: string; startMonth: number; endMonth: number; stage: string }>;
 }
 
 export default function InvestmentTable() {
@@ -138,9 +140,9 @@ export default function InvestmentTable() {
                 <tr>
                   <th className="px-3 py-4">Farm Listing</th>
                   <th className="px-3 py-4">Category</th>
-                  <th className="px-3 py-4">Stage</th>
+                  <th className="px-3 py-4">Track stages</th>
                   <th className="px-3 py-4">Status</th>
-                  <th className="px-3 py-4 text-right">ROI</th>
+                  <th className="px-3 py-4 text-right">profit</th>
                   <th className="px-3 py-4 text-right">Duration</th>
                   <th className="px-3 py-4 text-right">Total Units</th>
                   <th className="px-3 py-4 text-right">Actions</th>

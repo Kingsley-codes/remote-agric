@@ -3,7 +3,7 @@ export interface Opportunity {
   title: string;
   produceName: string;
   duration: string;
-  roi: number;
+  profit: number;
   unitPrice: number;
   minInvestment: number;
   fundedPercentage: number;
@@ -26,6 +26,14 @@ export interface Logo {
 }
 
 // API response type
+export interface OpportunityTrack {
+  _id: string;
+  name: string;
+  startMonth: number;
+  endMonth: number;
+  stage: string;
+}
+
 export interface ApiProduce {
   status: string;
   _id: string;
@@ -37,7 +45,9 @@ export interface ApiProduce {
   price: number;
   category: string;
   duration: number;
-  ROI: number;
+  profit: number;
+  rolloverProfit: number;
+  tracks: OpportunityTrack[];
   remainingUnit: number;
   remainingPercentage: number;
   image1: {

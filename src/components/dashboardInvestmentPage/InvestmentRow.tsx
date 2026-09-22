@@ -8,8 +8,8 @@ type Props = {
   invested: string;
   stage: string;
   status: string;
-  roiAmount: string;
-  roiPercentage: string;
+  profitAmount: string;
+  profitPercentage: string;
   mobileCard?: boolean;
   onDetails: () => void;
 };
@@ -67,12 +67,12 @@ export default function InvestmentRow({
   invested,
   stage,
   status,
-  roiAmount,
-  roiPercentage,
+  profitAmount,
+  profitPercentage,
   mobileCard = false,
   onDetails,
 }: Props) {
-  // ── Mobile card variant ──
+  // •”€•”€ Mobile card variant •”€•”€
   if (mobileCard) {
     return (
       <div className="p-4">
@@ -94,8 +94,8 @@ export default function InvestmentRow({
                 </p>
               </div>
               <span className="shrink-0 text-right">
-                <span className="block text-sm font-bold text-green-600">{roiAmount}</span>
-                <span className="block text-xs text-gray-500">{roiPercentage}</span>
+                <span className="block text-sm font-bold text-green-600">{profitAmount}</span>
+                <span className="block text-xs text-gray-500">{profitPercentage}</span>
               </span>
             </div>
 
@@ -126,7 +126,7 @@ export default function InvestmentRow({
     );
   }
 
-  // ── Desktop table row variant ──
+  // •”€•”€ Desktop table row variant •”€•”€
   return (
     <tr className="hover:bg-gray-50 transition-colors">
       <td className="px-6 py-4 font-bold text-xs text-gray-500">{orderID}</td>
@@ -150,8 +150,8 @@ export default function InvestmentRow({
         <StatusBadge status={status} />
       </td>
       <td className="px-6 py-4">
-        <span className="block text-green-600 font-bold text-sm">{roiAmount}</span>
-        <span className="block text-xs text-gray-500">{roiPercentage}</span>
+        <span className="block text-green-600 font-bold text-sm">{profitAmount}</span>
+        <span className="block text-xs text-gray-500">{profitPercentage}</span>
       </td>
       <td className="px-6 py-4 text-right">
         <button

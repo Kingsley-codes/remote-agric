@@ -8,7 +8,7 @@ export default function InvestmentForm() {
     name: "",
     category: "Crops",
     status: "Draft",
-    roi: "",
+    profit: "",
     duration: "",
     price: "",
     description: "",
@@ -116,11 +116,11 @@ export default function InvestmentForm() {
           <div className="grid grid-cols-2 gap-4">
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                ROI (%)
+                profit (%)
               </span>
               <input
-                name="roi"
-                value={formData.roi}
+                name="profit"
+                value={formData.profit}
                 onChange={handleChange}
                 className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                 placeholder="0"

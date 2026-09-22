@@ -7,7 +7,7 @@ const testimonials = [
     name: "Ebuka Nwajiuwa",
     Location: "Oyo, Nigeria",
     message:
-      "Being a remote farmer seemed impossible, but this platform made it easy. I funded broilers and pigs, tracked their growth online, and when the cycle ended, I had the option to sell or get the produce. I earned profits and learned so much about farming along the way.",
+      "Being a remote farmer seemed impossible, but this platform made it easy. I funded bprofitlers and pigs, tracked their growth online, and when the cycle ended, I had the option to sell or get the produce. I earned profits and learned so much about farming along the way.",
     avatar: "jcpvvrcgijhgqyilk4ry",
   },
   {

@@ -61,8 +61,8 @@ export default async function Page({ params }: PageProps) {
     produce.image3.url,
   ].filter(Boolean); // Remove any empty URLs
 
-  const roiValue =
-    typeof produce.ROI === "number" ? `+${produce.ROI}%` : produce.ROI;
+  const profitValue =
+    typeof produce.profit === "number" ? `+${produce.profit}%` : produce.profit;
 
   return (
     <>
@@ -85,14 +85,14 @@ export default async function Page({ params }: PageProps) {
                 {produce.title}
               </h1>
               <p className="text-gray-500 text-sm">
-                {produce.produceName} • {produce.category}
+                {produce.produceName} •€¢ {produce.category}
               </p>
             </div>
 
             <HeroGallery images={images} />
 
             <StatsPills
-              roi={roiValue}
+              profit={profitValue}
               duration={produce.duration}
               category={produce.category}
             />
@@ -124,6 +124,7 @@ export default async function Page({ params }: PageProps) {
                 soldUnits={soldUnits}
                 remainingUnits={produce.remainingUnit}
                 minimumUnit={produce.minimumUnit}
+                tracks={produce.tracks}
               />
 
               <NeedHelpCard />

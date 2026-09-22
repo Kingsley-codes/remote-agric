@@ -9,8 +9,8 @@ function getProduceImage(inv: UserInvestment): string {
   return inv.produce?.image1?.url ?? "";
 }
 
-function getRoiAmount(inv: UserInvestment): number {
-  return inv.totalPrice * Number(inv.ROI) / 100;
+function getProfitAmount(inv: UserInvestment): number {
+  return inv.totalPrice * Number(inv.profit) / 100;
 }
 
 function formatNaira(amount: number): string {
@@ -30,12 +30,14 @@ export default function InvestmentTable({
   investments,
   onHarvestChoiceUpdated,
 }: InvestmentTableProps) {
-  const [selected, setSelected] = useState<UserInvestment | null>(null);
+  const [selected, setSelected] = useState<UserInvestment | null>(() =>
+    investments.find((investment) => investment.status === "completed" && investment.cashReturnApprovedAt && !investment.rolledOverTo) ?? null,
+  );
 
   return (
     <>
       <div className="w-full rounded-xl border overflow-hidden border-[#d5e7cf] bg-white shadow-sm">
-        {/* ── Desktop table ── */}
+        {/* •”€•”€ Desktop table •”€•”€ */}
         <table className="w-full text-left hidden lg:table">
           <thead className="bg-gray-50 border-b border-[#d5e7cf]">
             <tr className="text-xs uppercase text-gray-500">
@@ -45,7 +47,7 @@ export default function InvestmentTable({
               <th className="px-6 py-4">Farm Value</th>
               <th className="px-6 py-4">Stage</th>
               <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4">ROI</th>
+              <th className="px-6 py-4">profit</th>
               <th className="px-6 py-4 text-right">Action</th>
             </tr>
           </thead>
@@ -61,15 +63,15 @@ export default function InvestmentTable({
                 invested={`₦${inv.totalPrice.toLocaleString()}`}
                 stage={inv.stage}
                 status={inv.status}
-                roiAmount={formatNaira(getRoiAmount(inv))}
-                roiPercentage={`+${inv.ROI}%`}
+                profitAmount={formatNaira(getProfitAmount(inv))}
+                profitPercentage={`+${inv.profit}%`}
                 onDetails={() => setSelected(inv)}
               />
             ))}
           </tbody>
         </table>
 
-        {/* ── Mobile cards ── */}
+        {/* •”€•”€ Mobile cards •”€•”€ */}
         <div className="lg:hidden divide-y divide-[#d5e7cf]">
           {investments.map((inv) => (
             <InvestmentRow
@@ -82,8 +84,8 @@ export default function InvestmentTable({
               invested={`₦${inv.totalPrice.toLocaleString()}`}
               stage={inv.stage}
               status={inv.status}
-              roiAmount={formatNaira(getRoiAmount(inv))}
-              roiPercentage={`+${inv.ROI}%`}
+              profitAmount={formatNaira(getProfitAmount(inv))}
+              profitPercentage={`+${inv.profit}%`}
               mobileCard
               onDetails={() => setSelected(inv)}
             />

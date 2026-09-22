@@ -22,7 +22,7 @@ export default function StatsBanner({ totalCount }: StatsBannerProps) {
           <div className="flex gap-6 rounded-2xl bg-primary/10 p-4 backdrop-blur-sm border border-primary/20">
             <div>
               <p className="text-xs font-medium text-gray-800 uppercase tracking-wider">
-                Avg ROI
+                Avg profit
               </p>
               <p className="text-xl font-bold text-center text-primary dark:text-green-400">
                 22%

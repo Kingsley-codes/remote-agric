@@ -17,8 +17,9 @@ async function getProduce(produceId: string): Promise<ApiProduce | null> {
   }
 }
 
-export default async function DashboardOpportunityDetailsPage({ params }: { params: Promise<{ produceId: string }> }) {
+export default async function DashboardOpportunityDetailsPage({ params, searchParams }: { params: Promise<{ produceId: string }>; searchParams: Promise<{ rolloverInvestmentId?: string }> }) {
   const { produceId } = await params;
+  const { rolloverInvestmentId } = await searchParams;
   const produce = await getProduce(produceId);
 
   if (!produce) {
@@ -28,7 +29,8 @@ export default async function DashboardOpportunityDetailsPage({ params }: { para
   const soldUnits = produce.totalUnit - produce.remainingUnit;
   const fundedPercent = Math.round((soldUnits / produce.totalUnit) * 100);
   const images = [produce.image1.url, produce.image2.url, produce.image3.url].filter(Boolean);
-  const roiValue = typeof produce.ROI === "number" ? `+${produce.ROI}%` : produce.ROI;
+  const profitValue = typeof produce.profit === "number" ? `+${produce.profit}%` : produce.profit;
 
-  return <main className="mx-auto max-w-7xl p-4 py-8 lg:px-8"><div className="grid grid-cols-1 gap-8 lg:grid-cols-12"><div className="flex flex-col gap-6 lg:col-span-8"><Breadcrumbs paths={[{ label: "Dashboard", href: "/dashboard" }, { label: "Opportunities", href: "/dashboard/opportunities" }, { label: produce.title, href: `/dashboard/opportunities/${produceId}` }]} /><div><h1 className="mb-1 text-3xl font-semibold md:text-4xl">{produce.title}</h1><p className="text-sm text-gray-500">{produce.produceName} • {produce.category}</p></div><HeroGallery images={images} /><StatsPills roi={roiValue} duration={produce.duration} category={produce.category} /><section className="mt-4"><h2 className="mb-3 w-47 border-b-2 border-primary text-2xl font-semibold">Project Summary</h2><p className="text-sm leading-relaxed text-gray-600 md:text-base">{produce.description}</p></section><FAQAccordion /></div><aside className="lg:col-span-4"><div className="sticky top-6 flex flex-col gap-4"><InvestmentCard status={produce.status} produceId={produce._id} unitPrice={produce.price} fundedPercent={fundedPercent} soldUnits={soldUnits} remainingUnits={produce.remainingUnit} minimumUnit={produce.minimumUnit} /><NeedHelpCard /></div></aside></div></main>;
+  return <main className="mx-auto max-w-7xl p-4 py-8 lg:px-8"><div className="grid grid-cols-1 gap-8 lg:grid-cols-12"><div className="flex flex-col gap-6 lg:col-span-8"><Breadcrumbs paths={[{ label: "Dashboard", href: "/dashboard" }, { label: "Opportunities", href: "/dashboard/opportunities" }, { label: produce.title, href: `/dashboard/opportunities/${produceId}` }]} /><div><h1 className="mb-1 text-3xl font-semibold md:text-4xl">{produce.title}</h1><p className="text-sm text-gray-500">{produce.produceName} •€¢ {produce.category}</p></div><HeroGallery images={images} /><StatsPills profit={profitValue} duration={produce.duration} category={produce.category} /><section className="mt-4"><h2 className="mb-3 w-47 border-b-2 border-primary text-2xl font-semibold">Project Summary</h2><p className="text-sm leading-relaxed text-gray-600 md:text-base">{produce.description}</p></section><FAQAccordion /></div><aside className="lg:col-span-4"><div className="sticky top-6 flex flex-col gap-4"><InvestmentCard status={produce.status} produceId={produce._id} unitPrice={produce.price} fundedPercent={fundedPercent} soldUnits={soldUnits} remainingUnits={produce.remainingUnit} minimumUnit={produce.minimumUnit}
+                tracks={produce.tracks} rolloverInvestmentId={rolloverInvestmentId} /><NeedHelpCard /></div></aside></div></main>;
 }

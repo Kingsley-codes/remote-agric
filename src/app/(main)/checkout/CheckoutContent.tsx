@@ -18,6 +18,9 @@ type Produce = {
   image1: { url: string; publicId: string };
   farm?: string;
   description?: string;
+  profit: number;
+  rolloverProfit: number;
+  tracks: Array<{ _id: string; name: string; startMonth: number; endMonth: number; stage: string }>;
 };
 
 type UserProfile = {
@@ -39,6 +42,9 @@ export default function CheckoutContent() {
   const searchParams = useSearchParams();
   const produceId = searchParams.get("produceId");
   const units = Number(searchParams.get("units") || 1);
+  const trackId = searchParams.get("trackId") ?? "";
+  const acknowledgeClosedTrack = searchParams.get("acknowledgeClosedTrack") === "true";
+  const rolloverInvestmentId = searchParams.get("rolloverInvestmentId") ?? undefined;
 
   const [produce, setProduce] = useState<Produce | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -49,9 +55,7 @@ export default function CheckoutContent() {
     email: "",
     address: "",
   });
-  const [paymentMethod, setPaymentMethod] = useState<
-    "card" | "wallet"
-  >("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet">(rolloverInvestmentId ? "wallet" : "card");
 
   const [produceLoading, setProduceLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -113,7 +117,7 @@ export default function CheckoutContent() {
       } catch (err) {
         console.error("Profile fetch error:", err);
       } finally {
-        setProfileLoading(false); // ← only controls profile loading
+        setProfileLoading(false); // •† only controls profile loading
       }
     };
     fetchProfile();
@@ -151,12 +155,14 @@ export default function CheckoutContent() {
               billingData={billingData}
               onChange={setBillingData}
             />
-            <PaymentMethod
-              method={paymentMethod}
-              onMethodChange={setPaymentMethod}
-              walletBalance={walletBalance}
-              isAuthenticated={Boolean(user)}
-            />
+            {rolloverInvestmentId ? (
+              <div className="rounded-xl border border-green-200 bg-green-50 p-5">
+                <p className="font-bold text-green-900">Wallet rollover</p>
+                <p className="mt-1 text-sm text-green-700">This investment uses your Agro Wallet balance and qualifies for the rollover profit.</p>
+              </div>
+            ) : (
+              <PaymentMethod method={paymentMethod} onMethodChange={setPaymentMethod} walletBalance={walletBalance} isAuthenticated={Boolean(user)} />
+            )}
             <TrustBadges />
           </div>
 
@@ -167,6 +173,9 @@ export default function CheckoutContent() {
               billingData={billingData}
               paymentMethod={paymentMethod}
               isAuthenticated={Boolean(user)}
+              trackId={trackId}
+              acknowledgeClosedTrack={acknowledgeClosedTrack}
+              rolloverInvestmentId={rolloverInvestmentId}
             />
           </div>
         </div>

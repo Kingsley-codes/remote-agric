@@ -1,15 +1,15 @@
 import { FaCircle } from "react-icons/fa";
 
 interface StatsPillsProps {
-  roi: string;
+  profit: string;
   duration: number;
   category: string;
 }
 
-export function StatsPills({ roi, duration, category }: StatsPillsProps) {
+export function StatsPills({ profit, duration, category }: StatsPillsProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <Stat label="Annualized ROI" value={roi} highlight />
+      <Stat label="Annualized profit" value={profit} highlight />
       <Stat label="Duration" value={`${duration} Months`} />
       <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
         <p className="text-gray-500 text-xs font-semibold uppercase mb-1">

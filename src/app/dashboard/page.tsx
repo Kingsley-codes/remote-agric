@@ -12,7 +12,7 @@ interface DashboardData {
   userInvestments: (ActiveInvestment & { status: string; orderDate: string })[];
   totalInvestedAmount: number;
   totalActiveInvestments: number;
-  totalProjectedROI: number;
+  totalProjectedProfit: number;
 }
 
 export default function DashboardPage() {
@@ -47,10 +47,10 @@ export default function DashboardPage() {
   }, [loading]);
 
   const firstName = user?.firstName ?? user?.name?.split(" ")[0] ?? "there";
-  const projectedRoi = dashboard?.totalProjectedROI ??
+  const projectedProfit = dashboard?.totalProjectedProfit ??
     dashboard?.userInvestments.filter((investment) => investment.status === "ongoing").reduce(
       (total, investment) =>
-        total + investment.totalPrice * Number(investment.ROI ?? 0) / 100,
+        total + investment.totalPrice * Number(investment.profit ?? 0) / 100,
       0,
     ) ?? 0;
 
@@ -80,10 +80,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <StatsGrid totalFarmValue={dashboard?.totalInvestedAmount ?? 0} activeProjects={dashboard?.totalActiveInvestments ?? 0} projectedRoi={projectedRoi} nextPayout={dashboard?.totalActiveInvestments ? "At harvest" : "No upcoming payout"} />
+          <StatsGrid totalFarmValue={dashboard?.totalInvestedAmount ?? 0} activeProjects={dashboard?.totalActiveInvestments ?? 0} projectedProfit={projectedProfit} nextPayout={dashboard?.totalActiveInvestments ? "At harvest" : "No upcoming payout"} />
 
           <div className="flex flex-col gap-8 mb-8">
-              <YieldChart projectedRoi={projectedRoi} investments={dashboard?.userInvestments ?? []} />
+              <YieldChart projectedProfit={projectedProfit} investments={dashboard?.userInvestments ?? []} />
               <ActiveInvestments investments={(dashboard?.userInvestments ?? []).filter((investment) => investment.status === "ongoing").slice(0, 5)} />
           </div>
     </div>

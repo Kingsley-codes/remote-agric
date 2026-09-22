@@ -3,7 +3,7 @@ import { FaWallet } from "react-icons/fa";
 interface StatsSectionProps {
   totalInvestedAmount: number;
   totalActiveInvestments: number;
-  totalProjectedROI: number;
+  totalProjectedProfit: number;
 }
 
 function formatCurrency(amount: number): string {
@@ -17,11 +17,11 @@ function formatCurrency(amount: number): string {
 export default function StatsSection({
   totalInvestedAmount,
   totalActiveInvestments,
-  totalProjectedROI,
+  totalProjectedProfit,
 }: StatsSectionProps) {
   // Compute a rough progress bar: cap at 100%
-  const roiProgress = Math.min(
-    (totalProjectedROI / totalInvestedAmount) * 100 * 5,
+  const profitProgress = Math.min(
+    (totalProjectedProfit / totalInvestedAmount) * 100 * 5,
     100,
   );
 
@@ -44,18 +44,18 @@ export default function StatsSection({
         </p>
       </div>
 
-      {/* Projected ROI */}
+      {/* Projected profit */}
       <div className="flex flex-col gap-1 rounded-xl p-5 bg-white border border-[#d5e7cf] shadow-sm">
         <div className="flex justify-between items-start">
-          <p className="text-gray-400 text-sm font-medium">Projected ROI</p>
+          <p className="text-gray-400 text-sm font-medium">Projected profit</p>
         </div>
         <p className="text-[#111b0d] text-3xl font-bold tracking-tight mt-2">
-          +{formatCurrency(totalProjectedROI)}
+          +{formatCurrency(totalProjectedProfit)}
         </p>
         <div className="w-full bg-gray-200 rounded-full h-1.5 mt-3">
           <div
             className="bg-[#46ec13] h-1.5 rounded-full transition-all duration-700"
-            style={{ width: `${roiProgress}%` }}
+            style={{ width: `${profitProgress}%` }}
           />
         </div>
       </div>

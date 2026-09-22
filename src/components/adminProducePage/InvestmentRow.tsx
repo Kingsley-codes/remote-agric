@@ -20,13 +20,15 @@ interface Investment {
   price: number;
   category: string;
   duration: number;
-  ROI: number;
+  profit: number;
   remainingUnit: number;
   image1: { url: string };
   image2: { url: string };
   image3: { url: string };
   stage: string;
   status: string;
+  rolloverProfit: number;
+  tracks: Array<{ _id: string; name: string; startMonth: number; endMonth: number; stage: string }>;
 }
 
 interface InvestmentRowProps {
@@ -47,22 +49,29 @@ export default function InvestmentRow({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [saving, setSaving] = useState<"stage" | "status" | null>(null);
+  const [saving, setSaving] = useState<string | null>(null);
   const stages = stagesByCategory[investment.category] ?? stagesByCategory.crops;
-  const updateField = async (field: "stage" | "status", value: string) => {
-    setSaving(field);
+  const updateStatus = async (value: string) => {
+    setSaving("status");
     try {
-      await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${investment._id}/${field}`, { [field]: value }, { withCredentials: true });
-      toast.success(field === "stage" ? "Stage updated and farm owners notified" : value === "closed" ? "Opportunity closed to new investments" : "Opportunity is accepting investments");
+      await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${investment._id}/status`, { status: value }, { withCredentials: true });
+      toast.success(value === "closed" ? "Opportunity closed" : "Opportunity activated");
       refreshInvestments?.();
-    } catch (error) {
-      toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to update opportunity" : "Unable to update opportunity");
-    } finally { setSaving(null); }
+    } catch (error) { toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to update status" : "Unable to update status"); }
+    finally { setSaving(null); }
+  };
+  const updateTrackStage = async (trackId: string, stage: string) => {
+    setSaving(trackId);
+    try {
+      await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${investment._id}/tracks/${trackId}/stage`, { stage }, { withCredentials: true });
+      toast.success("Track stage updated and its farm owners notified");
+      refreshInvestments?.();
+    } catch (error) { toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to update track" : "Unable to update track"); }
+    finally { setSaving(null); }
   };
   const selectClass = "w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-primary/30 disabled:opacity-50";
-  const stageSelect = <select aria-label={`Stage for ${investment.title}`} value={investment.stage} disabled={saving !== null} onChange={event => updateField("stage", event.target.value)} className={selectClass}>{!stages.includes(investment.stage) && <option value={investment.stage}>{stageLabel(investment.stage)}</option>}{stages.map(item => <option key={item} value={item}>{stageLabel(item)}</option>)}</select>;
-  const statusSelect = <select aria-label={`Status for ${investment.title}`} value={investment.status} disabled={saving !== null} onChange={event => updateField("status", event.target.value)} className={selectClass}>{!["active", "closed"].includes(investment.status) && <option value={investment.status}>{stageLabel(investment.status)}</option>}<option value="active">Active</option><option value="closed">Closed</option></select>;
-
+  const trackControls = <div className="min-w-44 space-y-2">{investment.tracks.map((track) => <label key={track._id} className="block"><span className="mb-1 block text-[10px] font-bold text-slate-500">{track.name}</span><select aria-label={`Stage for ${track.name}`} value={track.stage} disabled={saving !== null} onChange={(event) => void updateTrackStage(track._id, event.target.value)} className={selectClass}>{!stages.includes(track.stage) && <option value={track.stage}>{stageLabel(track.stage)}</option>}{stages.map((item) => <option key={item} value={item}>{stageLabel(item)}</option>)}</select></label>)}</div>;
+  const statusSelect = <select aria-label={`Status for ${investment.title}`} value={investment.status} disabled={saving !== null} onChange={(event) => void updateStatus(event.target.value)} className={selectClass}>{!["active", "closed"].includes(investment.status) && <option value={investment.status}>{stageLabel(investment.status)}</option>}<option value="active">Active</option><option value="closed">Closed</option></select>;
   const getCategoryStyles = (category: string) => {
     switch (category.toLowerCase()) {
       case "crops":
@@ -146,7 +155,7 @@ export default function InvestmentRow({
     </>
   );
 
-  /* ── MOBILE CARD ─────────────────────────────────────────── */
+  /* •”€•”€ MOBILE CARD •”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€ */
   if (mobileCard) {
     return (
       <>
@@ -198,10 +207,10 @@ export default function InvestmentRow({
           <div className="grid grid-cols-3 gap-2 text-center">
             <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2">
               <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-0.5">
-                ROI
+                profit
               </p>
               <p className="font-bold text-slate-900 dark:text-white text-sm">
-                {investment.ROI}%
+                {investment.profit}%
               </p>
             </div>
             <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2">
@@ -233,14 +242,14 @@ export default function InvestmentRow({
               <span className="capitalize">{investment.category}</span>
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-3"><label className="text-xs font-medium text-slate-500">Stage<div className="mt-1">{stageSelect}</div></label><label className="text-xs font-medium text-slate-500">Status<div className="mt-1">{statusSelect}</div></label></div>
+          <div className="grid grid-cols-2 gap-3"><label className="text-xs font-medium text-slate-500">Stage<div className="mt-1">{trackControls}</div></label><label className="text-xs font-medium text-slate-500">Status<div className="mt-1">{statusSelect}</div></label></div>
         </div>
         {modals}
       </>
     );
   }
 
-  /* ── DESKTOP TABLE ROW ───────────────────────────────────── */
+  /* •”€•”€ DESKTOP TABLE ROW •”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€•”€ */
   return (
     <>
       <tr className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -273,11 +282,11 @@ export default function InvestmentRow({
           </span>
         </td>
 
-        <td className="px-3 py-4">{stageSelect}</td>
+        <td className="px-3 py-4">{trackControls}</td>
         <td className="px-3 py-4">{statusSelect}</td>
 
         <td className="px-3 py-4 text-right font-bold text-slate-900 dark:text-white">
-          {investment.ROI}%
+          {investment.profit}%
         </td>
 
         <td className="px-3 py-4 text-right text-slate-600 dark:text-slate-400">

@@ -145,7 +145,7 @@ export default function InvestmentDetailModal({
 
   const image = investment.produce?.image1?.url ?? "";
   const projectedReturn =
-    investment.totalPrice * (1 + parseFloat(investment.ROI) / 100);
+    investment.totalPrice * (1 + parseFloat(investment.profit) / 100);
   const canChooseHarvestReturn =
     ["harvesting", "ready-for-sale"].includes(investment.stage) &&
     investment.orderStatus === "confirmed" &&
@@ -245,10 +245,11 @@ export default function InvestmentDetailModal({
             </span>
           </div>
 
-          <InvestmentCountdown orderDate={investment.orderDate} duration={investment.duration} status={investment.status} orderStatus={investment.orderStatus} />
+          <InvestmentCountdown startsAt={investment.startsAt} endsAt={investment.endsAt} status={investment.status} orderStatus={investment.orderStatus} />
           {/* Detail rows */}
           <div className="bg-[#f6f8f6] rounded-xl px-4 py-1 mb-4">
             <DetailRow label="Order ID" value={investment.orderID} />
+            <DetailRow label="Track" value={investment.track?.name ?? "Unavailable"} />
             <DetailRow
               label="Units"
               value={`${investment.units} unit${investment.units !== 1 ? "s" : ""}`}
@@ -261,7 +262,7 @@ export default function InvestmentDetailModal({
               label="Farm Value"
               value={`₦${investment.totalPrice.toLocaleString()}`}
             />
-            <DetailRow label="ROI" value={`+${investment.ROI}%`} accent />
+            <DetailRow label="profit" value={`+${investment.profit}%`} accent />
             <DetailRow
               label="Projected Return"
               value={`₦${Math.round(projectedReturn).toLocaleString()}`}
@@ -278,6 +279,13 @@ export default function InvestmentDetailModal({
             />
           </div>
 
+          {investment.status === "completed" && investment.cashReturnApprovedAt && !investment.rolledOverTo && (
+            <div className="mb-4 rounded-xl border border-green-200 bg-green-50 p-4">
+              <p className="text-sm font-bold text-green-900">Earn more when you roll over</p>
+              <p className="mt-1 text-xs leading-5 text-green-700">Reinvest from your Agro Wallet instead of withdrawing and receive the {investment.produce?.rolloverProfit ?? 0}% rollover profit on your next term.</p>
+              <Link href={`/dashboard/opportunities/${investment.produce?._id}?rolloverInvestmentId=${investment._id}`} onClick={onClose} className="mt-4 block rounded-xl bg-primary px-4 py-3 text-center text-sm font-bold text-white">Choose a track and roll over</Link>
+            </div>
+          )}
           {canChooseHarvestReturn && (
             <div className="bg-white border border-[#d5e7cf] rounded-xl p-4 mb-4">
               <p className="text-sm font-bold text-gray-800">

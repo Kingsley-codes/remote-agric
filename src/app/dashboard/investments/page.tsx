@@ -18,7 +18,12 @@ export interface UserInvestment {
   units: number;
   totalPrice: number;
   duration: number;
-  ROI: string;
+  profit: string;
+  startsAt: string;
+  endsAt: string;
+  track: { id: string; name: string; startMonth: number; endMonth: number };
+  isRollover?: boolean;
+  rolledOverTo?: string;
   status: string;
   stage: string;
   harvestChoice?: "physical-produce" | "cash-return" | null;
@@ -39,6 +44,7 @@ export interface UserInvestment {
   produce: {
     _id: string;
     stage: string;
+    rolloverProfit: number;
     image1?: ProduceImage;
     image2?: ProduceImage;
     image3?: ProduceImage;
@@ -49,7 +55,7 @@ export interface InvestmentDashboardData {
   userInvestments: UserInvestment[];
   totalInvestedAmount: number;
   totalActiveInvestments: number;
-  totalProjectedROI: number;
+  totalProjectedProfit: number;
 }
 
 export default function InvestmentsPage() {
@@ -101,12 +107,12 @@ export default function InvestmentsPage() {
     );
   }
 
-  const totalProjectedROI = data?.totalProjectedROI ??
+  const totalProjectedProfit = data?.totalProjectedProfit ??
     data?.userInvestments
       .filter((investment) => investment.status === "ongoing")
       .reduce(
       (total, investment) =>
-        total + investment.totalPrice * Number(investment.ROI) / 100,
+        total + investment.totalPrice * Number(investment.profit) / 100,
       0,
     ) ?? 0;
 
@@ -117,7 +123,7 @@ export default function InvestmentsPage() {
         <StatsSection
           totalInvestedAmount={data?.totalInvestedAmount ?? 0}
           totalActiveInvestments={data?.totalActiveInvestments ?? 0}
-          totalProjectedROI={totalProjectedROI}
+          totalProjectedProfit={totalProjectedProfit}
         />
         <InvestmentTable
           investments={data?.userInvestments ?? []}

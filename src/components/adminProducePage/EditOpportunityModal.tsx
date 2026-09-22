@@ -19,7 +19,7 @@ interface EditOpportunityModalProps {
     price: number;
     category: string;
     duration: number;
-    ROI: number;
+    profit: number;
   };
   onSuccess: () => void;
 }
@@ -34,7 +34,7 @@ export default function EditOpportunityModal({
     title: investment.title,
     produceName: investment.produceName,
     description: investment.description,
-    ROI: investment.ROI.toString(),
+    profit: investment.profit.toString(),
     price: investment.price.toString(),
     minimumUnit: investment.minimumUnit.toString(),
     totalUnit: investment.totalUnit.toString(),
@@ -82,7 +82,7 @@ export default function EditOpportunityModal({
       formDataToSend.append("title", formData.title);
       formDataToSend.append("produceName", formData.produceName);
       formDataToSend.append("description", formData.description);
-      formDataToSend.append("ROI", formData.ROI);
+      formDataToSend.append("profit", formData.profit);
       formDataToSend.append("price", formData.price);
       formDataToSend.append("minimumUnit", formData.minimumUnit);
       formDataToSend.append("totalUnit", formData.totalUnit);
@@ -304,13 +304,13 @@ export default function EditOpportunityModal({
                   </div>
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Expected ROI (%) *
+                      Expected profit (%) *
                     </label>
                     <input
                       type="number"
-                      value={formData.ROI}
+                      value={formData.profit}
                       onChange={(e) =>
-                        setFormData({ ...formData, ROI: e.target.value })
+                        setFormData({ ...formData, profit: e.target.value })
                       }
                       className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                       placeholder="e.g., 12.5"

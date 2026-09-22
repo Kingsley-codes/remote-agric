@@ -93,9 +93,9 @@ export default function OpportunityCard({
 
         <div className="grid grid-cols-2 rounded-2xl px-2 gap-4 -mx-3 mb-4 py-3 border-y bg-gray-200 border-dashed border-gray-200">
           <div>
-            <p className="text-xs text-text-muted">ROI</p>
+            <p className="text-xs text-text-muted">profit</p>
             <p className="text-lg font-bold text-primary">
-              {opportunity.ROI} %
+              {opportunity.profit} %
             </p>
           </div>
           <div className="text-right">
@@ -125,7 +125,7 @@ export default function OpportunityCard({
             <button
               onClick={() => {
                 router.push(
-                  `/checkout?produceId=${opportunity._id}&units=${opportunity.minimumUnit}`,
+                  detailsHref,
                 );
               }}
               className="flex-1 mt-3 rounded-lg bg-primary py-2.5 text-sm font-bold text-white hover:bg-primary-dark transition-colors"
