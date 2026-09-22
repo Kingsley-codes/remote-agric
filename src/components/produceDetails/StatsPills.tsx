@@ -11,15 +11,7 @@ export function StatsPills({ profit, duration, category }: StatsPillsProps) {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <Stat label="Annualized profit" value={profit} highlight />
       <Stat label="Duration" value={`${duration} Months`} />
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-        <p className="text-gray-500 text-xs font-semibold uppercase mb-1">
-          Risk Level
-        </p>
-        <div className="flex items-center gap-2">
-          <FaCircle className="text-green-500 text-xs" />
-          <p className="text-gray-900 text-2xl font-semibold">Low</p>
-        </div>
-      </div>
+
       <Stat label="Type" value={category} />
     </div>
   );

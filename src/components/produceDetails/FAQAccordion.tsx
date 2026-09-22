@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FaChevronDown } from "react-icons/fa";
 
 interface FAQItem {
@@ -9,12 +10,17 @@ const items: FAQItem[] = [
   {
     question: "When do I get my returns?",
     answer:
-      "Returns (capital plus profit) are paid automatically into your Grow Africa wallet at the end of the 9-month cycle.",
+      "Returns (capital plus profit) are paid automatically into your Remote Agric wallet at the end of the cycle.",
   },
   {
     question: "Is my farm ownership insured?",
     answer:
-      "Yes. This farm cycle is insured against natural disasters, fire and theft. The certificate is available in the documents section.",
+      "Yes. This farm cycle is insured against natural disasters, fire and theft. The insurance is provided by a reputable insurance company and covers the farm's assets and produce.",
+  },
+  {
+    question: "Can I sell my farm ownership?",
+    answer:
+      "Yes. You can sell your farm ownership units at the end of the cycle. You can also choose to receive the produce instead of selling your ownership. The option to sell or receive produce will be available in your dashboard when the project reaches that stage.",
   },
 ];
 
@@ -39,6 +45,14 @@ export function FAQAccordion() {
             <div className="px-4 pb-4 text-gray-500 text-sm">{item.answer}</div>
           </details>
         ))}
+
+        <p className="text-sm text-gray-500 mt-4">
+          If you have any other questions, please{" "}
+          <Link href="/faqs" className="text-green-500 hover:underline">
+            visit our FAQs page
+          </Link>
+          .
+        </p>
       </div>
     </section>
   );
