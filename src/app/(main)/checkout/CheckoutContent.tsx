@@ -20,7 +20,7 @@ type Produce = {
   description?: string;
   profit: number;
   rolloverProfit: number;
-  tracks: Array<{ _id: string; name: string; startMonth: number; endMonth: number; stage: string }>;
+  tracks: Array<{ _id: string; name: string; startMonth: number; endMonth: number; stage: string; status: 'active' | 'closed' }>;
 };
 
 type UserProfile = {
@@ -43,7 +43,6 @@ export default function CheckoutContent() {
   const produceId = searchParams.get("produceId");
   const units = Number(searchParams.get("units") || 1);
   const trackId = searchParams.get("trackId") ?? "";
-  const acknowledgeClosedTrack = searchParams.get("acknowledgeClosedTrack") === "true";
   const rolloverInvestmentId = searchParams.get("rolloverInvestmentId") ?? undefined;
 
   const [produce, setProduce] = useState<Produce | null>(null);
@@ -174,7 +173,6 @@ export default function CheckoutContent() {
               paymentMethod={paymentMethod}
               isAuthenticated={Boolean(user)}
               trackId={trackId}
-              acknowledgeClosedTrack={acknowledgeClosedTrack}
               rolloverInvestmentId={rolloverInvestmentId}
             />
           </div>

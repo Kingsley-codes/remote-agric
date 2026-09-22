@@ -21,6 +21,7 @@ interface EditOpportunityModalProps {
     category: string;
     duration: number;
     profit: number;
+    rolloverProfit: number;
     tracks: ProduceTrack[];
   };
   onSuccess: () => void;
@@ -39,6 +40,7 @@ export default function EditOpportunityModal({
     produceName: investment.produceName,
     description: investment.description,
     profit: investment.profit.toString(),
+    rolloverProfit: investment.rolloverProfit.toString(),
     price: investment.price.toString(),
     minimumUnit: investment.minimumUnit.toString(),
     totalUnit: investment.totalUnit.toString(),
@@ -87,6 +89,7 @@ export default function EditOpportunityModal({
       formDataToSend.append("produceName", formData.produceName);
       formDataToSend.append("description", formData.description);
       formDataToSend.append("profit", formData.profit);
+      formDataToSend.append("rolloverProfit", formData.rolloverProfit);
       formDataToSend.append("price", formData.price);
       formDataToSend.append("minimumUnit", formData.minimumUnit);
       formDataToSend.append("totalUnit", formData.totalUnit);
@@ -338,6 +341,22 @@ export default function EditOpportunityModal({
                       className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                       placeholder="e.g., 24"
                       min="1"
+                      max="12"
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Rollover profit (%) *
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.rolloverProfit}
+                      onChange={(e) => setFormData({ ...formData, rolloverProfit: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                      step="0.1"
+                      min="0"
+                      required
                       disabled={loading}
                     />
                   </div>
@@ -357,6 +376,7 @@ export default function EditOpportunityModal({
                       <option value="">Select category</option>
                       <option value="crops">Crops</option>
                       <option value="livestock">Livestock</option>
+                      <option value="aquaculture">Aquaculture</option>
                     </select>
                   </div>
                 </div>

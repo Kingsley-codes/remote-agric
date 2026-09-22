@@ -1,6 +1,5 @@
 "use client";
 
-import { stageLabel } from "@/lib/farmProgress";
 import { useState } from "react";
 import { MdDelete } from "react-icons/md";
 import axios from "axios";
@@ -28,7 +27,7 @@ interface Investment {
   stage: string;
   status: string;
   rolloverProfit: number;
-  tracks: Array<{ _id: string; name: string; startMonth: number; endMonth: number; stage: string }>;
+  tracks: Array<{ _id: string; name: string; startMonth: number; endMonth: number; stage: string; status: 'active' | 'closed' }>;
 }
 
 interface InvestmentRowProps {
@@ -50,16 +49,6 @@ export default function InvestmentRow({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [saving, setSaving] = useState<string | null>(null);
-  const updateStatus = async (value: string) => {
-    setSaving("status");
-    try {
-      await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${investment._id}/status`, { status: value }, { withCredentials: true });
-      toast.success(value === "closed" ? "Opportunity closed" : "Opportunity activated");
-      refreshInvestments?.();
-    } catch (error) { toast.error(axios.isAxiosError(error) ? error.response?.data?.message ?? "Unable to update status" : "Unable to update status"); }
-    finally { setSaving(null); }
-  };
   const getCategoryStyles = (category: string) => {
     switch (category.toLowerCase()) {
       case "crops":
@@ -129,9 +118,7 @@ export default function InvestmentRow({
             setIsDetailsModalOpen(false);
             setIsEditModalOpen(true);
           }}
-          onStatusChange={(status) => void updateStatus(status)}
           onTracksChanged={refreshInvestments}
-          saving={saving}
         />
       )}
       {isEditModalOpen && (
@@ -257,8 +244,8 @@ export default function InvestmentRow({
               <p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">{(investment.tracks ?? []).length}</p>
             </div>
             <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/50">
-              <p className="text-[10px] uppercase tracking-wide text-slate-400">Status</p>
-              <p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">{stageLabel(investment.status)}</p>
+              <p className="text-[10px] uppercase tracking-wide text-slate-400">Open tracks</p>
+              <p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">{(investment.tracks ?? []).filter((track) => track.status !== 'closed').length}</p>
             </div>
           </div>
         </div>
@@ -316,7 +303,7 @@ export default function InvestmentRow({
         </td>
         <td className="px-3 py-4">
           <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            {stageLabel(investment.status)}
+            {(investment.tracks ?? []).filter((track) => track.status !== 'closed').length} open
           </span>
         </td>
 

@@ -1,7 +1,6 @@
 "use client";
 
 import DetailDialog from "@/components/ui/DetailDialog";
-import { stageLabel } from "@/lib/farmProgress";
 import { TbEdit } from "react-icons/tb";
 import TrackManager, { type ProduceTrack } from "./TrackManager";
 
@@ -29,19 +28,16 @@ interface Props {
   produce: Produce;
   onClose: () => void;
   onEdit: () => void;
-  onStatusChange: (status: string) => void;
   onTracksChanged?: () => void;
-  saving: string | null;
 }
 
 const currency = (value: number) => new Intl.NumberFormat("en-NG", {
   style: "currency", currency: "NGN", maximumFractionDigits: 0,
 }).format(value);
 
-export default function ProduceDetailsModal({ produce, onClose, onEdit, onStatusChange, onTracksChanged, saving }: Props) {
+export default function ProduceDetailsModal({ produce, onClose, onEdit, onTracksChanged }: Props) {
   const tracks = produce.tracks ?? [];
   const images = [produce.image1, produce.image2, produce.image3].filter((image) => image?.url);
-  const selectClass = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary/30 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200";
   const facts = [
     ["Unit price", currency(produce.price)],
     ["Minimum units", produce.minimumUnit.toLocaleString()],
@@ -90,15 +86,6 @@ export default function ProduceDetailsModal({ produce, onClose, onEdit, onStatus
             </div>
           ))}
         </dl>
-
-        <div className="grid gap-2 sm:grid-cols-[10rem_1fr] sm:items-center">
-          <label htmlFor={`status-${produce._id}`} className="text-sm font-semibold text-slate-700 dark:text-slate-200">Listing status</label>
-          <select id={`status-${produce._id}`} value={produce.status} disabled={saving !== null} onChange={(event) => onStatusChange(event.target.value)} className={selectClass}>
-            {!['active', 'closed'].includes(produce.status) && <option value={produce.status}>{stageLabel(produce.status)}</option>}
-            <option value="active">Active</option>
-            <option value="closed">Closed</option>
-          </select>
-        </div>
 
         <TrackManager
           produceId={produce._id}

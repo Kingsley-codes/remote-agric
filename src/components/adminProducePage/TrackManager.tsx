@@ -13,6 +13,7 @@ export interface ProduceTrack {
   startMonth: number;
   endMonth: number;
   stage: string;
+  status: 'active' | 'closed';
 }
 
 interface Props {
@@ -113,6 +114,28 @@ export default function TrackManager({ produceId, duration, category, initialTra
     }
   };
 
+  const updateStatus = async (trackId: string, status: ProduceTrack['status']) => {
+    if (busy) return;
+    setBusy(trackId);
+    setErrorMessage('');
+    try {
+      await axios.patch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce/${produceId}/tracks/${trackId}/status`,
+        { status },
+        { withCredentials: true },
+      );
+      setTracks((current) => current.map((track) => track._id === trackId ? { ...track, status } : track));
+      toast.success(status === 'closed' ? 'Track closed to new investments' : 'Track opened for investment');
+      onChanged?.();
+    } catch (error) {
+      const message = axios.isAxiosError(error) ? error.response?.data?.message ?? `Unable to update track (${error.response?.status ?? 'network error'})` : 'Unable to update track';
+      setErrorMessage(message);
+      toast.error(message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <section>
       <div className="mb-3 flex items-center justify-between gap-3">
@@ -156,7 +179,7 @@ export default function TrackManager({ produceId, duration, category, initialTra
 
       <div className="space-y-3">
         {tracks.map((track) => (
-          <div key={track._id} className="grid gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700 sm:grid-cols-[1fr_12rem_auto] sm:items-center">
+          <div key={track._id} className="grid gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700 sm:grid-cols-[1fr_10rem_12rem_auto] sm:items-center">
             <div>
               <p className="text-sm font-bold text-slate-900 dark:text-white">{track.name}</p>
               <p className="mt-1 text-xs text-slate-500">{months[track.startMonth - 1]} to {months[track.endMonth - 1]}</p>
@@ -164,6 +187,10 @@ export default function TrackManager({ produceId, duration, category, initialTra
             <select aria-label={`Stage for ${track.name}`} value={track.stage} disabled={busy !== null} onChange={(event) => void updateStage(track._id, event.target.value)} className={inputClass}>
               {!stages.includes(track.stage) && <option value={track.stage}>{stageLabel(track.stage)}</option>}
               {stages.map((stage) => <option key={stage} value={stage}>{stageLabel(stage)}</option>)}
+            </select>
+            <select aria-label={`Listing status for ${track.name}`} value={track.status ?? 'active'} disabled={busy !== null} onChange={(event) => void updateStatus(track._id, event.target.value as ProduceTrack['status'])} className={inputClass}>
+              <option value="active">Open for investment</option>
+              <option value="closed">Closed</option>
             </select>
             <button type="button" onClick={() => void deleteTrack(track)} disabled={busy !== null || tracks.length === 1} title={tracks.length === 1 ? "A produce must have at least one track" : `Delete ${track.name}`} aria-label={`Delete ${track.name}`} className="rounded-lg p-2 text-red-600 hover:bg-red-50 disabled:opacity-30 dark:hover:bg-red-900/20">
               <MdDelete className="h-5 w-5" />

@@ -26,7 +26,7 @@ interface Produce {
   stage: string;
   status: string;
   rolloverProfit: number;
-  tracks: Array<{ _id: string; name: string; startMonth: number; endMonth: number; stage: string }>;
+  tracks: Array<{ _id: string; name: string; startMonth: number; endMonth: number; stage: string; status: 'active' | 'closed' }>;
 }
 
 export default function InvestmentTable() {
@@ -141,7 +141,7 @@ export default function InvestmentTable() {
                   <th className="px-3 py-4">Farm Listing</th>
                   <th className="px-3 py-4">Category</th>
                   <th className="px-3 py-4 text-center">Tracks</th>
-                  <th className="px-3 py-4">Status</th>
+                  <th className="px-3 py-4">Open tracks</th>
                   <th className="px-3 py-4 text-right">profit</th>
                   <th className="px-3 py-4 text-right">Duration</th>
                   <th className="px-3 py-4 text-right">Total Units</th>

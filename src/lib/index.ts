@@ -32,6 +32,7 @@ export interface OpportunityTrack {
   startMonth: number;
   endMonth: number;
   stage: string;
+  status: 'active' | 'closed';
 }
 
 export interface ApiProduce {
