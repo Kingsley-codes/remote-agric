@@ -56,7 +56,7 @@ export function useAuth({ allowedRoles }: { allowedRoles: Role[] }) {
 
         // The authenticated endpoint, never local storage, determines the role.
         const role: Role = isAdminRoute ? "admin" : "user";
-        const user = { ...profile, role };
+        const user = { ...profile, profilePhoto: typeof profile.profilePhoto === "string" ? profile.profilePhoto : profile.profilePhoto?.url, role };
         const allowed = rolesRef.current.map((item) => item.toLowerCase());
 
         if (!allowed.includes(role)) {
@@ -75,6 +75,8 @@ export function useAuth({ allowedRoles }: { allowedRoles: Role[] }) {
     };
 
     checkAuth();
+    window.addEventListener("profile-updated", checkAuth);
+    return () => window.removeEventListener("profile-updated", checkAuth);
   }, [router]);
 
   return { loading, user };

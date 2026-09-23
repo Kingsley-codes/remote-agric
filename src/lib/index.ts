@@ -43,6 +43,8 @@ export interface ApiProduce {
   description: string;
   totalUnit: number;
   minimumUnit: number;
+  maximumUnit?: number;
+  referralBonus?: number;
   price: number;
   category: string;
   duration: number;

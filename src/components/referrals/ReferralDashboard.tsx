@@ -1,5 +1,6 @@
 "use client";
 
+import DetailDialog from "@/components/ui/DetailDialog";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { CheckCircle2, Copy, Gift, Loader2, Users } from "lucide-react";
@@ -12,7 +13,12 @@ type Person = {
   farmerID: string;
 };
 
+type Reward = {
+  _id: string; amount: number; units: number; referralBonus: number; date: string; transactionID: string;
+  referralRewardInvestment?: { title: string; orderID: string; totalPrice: number; track?: { name: string } };
+};
 type Item = {
+  rewards?: Reward[];
   _id: string;
   referrer?: Person;
   referredUser: Person;
@@ -26,7 +32,6 @@ type Item = {
 
 type ReferralData = {
   referralCode?: string;
-  rewardPerUnit: number;
   rewardDurationMonths: number;
   stats: {
     total: number;
@@ -39,6 +44,8 @@ type ReferralData = {
 };
 
 export default function ReferralDashboard({ admin = false }: { admin?: boolean }) {
+  const [selected, setSelected] = useState<Item | null>(null);
+  const [error, setError] = useState("");
   const [data, setData] = useState<ReferralData | null>(null);
 
   useEffect(() => {
@@ -47,9 +54,11 @@ export default function ReferralDashboard({ admin = false }: { admin?: boolean }
         `${process.env.NEXT_PUBLIC_BACKEND_URL}${admin ? "/api/admin/referrals" : "/api/referrals"}`,
         { withCredentials: true },
       )
-      .then((response) => setData(response.data.data));
+      .then((response) => setData(response.data.data))
+      .catch(() => setError("Unable to load referral activity. Please reload to try again."));
   }, [admin]);
 
+  if (error) return <p role="alert" className="p-10 text-red-700">{error}</p>;
   if (!data) {
     return (
       <div className="flex justify-center p-20">
@@ -86,9 +95,7 @@ export default function ReferralDashboard({ admin = false }: { admin?: boolean }
           {admin ? "Referral activity" : "Referral rewards"}
         </h1>
         <p className="mt-2 text-sm text-gray-500">
-          {admin
-            ? `Referrers earn ${money(data.rewardPerUnit)} per unit purchased during each referral's first ${data.rewardDurationMonths} months.`
-            : `Earn ${money(data.rewardPerUnit)} for every unit a referred friend buys during their first ${data.rewardDurationMonths} months on the platform.`}
+          Earn a produce-specific bonus per unit for investments made within {data.rewardDurationMonths} months of a referred user’s registration. View each produce for its current rate.
         </p>
       </div>
 
@@ -156,7 +163,7 @@ export default function ReferralDashboard({ admin = false }: { admin?: boolean }
                 <p className="font-medium">
                   {admin
                     ? `${referral.referrer?.firstName ?? ""} ${referral.referrer?.lastName ?? ""}`
-                    : `${referral.referredUser.firstName} ${referral.referredUser.lastName}`}
+                    : `${referral.referredUser?.firstName ?? "Deleted"} ${referral.referredUser?.lastName ?? "user"}`}
                 </p>
                 {!admin && (
                   <p className="mt-1 text-xs text-gray-400">Eligible until {date(referral.expiresAt)}</p>
@@ -170,11 +177,11 @@ export default function ReferralDashboard({ admin = false }: { admin?: boolean }
                   <div>
                     <p className="text-xs text-gray-400">New user</p>
                     <p className="font-medium">
-                      {referral.referredUser.firstName} {referral.referredUser.lastName}
+                      {referral.referredUser?.firstName ?? "Deleted"} {referral.referredUser?.lastName ?? "user"}
                     </p>
                   </div>
                   <p className="font-mono text-xs font-medium text-primary">
-                    {referral.referredUser.farmerID ?? "Unavailable"}
+                    {referral.referredUser?.farmerID ?? "Unavailable"}
                   </p>
                 </>
               )}
@@ -188,11 +195,30 @@ export default function ReferralDashboard({ admin = false }: { admin?: boolean }
                 {referral.status}
               </span>
               <p className="font-medium">{referral.rewardedUnits ?? 0} units</p>
-              <p className="font-medium">{money(referral.commission)}</p>
+              <div><p className="font-medium">{money(referral.commission)}</p><button onClick={() => setSelected(referral)} className="mt-2 text-xs font-semibold text-primary underline">View details</button></div>
             </div>
           ))
         )}
       </div>
+      <div className="mt-7 overflow-x-auto rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="mb-4 font-semibold">Bonuses by investment</h2>
+        <table className="w-full text-left text-sm"><thead><tr className="border-b text-xs text-slate-500">{[...(admin ? ["Referrer"] : []), "Referred user", "Produce / track", "Units", "Bonus per unit", "Total bonus", "Date"].map(label => <th key={label} className="whitespace-nowrap p-3">{label}</th>)}</tr></thead>
+          <tbody>{data.referrals.flatMap(referral => (referral.rewards ?? []).map(reward => <tr key={reward._id} className="border-b border-slate-100">
+            {admin && <td className="p-3">{referral.referrer?.firstName} {referral.referrer?.lastName}</td>}
+            <td className="p-3">{referral.referredUser?.firstName} {referral.referredUser?.lastName}</td>
+            <td className="p-3"><button className="text-left font-medium text-primary underline" onClick={() => setSelected(referral)}>{reward.referralRewardInvestment?.title ?? "Archived investment"}</button><p className="text-xs text-slate-500">{reward.referralRewardInvestment?.track?.name ?? "—"}</p></td>
+            <td className="p-3">{reward.units}</td><td className="whitespace-nowrap p-3">{money(reward.referralBonus)}</td><td className="whitespace-nowrap p-3 font-semibold">{money(reward.amount)}</td><td className="whitespace-nowrap p-3">{date(reward.date)}</td>
+          </tr>))}</tbody></table>
+        {!data.referrals.some(r => r.rewards?.length) && <p className="p-6 text-center text-sm text-slate-500">No investment bonuses yet.</p>}
+      </div>
+      {selected && <DetailDialog title="Referral details" onClose={() => setSelected(null)}>
+        <dl className="grid gap-4 text-sm sm:grid-cols-2">
+          {[["Referred user", `${selected.referredUser?.firstName ?? ""} ${selected.referredUser?.lastName ?? ""}`], ["Email", selected.referredUser?.email], ["Farmer ID", selected.referredUser?.farmerID], ["Registered", date(selected.createdAt)], ["Eligible until", date(selected.expiresAt)], ["Total earned", money(selected.commission)], ...(admin ? [["Referrer", `${selected.referrer?.firstName ?? ""} ${selected.referrer?.lastName ?? ""}`], ["Referrer ID", selected.referrer?.farmerID]] : [])].map(([label, value]) => <div key={label}><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 break-words font-medium">{value || "Not provided"}</dd></div>)}
+        </dl>
+        <h3 className="mb-3 mt-6 font-semibold">Investment rewards</h3>
+        {(selected.rewards ?? []).map(reward => <div key={reward._id} className="mb-3 rounded-xl border p-4 text-sm"><p className="font-semibold">{reward.referralRewardInvestment?.title ?? "Archived investment"}</p><p className="mt-1 text-xs text-slate-500">{reward.referralRewardInvestment?.track?.name} · {reward.referralRewardInvestment?.orderID} · {date(reward.date)}</p><p className="mt-3">{reward.units} units × {money(reward.referralBonus)} = <strong>{money(reward.amount)}</strong></p><p className="mt-2 break-all text-xs text-slate-500">{reward.transactionID}</p></div>)}
+        {!selected.rewards?.length && <p className="text-sm text-slate-500">No investment bonuses yet.</p>}
+      </DetailDialog>}
     </section>
   );
 }

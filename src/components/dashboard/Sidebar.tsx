@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   FiGrid,
+  FiSettings,
   FiPieChart,
   FiShoppingBag,
   FiCreditCard,
@@ -20,7 +21,7 @@ export interface UserData {
   firstName?: string;
   lastName?: string;
   name?: string;
-  profilePhoto?: string;
+  profilePhoto?: string | { url?: string };
   email?: string;
   role?: string;
 }
@@ -32,6 +33,7 @@ interface SidebarProps {
 }
 
 const navLinks = [
+  { href: "/dashboard/settings", label: "Profile settings", icon: FiSettings },
   { href: "/dashboard", label: "Dashboard", icon: FiGrid },
   { href: "/dashboard/investments", label: "My Farms", icon: FiPieChart },
   { href: "/dashboard/opportunities", label: "Own a New Farm", icon: FiShoppingBag },
@@ -64,7 +66,7 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const initials = getInitials(user);
   const displayName = getDisplayName(user);
-  const profilePhoto = user?.profilePhoto;
+  const profilePhoto = typeof user?.profilePhoto === "string" ? user.profilePhoto : user?.profilePhoto?.url;
   const sidebarRef = useRef<HTMLElement>(null);
 
   const [menuOpen, setMenuOpen] = useState(false);

@@ -76,6 +76,7 @@ export default function VerifyPaymentContent() {
   const reference = searchParams.get("reference") ?? "";
   const [status, setStatus] = useState<VerifyStatus>("loading");
   const [details, setDetails] = useState<PaymentDetails | null>(null);
+  const [refundMessage, setRefundMessage] = useState("");
   const [retrying, setRetrying] = useState(false);
   const [loading, setLoading] = useState(true); // FIX: now properly toggled
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -101,6 +102,9 @@ export default function VerifyPaymentContent() {
         );
         const data = await res.json();
 
+        if (data.status === "refunded") {
+          setRefundMessage(data.message); setStatus("failed"); return;
+        }
         if (!res.ok) throw new Error(data.message || "Verification failed");
 
         const payload = data.data;
@@ -212,8 +216,8 @@ export default function VerifyPaymentContent() {
                 <StatusBadge status={status} />
 
                 <div className="space-y-2">
-                  <h2 className="text-3xl font-bold">{heading}</h2>
-                  <p className="text-gray-500 text-sm max-w-sm">{subtext}</p>
+                  <h2 className="text-3xl font-bold">{refundMessage ? "Payment credited to wallet" : heading}</h2>
+                  <p className="text-gray-500 text-sm max-w-sm">{refundMessage || subtext}</p>
                 </div>
 
                 {/* CTA buttons */}
@@ -258,10 +262,10 @@ export default function VerifyPaymentContent() {
                   {status === "failed" && (
                     <>
                       <button
-                        onClick={() => router.back()}
+                        onClick={() => refundMessage ? router.push("/dashboard/wallet") : router.back()}
                         className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-green-500/20 transition"
                       >
-                        Try Again <FiArrowRight />
+                        {refundMessage ? "View wallet" : "Try Again"} <FiArrowRight />
                       </button>
                       <button
                         onClick={() => router.push("/")}

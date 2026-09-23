@@ -17,6 +17,8 @@ interface EditOpportunityModalProps {
     description: string;
     totalUnit: number;
     minimumUnit: number;
+    maximumUnit?: number;
+    referralBonus?: number;
     price: number;
     category: string;
     duration: number;
@@ -43,6 +45,8 @@ export default function EditOpportunityModal({
     rolloverProfit: investment.rolloverProfit.toString(),
     price: investment.price.toString(),
     minimumUnit: investment.minimumUnit.toString(),
+    maximumUnit: String(investment.maximumUnit ?? investment.totalUnit),
+    referralBonus: String(investment.referralBonus ?? 50),
     totalUnit: investment.totalUnit.toString(),
     duration: investment.duration.toString(),
     category: investment.category,
@@ -92,6 +96,8 @@ export default function EditOpportunityModal({
       formDataToSend.append("rolloverProfit", formData.rolloverProfit);
       formDataToSend.append("price", formData.price);
       formDataToSend.append("minimumUnit", formData.minimumUnit);
+      formDataToSend.append("maximumUnit", formData.maximumUnit);
+      formDataToSend.append("referralBonus", formData.referralBonus);
       formDataToSend.append("totalUnit", formData.totalUnit);
       formDataToSend.append("category", formData.category);
       formDataToSend.append("duration", formData.duration);
@@ -340,8 +346,9 @@ export default function EditOpportunityModal({
                       }
                       className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                       placeholder="e.g., 24"
-                      min="1"
-                      max="12"
+                      min="2"
+                      max="60"
+                      required
                       disabled={loading}
                     />
                   </div>
@@ -382,6 +389,15 @@ export default function EditOpportunityModal({
                 </div>
               </div>
 
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="text-sm font-medium">Maximum units per investor per track
+                  <input type="number" required min={Number(formData.minimumUnit) || 1} max={Number(formData.totalUnit) || undefined} step="1" value={formData.maximumUnit} onChange={e => setFormData({ ...formData, maximumUnit: e.target.value })} disabled={loading} className="mt-2 w-full rounded-lg border p-3" />
+                </label>
+                <label className="text-sm font-medium">Referral bonus per unit (NGN)
+                  <input type="number" required min="0" step="0.01" value={formData.referralBonus} onChange={e => setFormData({ ...formData, referralBonus: e.target.value })} disabled={loading} className="mt-2 w-full rounded-lg border p-3" />
+                </label>
+              </div>
+              <p className="text-xs text-slate-500">Saving a new duration recalculates track end months for future investments. Existing investments keep their original schedule and referral rewards.</p>
               <TrackManager
                 produceId={investment._id}
                 duration={investment.duration}

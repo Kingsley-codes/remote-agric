@@ -11,6 +11,10 @@ import OrderSummary from "@/components/checkout/OrderSummary";
 import CheckoutLoading from "@/components/checkout/CheckoutLoading";
 
 type Produce = {
+  minimumUnit: number;
+  maximumUnit?: number;
+  remainingUnit: number;
+  totalUnit: number;
   _id: string;
   name: string;
   title: string;

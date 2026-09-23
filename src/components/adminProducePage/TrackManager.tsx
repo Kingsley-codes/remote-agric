@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { MdDelete } from "react-icons/md";
@@ -28,8 +28,6 @@ const months = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
-const monthSpan = (startMonth: number, endMonth: number) =>
-  ((endMonth - startMonth + 12) % 12) + 1;
 const inputClass =
   "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-primary/30 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200";
 
@@ -37,13 +35,13 @@ export default function TrackManager({ produceId, duration, category, initialTra
   const [tracks, setTracks] = useState(initialTracks);
   const [name, setName] = useState("");
   const [startMonth, setStartMonth] = useState(1);
-  const [endMonth, setEndMonth] = useState(1);
+  const endMonth = ((startMonth + duration - 2) % 12) + 1;
   const [showForm, setShowForm] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const stages = stagesByCategory[category] ?? stagesByCategory.crops;
-  const span = useMemo(() => monthSpan(startMonth, endMonth), [startMonth, endMonth]);
-  const valid = Number.isInteger(duration) && duration >= 1 && duration <= 12 && span === duration;
+  const span = duration;
+  const valid = Number.isInteger(duration) && duration >= 2 && duration <= 60;
 
   const addTrack = async () => {
     if (!valid || busy) return;
@@ -164,7 +162,7 @@ export default function TrackManager({ produceId, duration, category, initialTra
               </select>
             </label>
             <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Ends
-              <select value={endMonth} onChange={(event) => setEndMonth(Number(event.target.value))} className={`mt-1 ${inputClass}`} disabled={busy !== null}>
+              <select value={endMonth} aria-label="Calculated end month" className={`mt-1 ${inputClass}`} disabled>
                 {months.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}
               </select>
             </label>
@@ -182,7 +180,7 @@ export default function TrackManager({ produceId, duration, category, initialTra
           <div key={track._id} className="grid gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700 sm:grid-cols-[1fr_10rem_12rem_auto] sm:items-center">
             <div>
               <p className="text-sm font-bold text-slate-900 dark:text-white">{track.name}</p>
-              <p className="mt-1 text-xs text-slate-500">{months[track.startMonth - 1]} to {months[track.endMonth - 1]}</p>
+              <p className="mt-1 text-xs text-slate-500">{months[track.startMonth - 1]} to {months[track.endMonth - 1]} · {duration} months</p>
             </div>
             <select aria-label={`Stage for ${track.name}`} value={track.stage} disabled={busy !== null} onChange={(event) => void updateStage(track._id, event.target.value)} className={inputClass}>
               {!stages.includes(track.stage) && <option value={track.stage}>{stageLabel(track.stage)}</option>}

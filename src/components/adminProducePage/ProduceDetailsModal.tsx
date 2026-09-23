@@ -11,6 +11,8 @@ interface Produce {
   description: string;
   totalUnit: number;
   minimumUnit: number;
+  maximumUnit?: number;
+  referralBonus?: number;
   price: number;
   category: string;
   duration: number;
@@ -41,6 +43,8 @@ export default function ProduceDetailsModal({ produce, onClose, onEdit, onTracks
   const facts = [
     ["Unit price", currency(produce.price)],
     ["Minimum units", produce.minimumUnit.toLocaleString()],
+    ["Maximum units per track", (produce.maximumUnit ?? produce.totalUnit).toLocaleString()],
+    ["Referral bonus per unit", new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(produce.referralBonus ?? 50)],
     ["Total units", produce.totalUnit.toLocaleString()],
     ["Remaining units", produce.remainingUnit.toLocaleString()],
     ["Profit", `${produce.profit}%`],

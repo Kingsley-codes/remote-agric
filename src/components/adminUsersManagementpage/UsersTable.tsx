@@ -1,5 +1,6 @@
 "use client";
 
+import DetailDialog from "@/components/ui/DetailDialog";
 import Image from "next/image";
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
@@ -15,6 +16,8 @@ import {
 type Status = "Active" | "Pending" | "Suspended";
 
 interface ApiUser {
+  phone?: string; address?: string; gender?: string; username?: string;
+  suspendReason?: string; hasActiveInvestment?: boolean; referredBy?: string;
   _id: string;
   firstName: string;
   lastName: string;
@@ -33,6 +36,7 @@ interface ApiUser {
 }
 
 interface User {
+  details: ApiUser;
   id: string;
   userID: string;
   name: string;
@@ -79,6 +83,7 @@ function formatDate(iso: string): { date: string; time: string } {
 function mapApiUser(u: ApiUser): User {
   const { date, time } = formatDate(u.createdAt);
   return {
+    details: u,
     id: u._id,
     userID: u.farmerID ?? u._id.slice(-8).toUpperCase(),
     name: `${u.firstName} ${u.lastName}`,
@@ -191,7 +196,9 @@ function ActionMenu({ userId, currentStatus, onAction }: ActionMenuProps) {
 function UserCard({
   user,
   onAction,
+  onDetails,
 }: {
+  onDetails: () => void;
   user: User;
   onAction: (userId: string, action: "activate" | "suspend") => Promise<void>;
 }) {
@@ -236,6 +243,7 @@ function UserCard({
             {user.balance}
           </span>
         </div>
+        <button onClick={onDetails} className="mt-3 text-xs font-semibold text-primary underline">View details</button>
         <p className="text-xs text-gray-400 mt-1.5">
           Joined:{" "}
           <span className="text-[#111b0d]">
@@ -262,6 +270,7 @@ function SkeletonRow() {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 export default function UsersTable() {
+  const [selected, setSelected] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -285,9 +294,6 @@ export default function UsersTable() {
   }, [search]);
 
   // Reset page when status filter changes
-  useEffect(() => {
-    setPage(1);
-  }, [statusFilter]);
 
   // ── Fetch (params: page + q + status) ────────────────────────────────────
   const fetchUsers = useCallback(
@@ -323,7 +329,8 @@ export default function UsersTable() {
 
   // Re-fetch whenever page, debouncedSearch, or statusFilter changes
   useEffect(() => {
-    fetchUsers(page, debouncedSearch, statusFilter);
+    const timer = setTimeout(() => void fetchUsers(page, debouncedSearch, statusFilter), 0);
+    return () => clearTimeout(timer);
   }, [page, debouncedSearch, statusFilter, fetchUsers]);
 
   // ── Optimistic activate / suspend ─────────────────────────────────────────
@@ -385,7 +392,7 @@ export default function UsersTable() {
           <div className="relative flex-1 sm:flex-none">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               className="w-full h-11 pl-3 pr-9 bg-white border border-[#d5e7cf] rounded-lg text-sm font-medium text-[#111b0d] focus:ring-1 focus:ring-[#46ec13] focus:border-[#46ec13] appearance-none cursor-pointer hover:bg-gray-50 transition-colors"
             >
               <option>All Status</option>
@@ -538,6 +545,7 @@ export default function UsersTable() {
                         </span>
                       </td>
                       <td className="p-4 pr-6 text-right">
+                        <button onClick={() => setSelected(user)} className="mb-2 whitespace-nowrap text-xs font-semibold text-primary underline">View details</button>
                         <ActionMenu
                           userId={user.id}
                           currentStatus={user.status}
@@ -568,11 +576,20 @@ export default function UsersTable() {
                 </div>
               ))
             : users.map((user) => (
-                <UserCard key={user.id} user={user} onAction={handleAction} />
+                <UserCard key={user.id} user={user} onAction={handleAction} onDetails={() => setSelected(user)} />
               ))}
         </div>
 
-        {/* Pagination */}
+        {selected && <DetailDialog title="User details" onClose={() => setSelected(null)}>
+        <div className="mb-6 flex items-center gap-4"><Image unoptimized src={selected.avatar} alt={selected.name} width={80} height={80} className="size-20 rounded-full object-cover" /><div><h3 className="text-xl font-semibold">{selected.name}</h3><p className="text-sm text-slate-500">{selected.userID}</p></div></div>
+        <dl className="grid gap-5 text-sm sm:grid-cols-2">{[
+          ["Email", selected.email], ["Phone", selected.details.phone], ["Address", selected.details.address], ["Gender", selected.details.gender], ["Username", selected.details.username],
+          ["Status", selected.status], ["Verified", selected.isVerified ? "Yes" : "No"], ["Wallet balance", selected.balance], ["Wallet ID", selected.details.wallet?.walletId],
+          ["Active investment", selected.details.hasActiveInvestment ? "Yes" : "No"], ["Referred by (user ID)", selected.details.referredBy], ["Suspension reason", selected.details.suspendReason],
+          ["Registered", new Date(selected.details.createdAt).toLocaleString()], ["Last updated", new Date(selected.details.updatedAt).toLocaleString()], ["Account ID", selected.id],
+        ].map(([label, value]) => <div key={label}><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 whitespace-pre-wrap break-words font-medium">{value || "Not provided"}</dd></div>)}</dl>
+      </DetailDialog>}
+      {/* Pagination */}
         <div className="flex items-center justify-between p-4 border-t border-[#d5e7cf] bg-[#f9fcf8]">
           <p className="text-sm text-[#5e9a4c]">
             <span className="font-bold text-[#111b0d]">Page {page}</span>

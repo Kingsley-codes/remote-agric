@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiArrowRight, FiLock } from "react-icons/fi";
 
-type ProduceType = { _id: string; title: string; price: number; image1: { url: string }; profit: number; rolloverProfit: number; tracks: Array<{ _id: string; name: string }> };
+type ProduceType = { minimumUnit: number; maximumUnit?: number; remainingUnit: number; totalUnit: number; _id: string; title: string; price: number; image1: { url: string }; profit: number; rolloverProfit: number; tracks: Array<{ _id: string; name: string }> };
 type BillingData = { firstName: string; lastName: string; email: string; address: string };
 type Props = { produce: ProduceType | null; units: number; billingData: BillingData; paymentMethod: "card" | "wallet"; isAuthenticated: boolean; trackId: string; rolloverInvestmentId?: string };
 const STORAGE_KEY = "remote-agric-payment-intent";
@@ -22,6 +22,7 @@ export default function OrderSummary({ produce, units, billingData, paymentMetho
   const track=produce.tracks.find((item)=>item._id===trackId);
 
   const pay=async()=>{
+    if (!Number.isSafeInteger(units) || units < produce.minimumUnit || units > Math.min(produce.remainingUnit, produce.maximumUnit ?? produce.totalUnit)) { setError("Choose a whole number of units within this produce’s minimum, maximum and availability limits."); return; }
     if(!track){setError("This track is no longer available. Please return to the opportunity and select an open track.");return;}
     if(!agreed){setError("Please agree to the Farm Ownership Terms to continue.");return;}
     if(paymentMethod==="wallet"&&!isAuthenticated){setError("Please sign in to pay with your Agro Wallet.");return;}

@@ -123,7 +123,7 @@ export default async function Page({ params }: PageProps) {
                 fundedPercent={fundedPercent}
                 soldUnits={soldUnits}
                 remainingUnits={produce.remainingUnit}
-                minimumUnit={produce.minimumUnit}
+                minimumUnit={produce.minimumUnit} maximumUnit={produce.maximumUnit ?? produce.totalUnit} referralBonus={produce.referralBonus ?? 50}
                 tracks={produce.tracks}
               />
 
