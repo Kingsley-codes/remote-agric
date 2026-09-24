@@ -33,13 +33,14 @@ export default function InvestmentTable() {
   const [investments, setInvestments] = useState<Produce[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
   const fetchInvestments = async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce`,
-        { withCredentials: true },
+        { withCredentials: true, params: categoryFilter ? { category: categoryFilter } : {} },
       );
       if (response.data.produce) {
         setInvestments(response.data.produce);
@@ -54,24 +55,27 @@ export default function InvestmentTable() {
 
   useEffect(() => {
     const controller = new AbortController();
-    axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce`,
-      { withCredentials: true, signal: controller.signal },
-    )
-      .then((response) => {
-        if (response.data.produce) setInvestments(response.data.produce);
-      })
-      .catch((error) => {
-        if (!controller.signal.aborted) {
-          console.error("Error fetching investments:", error);
-          toast.error("Failed to load farm listings");
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
+    const timer = setTimeout(() => {
+      setLoading(true);
+      axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/produce`,
+        { withCredentials: true, signal: controller.signal, params: categoryFilter ? { category: categoryFilter } : {} },
+      )
+        .then((response) => {
+          if (!controller.signal.aborted && response.data.produce) setInvestments(response.data.produce);
+        })
+        .catch((error) => {
+          if (!controller.signal.aborted) {
+            console.error("Error fetching investments:", error);
+            toast.error("Failed to load farm listings");
+          }
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setLoading(false);
+        });
+    }, 0);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [categoryFilter]);
 
   const handleEditSuccess = () => {
     toast.success("Farm listing updated successfully!");
@@ -85,9 +89,10 @@ export default function InvestmentTable() {
 
   const filteredInvestments = investments.filter(
     (investment) =>
-      investment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      investment.produceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      investment._id.toLowerCase().includes(searchTerm.toLowerCase()),
+      (!categoryFilter || investment.category.toLowerCase() === categoryFilter) &&
+      (investment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        investment.produceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        investment._id.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   return (
@@ -97,15 +102,28 @@ export default function InvestmentTable() {
         <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
           Active Listings
         </h3>
-        <div className="relative border border-gray-200 dark:border-slate-700 px-3 py-2 rounded-lg flex items-center gap-2 w-full sm:max-w-md">
-          <FaSearch className="text-gray-400 h-4 w-4 shrink-0" />
-          <input
-            className="bg-transparent border-none focus:ring-0 text-sm w-full text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
-            placeholder="Search projects..."
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+          <select
+            aria-label="Filter opportunities by category"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+          >
+            <option value="">All categories</option>
+            <option value="crops">Crops</option>
+            <option value="livestock">Livestock</option>
+            <option value="aquaculture">Aquaculture</option>
+          </select>
+          <div className="relative border border-gray-200 dark:border-slate-700 px-3 py-2 rounded-lg flex items-center gap-2 w-full sm:max-w-md">
+            <FaSearch className="text-gray-400 h-4 w-4 shrink-0" />
+            <input
+              className="bg-transparent border-none focus:ring-0 text-sm w-full text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+              placeholder="Search projects..."
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 

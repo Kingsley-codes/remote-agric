@@ -47,9 +47,21 @@ const navLinks = [
 
   { href: "/admin/dashboard/support", label: "Support", icon: IoIosChatboxes },
   { href: "/admin/dashboard/referrals", label: "Referrals", icon: FiGift },
-  { href: "/admin/dashboard/agri-learn", label: "Agri-Learn", icon: FiBookOpen },
-  { href: "/admin/dashboard/notifications", label: "Notifications", icon: FiBell },
-  { href: "/admin/dashboard/audit-logs", label: "Audit Logs", icon: FiClipboard },
+  {
+    href: "/admin/dashboard/agri-learn",
+    label: "Agri-Learn",
+    icon: FiBookOpen,
+  },
+  {
+    href: "/admin/dashboard/notifications",
+    label: "Notifications",
+    icon: FiBell,
+  },
+  {
+    href: "/admin/dashboard/audit-logs",
+    label: "Audit Logs",
+    icon: FiClipboard,
+  },
 ];
 
 function getInitials(user: UserData | null): string {
@@ -238,7 +250,7 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
 
         {/* User menu */}
         <div className="flex flex-col gap-4 w-full">
-<div
+          <div
             ref={menuRef}
             className={`relative flex items-center gap-3 border-t border-gray-400 pt-4 ${
               isOpen ? "px-2 py-2" : "justify-center"
@@ -262,7 +274,9 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
               {isOpen && (
                 <>
                   <div className="flex-1">
-                    <p className="text-sm font-bold">{displayName}</p>
+                    <p className="text-sm text-gray-600 font-bold">
+                      {displayName}
+                    </p>
                     <p className="text-xs text-gray-500">Administrator</p>
                   </div>
                   <FiChevronUp

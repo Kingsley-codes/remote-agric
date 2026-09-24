@@ -159,8 +159,9 @@ function ActionMenu({ userId, currentStatus, onAction }: ActionMenuProps) {
   }
 
   return (
-    <div ref={ref} className="relative inline-block">
+    <div ref={ref} onClick={(event) => event.stopPropagation()} className="relative inline-block">
       <button
+        aria-label="User actions"
         onClick={() => setOpen((o) => !o)}
         disabled={busy}
         className="text-[#5e9a4c] hover:text-[#111b0d] transition-colors p-1 rounded hover:bg-gray-100 disabled:opacity-40"
@@ -205,18 +206,17 @@ function UserCard({
   const status = statusBadge[user.status];
 
   return (
-    <div className="flex items-start gap-3 p-4 border-b border-[#eaf3e7] last:border-0 hover:bg-[#f9fcf8] transition-colors">
-      <Image
-        src={user.avatar}
-        alt={user.name}
-        width={40}
-        height={40}
-        className="rounded-full object-cover shrink-0"
-        onError={(e) => {
-          (e.target as HTMLImageElement).src =
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=d5e7cf&color=111b0d`;
-        }}
-      />
+    <div
+      tabIndex={0}
+      aria-label={`View details for ${user.name}`}
+      onClick={onDetails}
+      onKeyDown={(event) => {
+        if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          onDetails();
+        }
+      }}
+      className="flex cursor-pointer items-start gap-3 p-4 border-b border-[#eaf3e7] last:border-0 hover:bg-[#f9fcf8] focus-visible:outline-2 focus-visible:outline-primary transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span className="font-bold text-gray-700 text-sm truncate">
@@ -243,7 +243,6 @@ function UserCard({
             {user.balance}
           </span>
         </div>
-        <button onClick={onDetails} className="mt-3 text-xs font-semibold text-primary underline">View details</button>
         <p className="text-xs text-gray-400 mt-1.5">
           Joined:{" "}
           <span className="text-[#111b0d]">
@@ -259,7 +258,7 @@ function UserCard({
 function SkeletonRow() {
   return (
     <tr className="animate-pulse">
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 7 }).map((_, i) => (
         <td key={i} className="p-4">
           <div className="h-4 bg-[#eaf3e7] rounded w-3/4" />
         </td>
@@ -275,6 +274,9 @@ export default function UsersTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
+  const pendingAction = useRef(false);
+  const requestController = useRef<AbortController | null>(null);
 
   // Search / filter state — these drive the API call
   const [search, setSearch] = useState("");
@@ -298,6 +300,9 @@ export default function UsersTable() {
   // ── Fetch (params: page + q + status) ────────────────────────────────────
   const fetchUsers = useCallback(
     async (currentPage: number, q: string, status: string) => {
+      requestController.current?.abort();
+      const controller = new AbortController();
+      requestController.current = controller;
       setLoading(true);
       setError(null);
       try {
@@ -309,19 +314,19 @@ export default function UsersTable() {
 
         const res = await fetch(
           `${BACKEND_URL}/api/admin/dashboard/users?${params.toString()}`,
-          { credentials: "include" },
+          { credentials: "include", signal: controller.signal },
         );
         if (!res.ok) throw new Error(`Server responded with ${res.status}`);
         const json = await res.json();
         if (!json.success) throw new Error("API returned success: false");
 
+        if (controller.signal.aborted) return;
         setUsers((json.data as ApiUser[]).map(mapApiUser));
-        setPage(json.page ?? 1);
         setTotalPages(json.pages ?? 1);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load users");
+        if (!controller.signal.aborted) setError(err instanceof Error ? err.message : "Failed to load users");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     },
     [],
@@ -330,20 +335,17 @@ export default function UsersTable() {
   // Re-fetch whenever page, debouncedSearch, or statusFilter changes
   useEffect(() => {
     const timer = setTimeout(() => void fetchUsers(page, debouncedSearch, statusFilter), 0);
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(timer); requestController.current?.abort(); };
   }, [page, debouncedSearch, statusFilter, fetchUsers]);
 
-  // ── Optimistic activate / suspend ─────────────────────────────────────────
+  // ── Activate / suspend ─────────────────────────────────────────
   const handleAction = useCallback(
     async (userId: string, action: "activate" | "suspend") => {
+      if (pendingAction.current) return;
+      pendingAction.current = true;
+      setActionBusy(true);
       setActionError(null);
-
-      const previousUsers = users;
       const newStatus: Status = action === "activate" ? "Active" : "Suspended";
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u)),
-      );
-
       try {
         const endpoint =
           action === "activate"
@@ -361,16 +363,23 @@ export default function UsersTable() {
           throw new Error(`Request failed with status ${res.status}`);
         const json = await res.json();
         if (!json.success) throw new Error(json.message ?? "Action failed");
+        const updateUser = (user: User): User => user.id === userId
+          ? { ...user, status: newStatus, details: { ...user.details, status: newStatus.toLowerCase() } }
+          : user;
+        setUsers((current) => current.map(updateUser));
+        setSelected((current) => current ? updateUser(current) : null);
       } catch (err) {
-        setUsers(previousUsers);
         setActionError(
           err instanceof Error
             ? err.message
             : "Action failed. Please try again.",
         );
+      } finally {
+        pendingAction.current = false;
+        setActionBusy(false);
       }
     },
-    [users],
+    [],
   );
 
   return (
@@ -406,9 +415,10 @@ export default function UsersTable() {
           <button
             onClick={() => fetchUsers(page, debouncedSearch, statusFilter)}
             className="h-11 px-4 flex items-center gap-2 bg-white border border-[#d5e7cf] rounded-lg text-sm font-bold text-[#111b0d] hover:bg-gray-50 transition-colors shrink-0"
+            disabled={loading}
             title="Refresh"
           >
-            <MdRefresh className="text-lg" />
+            <MdRefresh className={`text-lg ${loading ? "animate-spin" : ""}`} />
           </button>
 
           <button className="h-11 px-4 flex items-center gap-2 bg-white border border-[#d5e7cf] rounded-lg text-sm font-bold text-[#111b0d] hover:bg-gray-50 transition-colors shrink-0">
@@ -443,7 +453,7 @@ export default function UsersTable() {
       )}
 
       {/* ── Table / Cards ── */}
-      <div className="bg-white border border-[#d5e7cf] rounded-xl overflow-hidden shadow-sm">
+      <div aria-busy={loading} className="bg-white border border-[#d5e7cf] rounded-xl overflow-hidden shadow-sm">
         {/* Desktop table */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -451,7 +461,6 @@ export default function UsersTable() {
               <tr className="bg-[#f9fcf8] border-b border-[#d5e7cf]">
                 {[
                   "User ID",
-                  "Profile Photo",
                   "User",
                   "Verified",
                   "Wallet Balance",
@@ -471,12 +480,12 @@ export default function UsersTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#eaf3e7]">
-              {loading ? (
+              {loading && users.length === 0 ? (
                 Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
               ) : users.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={7}
                     className="text-center py-12 text-[#5e9a4c] text-sm"
                   >
                     No users match your search.
@@ -488,25 +497,22 @@ export default function UsersTable() {
                   return (
                     <tr
                       key={user.id}
-                      className="hover:bg-[#f9fcf8] transition-colors"
+                      tabIndex={0}
+                      aria-label={`View details for ${user.name}`}
+                      onClick={() => { setActionError(null); setSelected(user); }}
+                      onKeyDown={(event) => {
+                        if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                          event.preventDefault();
+                          setActionError(null);
+                          setSelected(user);
+                        }
+                      }}
+                      className="cursor-pointer hover:bg-[#f9fcf8] focus-visible:outline-2 focus-visible:outline-primary transition-colors"
                     >
                       <td className="p-4 pl-6">
                         <span className="text-sm font-mono font-medium text-gray-600">
                           {user.userID}
                         </span>
-                      </td>
-                      <td className="p-4 px-7">
-                        <Image
-                          src={user.avatar}
-                          alt={user.name}
-                          width={40}
-                          height={40}
-                          className="rounded-full object-cover shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src =
-                              `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=d5e7cf&color=111b0d`;
-                          }}
-                        />
                       </td>
                       <td className="p-4">
                         <div className="flex flex-col">
@@ -545,7 +551,6 @@ export default function UsersTable() {
                         </span>
                       </td>
                       <td className="p-4 pr-6 text-right">
-                        <button onClick={() => setSelected(user)} className="mb-2 whitespace-nowrap text-xs font-semibold text-primary underline">View details</button>
                         <ActionMenu
                           userId={user.id}
                           currentStatus={user.status}
@@ -562,13 +567,12 @@ export default function UsersTable() {
 
         {/* Mobile card list */}
         <div className="md:hidden">
-          {loading
+          {loading && users.length === 0
             ? Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
                   className="p-4 border-b border-[#eaf3e7] animate-pulse flex gap-3"
                 >
-                  <div className="size-10 rounded-full bg-[#eaf3e7] shrink-0" />
                   <div className="flex-1 space-y-2">
                     <div className="h-4 bg-[#eaf3e7] rounded w-1/2" />
                     <div className="h-3 bg-[#eaf3e7] rounded w-3/4" />
@@ -576,18 +580,27 @@ export default function UsersTable() {
                 </div>
               ))
             : users.map((user) => (
-                <UserCard key={user.id} user={user} onAction={handleAction} onDetails={() => setSelected(user)} />
+                <UserCard key={user.id} user={user} onAction={handleAction} onDetails={() => { setActionError(null); setSelected(user); }} />
               ))}
         </div>
 
         {selected && <DetailDialog title="User details" onClose={() => setSelected(null)}>
         <div className="mb-6 flex items-center gap-4"><Image unoptimized src={selected.avatar} alt={selected.name} width={80} height={80} className="size-20 rounded-full object-cover" /><div><h3 className="text-xl font-semibold">{selected.name}</h3><p className="text-sm text-slate-500">{selected.userID}</p></div></div>
         <dl className="grid gap-5 text-sm sm:grid-cols-2">{[
-          ["Email", selected.email], ["Phone", selected.details.phone], ["Address", selected.details.address], ["Gender", selected.details.gender], ["Username", selected.details.username],
+          ["Email", selected.email], ["Phone", selected.details.phone], ["Address", selected.details.address], ["Gender", selected.details.gender],
           ["Status", selected.status], ["Verified", selected.isVerified ? "Yes" : "No"], ["Wallet balance", selected.balance], ["Wallet ID", selected.details.wallet?.walletId],
           ["Active investment", selected.details.hasActiveInvestment ? "Yes" : "No"], ["Referred by (user ID)", selected.details.referredBy], ["Suspension reason", selected.details.suspendReason],
-          ["Registered", new Date(selected.details.createdAt).toLocaleString()], ["Last updated", new Date(selected.details.updatedAt).toLocaleString()], ["Account ID", selected.id],
+          ["Registered", new Date(selected.details.createdAt).toLocaleString()], ["Last updated", new Date(selected.details.updatedAt).toLocaleString()],
         ].map(([label, value]) => <div key={label}><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 whitespace-pre-wrap break-words font-medium">{value || "Not provided"}</dd></div>)}</dl>
+        {actionError && <p role="alert" className="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{actionError}</p>}
+        <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-gray-200 pt-5" aria-busy={actionBusy}>
+          <button type="button" disabled={actionBusy || selected.status === "Active"} onClick={() => void handleAction(selected.id, "activate")} className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40">
+            <MdCheckCircle /> Activate User
+          </button>
+          <button type="button" disabled={actionBusy || selected.status === "Suspended"} onClick={() => void handleAction(selected.id, "suspend")} className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40">
+            <MdBlock /> Suspend User
+          </button>
+        </div>
       </DetailDialog>}
       {/* Pagination */}
         <div className="flex items-center justify-between p-4 border-t border-[#d5e7cf] bg-[#f9fcf8]">

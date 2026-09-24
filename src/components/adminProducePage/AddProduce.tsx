@@ -143,7 +143,7 @@ export default function NewOpportunityModal({
       />
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative w-full max-w-3xl rounded-2xl bg-white shadow-xl">
-          <div className="flex items-start justify-between border-b p-6">
+          <div className="flex items-start justify-between border-b border-gray-200 p-6">
             <div>
               <h2 className="text-xl font-bold">New opportunity</h2>
               <p className="mt-1 text-sm text-slate-500">
@@ -358,7 +358,7 @@ export default function NewOpportunityModal({
               </div>
             </section>
 
-            <div className="flex justify-end gap-3 border-t pt-5">
+            <div className="flex justify-end gap-3 border-t border-gray-200 pt-5">
               <button
                 type="button"
                 onClick={onClose}

@@ -33,10 +33,13 @@ interface SidebarProps {
 }
 
 const navLinks = [
-  { href: "/dashboard/settings", label: "Profile settings", icon: FiSettings },
   { href: "/dashboard", label: "Dashboard", icon: FiGrid },
   { href: "/dashboard/investments", label: "My Farms", icon: FiPieChart },
-  { href: "/dashboard/opportunities", label: "Own a New Farm", icon: FiShoppingBag },
+  {
+    href: "/dashboard/opportunities",
+    label: "Own a New Farm",
+    icon: FiShoppingBag,
+  },
   { href: "/dashboard/wallet", label: "Wallet", icon: FiCreditCard },
   { href: "/dashboard/support", label: "Support", icon: IoIosChatboxes },
   { href: "/dashboard/referrals", label: "Referrals", icon: FiGift },
@@ -66,7 +69,10 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const initials = getInitials(user);
   const displayName = getDisplayName(user);
-  const profilePhoto = typeof user?.profilePhoto === "string" ? user.profilePhoto : user?.profilePhoto?.url;
+  const profilePhoto =
+    typeof user?.profilePhoto === "string"
+      ? user.profilePhoto
+      : user?.profilePhoto?.url;
   const sidebarRef = useRef<HTMLElement>(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -140,7 +146,7 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
         ref={sidebarRef} // ← attach ref here
         className={`
           flex flex-col justify-between border-r border-gray-200 bg-gray-100 h-full
-          transition-all duration-300 ease-in-out overflow-hidden
+          transition-all duration-300 ease-in-out overflow-visible
           fixed z-50
           md:relative md:z-auto
 
@@ -228,13 +234,15 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
 
         {/* User menu */}
         <div className="flex flex-col gap-4 w-full">
-<div
+          <div
             ref={menuRef}
             className={`flex relative  items-center gap-3 border-t border-gray-400 pt-4 ${isOpen ? "px-2 py-2" : "justify-center"}`}
           >
             <button
+              aria-label="Account menu"
+              aria-expanded={menuOpen}
               onClick={() => setMenuOpen((prev) => !prev)}
-              className="flex items-center gap-3 w-full text-left hover:bg-gray-100 rounded-lg p-2 transition"
+              className="flex cursor-pointer items-center gap-3 w-full text-left hover:bg-gray-100 rounded-lg p-2 transition"
             >
               {profilePhoto ? (
                 <div
@@ -249,7 +257,9 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
               {isOpen && (
                 <>
                   <div>
-                    <p className="text-sm font-bold">{displayName}</p>
+                    <p className="text-sm text-gray-600 font-bold">
+                      {displayName}
+                    </p>
                     <p className="text-xs text-gray-500 capitalize">
                       {user?.role ?? "Remote Farmer"}
                     </p>
@@ -265,10 +275,21 @@ export default function Sidebar({ user, isOpen, onToggle }: SidebarProps) {
             </button>
 
             {menuOpen && (
-              <div className="absolute bottom-full mb-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+              <div className="absolute bottom-full left-0 z-50 mb-2 w-52 min-w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                <Link
+                  href="/dashboard/settings"
+                  onClick={() => setMenuOpen(false)}
+                  aria-current={
+                    pathname === "/dashboard/settings" ? "page" : undefined
+                  }
+                  className="flex cursor-pointer items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <FiSettings size={16} />
+                  Profile settings
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-gray-50 w-full"
+                  className="flex cursor-pointer items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-gray-50 w-full"
                 >
                   <FiLogOut size={16} />
                   Logout
