@@ -137,8 +137,10 @@ export default function ManageLearn() {
     event.preventDefault();
     setSaving(true);
     const form = new FormData(event.currentTarget);
-    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
-    const status: "draft" | "published" = submitter?.value === "draft" ? "draft" : "published";
+    const submitter = (event.nativeEvent as SubmitEvent)
+      .submitter as HTMLButtonElement | null;
+    const status: "draft" | "published" =
+      submitter?.value === "draft" ? "draft" : "published";
     form.set("status", status);
     form.set("postType", postType);
     if (postType === "blog") {
@@ -152,18 +154,32 @@ export default function ManageLearn() {
 
     try {
       if (editingPost) {
-        await axios.patch(`${API}/api/admin/agri-learn/${editingPost._id}`, form, { withCredentials: true });
+        await axios.patch(
+          `${API}/api/admin/agri-learn/${editingPost._id}`,
+          form,
+          { withCredentials: true },
+        );
       } else {
-        await axios.post(`${API}/api/admin/agri-learn`, form, { withCredentials: true });
+        await axios.post(`${API}/api/admin/agri-learn`, form, {
+          withCredentials: true,
+        });
       }
-      toast.success(status === "published" ? (editingPost ? "Post updated and published" : "Post published") : (editingPost ? "Draft updated" : "Draft saved"));
+      toast.success(
+        status === "published"
+          ? editingPost
+            ? "Post updated and published"
+            : "Post published"
+          : editingPost
+            ? "Draft updated"
+            : "Draft saved",
+      );
       setOpen(false);
       resetForm();
       await load();
     } catch (error) {
       toast.error(
         axios.isAxiosError(error)
-          ? error.response?.data?.message ?? "Unable to save post"
+          ? (error.response?.data?.message ?? "Unable to save post")
           : "Unable to save post",
       );
     } finally {
@@ -173,7 +189,9 @@ export default function ManageLearn() {
 
   async function remove(id: string) {
     if (!window.confirm("Delete this post permanently?")) return;
-    await axios.delete(`${API}/api/admin/agri-learn/${id}`, { withCredentials: true });
+    await axios.delete(`${API}/api/admin/agri-learn/${id}`, {
+      withCredentials: true,
+    });
     toast.success("Post deleted");
     await load();
   }
@@ -199,7 +217,7 @@ export default function ManageLearn() {
     } catch (error) {
       toast.error(
         axios.isAxiosError(error)
-          ? error.response?.data?.message ?? "Unable to update tags"
+          ? (error.response?.data?.message ?? "Unable to update tags")
           : "Unable to update tags",
       );
     } finally {
@@ -215,7 +233,8 @@ export default function ManageLearn() {
   const currentHero = editingPost ? getHeroImage(editingPost) : undefined;
   const currentBodyMedia = editingPost ? getBodyMedia(editingPost) : undefined;
   const heroPreviewUrl =
-    heroPreview ?? (currentHero?.type === "image" ? currentHero.url : undefined);
+    heroPreview ??
+    (currentHero?.type === "image" ? currentHero.url : undefined);
   const bodyPreviewUrl =
     bodyPreview ??
     (!bodyFile && currentBodyMedia?.type === "image"
@@ -231,10 +250,11 @@ export default function ManageLearn() {
               Content management
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
-              Agri-Learn
+              Agro-Blog
             </h1>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Create and manage educational stories for the Remote Agric community.
+              Create and manage educational stories for the Remote Agric
+              community.
             </p>
           </div>
           <button
@@ -249,13 +269,19 @@ export default function ManageLearn() {
         <div className="mt-8 rounded-2xl bg-white shadow-sm ring-1 ring-slate-900/5">
           <div className="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-base font-medium text-slate-800">Content library</h2>
+              <h2 className="text-base font-medium text-slate-800">
+                Content library
+              </h2>
               <p className="mt-1 text-xs text-slate-400">
-                {posts.length} post{posts.length === 1 ? "" : "s"} in your library
+                {posts.length} post{posts.length === 1 ? "" : "s"} in your
+                library
               </p>
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={17} />
+              <Search
+                className="absolute left-3 top-2.5 text-slate-400"
+                size={17}
+              />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -272,7 +298,9 @@ export default function ManageLearn() {
                 {posts.length ? "No matching posts" : "Create your first post"}
               </h3>
               <p className="mt-2 text-sm text-slate-400">
-                {posts.length ? "Try a different search term." : "Share practical knowledge with your users."}
+                {posts.length
+                  ? "Try a different search term."
+                  : "Share practical knowledge with your users."}
               </p>
             </div>
           ) : (
@@ -287,87 +315,111 @@ export default function ManageLearn() {
                 <span className="sr-only">Actions</span>
               </div>
               <div className="divide-y divide-slate-100">
-              {filtered.map((post) => {
-                const cover = getHeroImage(post);
-                const thumbnail = getYouTubeThumbnail(post.videoUrl);
-                return (
-                  <div
-                    key={post._id}
-                    className="grid items-center gap-4 p-5 transition hover:bg-slate-50/70 md:grid-cols-[72px_1fr_90px_110px_100px_140px_50px]"
-                  >
-                    <div className="h-14 w-[72px] overflow-hidden rounded-lg bg-[#e9f0e7]">
-                      {cover?.type === "image" ? (
-                        <Image
-                          src={cover.url}
-                          alt=""
-                          width={144}
-                          height={112}
-                          unoptimized
-                          className="h-full w-full object-cover"
-                        />
-                      ) : thumbnail ? (
-                        <Image src={thumbnail} alt="" width={144} height={112} unoptimized className="h-full w-full object-cover" />
-                      ) : (
-                        <span className="flex h-full items-center justify-center text-primary">
-                          {post.postType === "podcast" ? <Video size={20} /> : <BookOpen size={20} />}
-                        </span>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-800">{post.title}</p>
-                      <p className="mt-1 line-clamp-1 text-xs text-slate-400">{post.excerpt}</p>
-                      {post.tags && post.tags.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          {post.tags.slice(0, 4).map((tag) => (
-                            <span key={tag} className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500"># {tag}</span>
-                          ))}
+                {filtered.map((post) => {
+                  const cover = getHeroImage(post);
+                  const thumbnail = getYouTubeThumbnail(post.videoUrl);
+                  return (
+                    <div
+                      key={post._id}
+                      className="grid items-center gap-4 p-5 transition hover:bg-slate-50/70 md:grid-cols-[72px_1fr_90px_110px_100px_140px_50px]"
+                    >
+                      <div className="h-14 w-[72px] overflow-hidden rounded-lg bg-[#e9f0e7]">
+                        {cover?.type === "image" ? (
+                          <Image
+                            src={cover.url}
+                            alt=""
+                            width={144}
+                            height={112}
+                            unoptimized
+                            className="h-full w-full object-cover"
+                          />
+                        ) : thumbnail ? (
+                          <Image
+                            src={thumbnail}
+                            alt=""
+                            width={144}
+                            height={112}
+                            unoptimized
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="flex h-full items-center justify-center text-primary">
+                            {post.postType === "podcast" ? (
+                              <Video size={20} />
+                            ) : (
+                              <BookOpen size={20} />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-slate-800">
+                          {post.title}
+                        </p>
+                        <p className="mt-1 line-clamp-1 text-xs text-slate-400">
+                          {post.excerpt}
+                        </p>
+                        {post.tags && post.tags.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {post.tags.slice(0, 4).map((tag) => (
+                              <span
+                                key={tag}
+                                className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500"
+                              >
+                                # {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <span className="w-fit rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-600">
+                        {post.postType ?? "blog"}
+                      </span>
+                      <span className="w-fit rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-primary">
+                        {post.category}
+                      </span>
+                      <span
+                        className={`w-fit rounded-full px-2.5 py-1 text-xs font-medium capitalize ${post.status === "published" ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}
+                      >
+                        {post.status}
+                      </span>
+                      <span className="flex items-center gap-2 text-xs text-slate-400">
+                        <CalendarDays size={14} />
+                        {post.publishedAt
+                          ? formatDate(post.publishedAt)
+                          : "Not published"}
+                      </span>
+                      <div className="relative group">
+                        <button className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                          <MoreHorizontal size={18} />
+                        </button>
+                        <div className="invisible absolute right-0 top-9 z-10 w-36 rounded-lg bg-white p-1 opacity-0 shadow-lg ring-1 ring-slate-900/10 transition group-focus-within:visible group-focus-within:opacity-100">
+                          <button
+                            onClick={() => editPost(post)}
+                            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                          >
+                            <Pencil size={14} />
+                            Edit post
+                          </button>
+                          <button
+                            onClick={() => editTags(post)}
+                            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                          >
+                            <Tags size={14} />
+                            Edit tags
+                          </button>
+                          <button
+                            onClick={() => remove(post._id)}
+                            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 size={14} />
+                            Delete
+                          </button>
                         </div>
-                      )}
-                    </div>
-                    <span className="w-fit rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium capitalize text-slate-600">
-                      {post.postType ?? "blog"}
-                    </span>
-                    <span className="w-fit rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-primary">
-                      {post.category}
-                    </span>
-                    <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-medium capitalize ${post.status === "published" ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
-                      {post.status}
-                    </span>
-                    <span className="flex items-center gap-2 text-xs text-slate-400">
-                      <CalendarDays size={14} />
-                      {post.publishedAt ? formatDate(post.publishedAt) : "Not published"}
-                    </span>
-                    <div className="relative group">
-                      <button className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
-                        <MoreHorizontal size={18} />
-                      </button>
-                      <div className="invisible absolute right-0 top-9 z-10 w-36 rounded-lg bg-white p-1 opacity-0 shadow-lg ring-1 ring-slate-900/10 transition group-focus-within:visible group-focus-within:opacity-100">
-                        <button
-                          onClick={() => editPost(post)}
-                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
-                        >
-                          <Pencil size={14} />
-                          Edit post
-                        </button>
-                        <button
-                          onClick={() => editTags(post)}
-                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
-                        >
-                          <Tags size={14} />
-                          Edit tags
-                        </button>
-                        <button
-                          onClick={() => remove(post._id)}
-                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 size={14} />
-                          Delete
-                        </button>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -381,10 +433,14 @@ export default function ManageLearn() {
               <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900">
-                    {editingPost ? "Edit Agri-Learn post" : "Create an Agri-Learn post"}
+                    {editingPost
+                      ? "Edit Agri-Learn post"
+                      : "Create an Agri-Learn post"}
                   </h2>
                   <p className="mt-1 text-sm text-slate-500">
-                    {editingPost ? "Correct the post, change its format, or update its publication status." : "Add a clear title, useful summary and the right content format."}
+                    {editingPost
+                      ? "Correct the post, change its format, or update its publication status."
+                      : "Add a clear title, useful summary and the right content format."}
                   </p>
                 </div>
                 <button
@@ -405,7 +461,9 @@ export default function ManageLearn() {
               >
                 <div className="space-y-7 px-6 py-6">
                   <fieldset>
-                    <legend className="text-sm font-medium text-slate-800">Post details</legend>
+                    <legend className="text-sm font-medium text-slate-800">
+                      Post details
+                    </legend>
                     <p className="mt-1 text-xs text-slate-400">
                       This information appears on the Agri-Learn listing page.
                     </p>
@@ -423,7 +481,11 @@ export default function ManageLearn() {
                             }`}
                           >
                             <span className="flex items-center gap-2 text-sm font-medium">
-                              {type === "blog" ? <BookOpen size={16} /> : <Video size={16} />}
+                              {type === "blog" ? (
+                                <BookOpen size={16} />
+                              ) : (
+                                <Video size={16} />
+                              )}
                               {type === "blog" ? "Blog" : "Podcast"}
                             </span>
                             <span className="mt-1 block text-xs text-slate-400">
@@ -449,7 +511,9 @@ export default function ManageLearn() {
 
                       <div className="grid gap-4 sm:grid-cols-2">
                         <label>
-                          <span className="text-sm text-slate-600">Category</span>
+                          <span className="text-sm text-slate-600">
+                            Category
+                          </span>
                           <input
                             name="category"
                             defaultValue={editingPost?.category}
@@ -459,7 +523,9 @@ export default function ManageLearn() {
                           />
                         </label>
                         <label>
-                          <span className="text-sm text-slate-600">Short introduction</span>
+                          <span className="text-sm text-slate-600">
+                            Short introduction
+                          </span>
                           <span className="mt-1.5 block rounded-lg bg-slate-50 px-3.5 py-2.5 text-xs leading-5 text-slate-400">
                             Keep the summary concise and inviting.
                           </span>
@@ -487,7 +553,9 @@ export default function ManageLearn() {
                           placeholder="maize, marketing, farm management"
                           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                         />
-                        <span className="mt-1.5 block text-xs text-slate-400">Separate tags with commas. Add up to 10 tags.</span>
+                        <span className="mt-1.5 block text-xs text-slate-400">
+                          Separate tags with commas. Add up to 10 tags.
+                        </span>
                       </label>
                     </div>
                   </fieldset>
@@ -495,9 +563,12 @@ export default function ManageLearn() {
                   {postType === "blog" ? (
                     <>
                       <fieldset className="border-t border-slate-100 pt-6">
-                        <legend className="text-sm font-medium text-slate-800">Article body</legend>
+                        <legend className="text-sm font-medium text-slate-800">
+                          Article body
+                        </legend>
                         <p className="mt-1 text-xs text-slate-400">
-                          Structure the article with headings, lists, quotes, links and text formatting.
+                          Structure the article with headings, lists, quotes,
+                          links and text formatting.
                         </p>
                         <RichTextEditor
                           initialContent={articleContent}
@@ -509,9 +580,12 @@ export default function ManageLearn() {
                       </fieldset>
 
                       <fieldset className="border-t border-slate-100 pt-6">
-                        <legend className="text-sm font-medium text-slate-800">Media</legend>
+                        <legend className="text-sm font-medium text-slate-800">
+                          Media
+                        </legend>
                         <p className="mt-1 text-xs text-slate-400">
-                          Every article needs one hero image. You may also add one image or video inside the article body.
+                          Every article needs one hero image. You may also add
+                          one image or video inside the article body.
                         </p>
                         <div className="mt-4 grid gap-4 sm:grid-cols-2">
                           <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-3">
@@ -525,29 +599,43 @@ export default function ManageLearn() {
                                   className="h-full w-full object-cover"
                                 />
                               ) : (
-                                <FileImage className="text-slate-300" size={34} />
+                                <FileImage
+                                  className="text-slate-300"
+                                  size={34}
+                                />
                               )}
                               {heroPreviewUrl && (
                                 <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/75 px-2 py-1 text-[10px] font-medium text-white">
-                                  {heroFile ? "New image preview" : "Existing image"}
+                                  {heroFile
+                                    ? "New image preview"
+                                    : "Existing image"}
                                 </span>
                               )}
                             </div>
                             <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-center transition hover:border-primary hover:bg-green-50/40">
                               <UploadCloud className="text-primary" size={20} />
                               <span className="min-w-0">
-                                <span className="block text-sm font-medium text-slate-700">Choose hero image *</span>
+                                <span className="block text-sm font-medium text-slate-700">
+                                  Choose hero image *
+                                </span>
                                 <span className="block max-w-full truncate text-xs text-slate-400">
-                                  {heroFile?.name ?? (heroPreviewUrl ? "Choose a new image to replace it" : "JPG, PNG or WEBP")}
+                                  {heroFile?.name ??
+                                    (heroPreviewUrl
+                                      ? "Choose a new image to replace it"
+                                      : "JPG, PNG or WEBP")}
                                 </span>
                               </span>
                               <input
                                 name="heroImage"
-                                required={!editingPost || !getHeroImage(editingPost)}
+                                required={
+                                  !editingPost || !getHeroImage(editingPost)
+                                }
                                 type="file"
                                 accept="image/jpeg,image/png,image/webp"
                                 className="hidden"
-                                onChange={(event) => selectHeroImage(event.target.files?.[0])}
+                                onChange={(event) =>
+                                  selectHeroImage(event.target.files?.[0])
+                                }
                               />
                             </label>
                           </div>
@@ -562,26 +650,39 @@ export default function ManageLearn() {
                                   className="h-full w-full object-cover"
                                 />
                               ) : bodyFile?.type.startsWith("video/") ||
-                                (!bodyFile && currentBodyMedia?.type === "video") ? (
+                                (!bodyFile &&
+                                  currentBodyMedia?.type === "video") ? (
                                 <div className="flex flex-col items-center gap-2 text-slate-400">
                                   <Video size={34} />
-                                  <span className="text-xs">Video selected</span>
+                                  <span className="text-xs">
+                                    Video selected
+                                  </span>
                                 </div>
                               ) : (
-                                <FileImage className="text-slate-300" size={34} />
+                                <FileImage
+                                  className="text-slate-300"
+                                  size={34}
+                                />
                               )}
                               {bodyPreviewUrl && (
                                 <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/75 px-2 py-1 text-[10px] font-medium text-white">
-                                  {bodyFile ? "New image preview" : "Existing image"}
+                                  {bodyFile
+                                    ? "New image preview"
+                                    : "Existing image"}
                                 </span>
                               )}
                             </div>
                             <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-center transition hover:border-primary hover:bg-green-50/40">
                               <UploadCloud className="text-primary" size={20} />
                               <span className="min-w-0">
-                                <span className="block text-sm font-medium text-slate-700">Choose body media</span>
+                                <span className="block text-sm font-medium text-slate-700">
+                                  Choose body media
+                                </span>
                                 <span className="block max-w-full truncate text-xs text-slate-400">
-                                  {bodyFile?.name ?? (currentBodyMedia ? "Choose new media to replace it" : "One image or video")}
+                                  {bodyFile?.name ??
+                                    (currentBodyMedia
+                                      ? "Choose new media to replace it"
+                                      : "One image or video")}
                                 </span>
                               </span>
                               <input
@@ -589,7 +690,9 @@ export default function ManageLearn() {
                                 type="file"
                                 accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
                                 className="hidden"
-                                onChange={(event) => selectBodyMedia(event.target.files?.[0])}
+                                onChange={(event) =>
+                                  selectBodyMedia(event.target.files?.[0])
+                                }
                               />
                             </label>
                           </div>
@@ -598,12 +701,17 @@ export default function ManageLearn() {
                     </>
                   ) : (
                     <fieldset className="border-t border-slate-100 pt-6">
-                      <legend className="text-sm font-medium text-slate-800">Podcast video</legend>
+                      <legend className="text-sm font-medium text-slate-800">
+                        Podcast video
+                      </legend>
                       <p className="mt-1 text-xs text-slate-400">
-                        Paste a public YouTube link. Users will watch it inside Agri-Learn.
+                        Paste a public YouTube link. Users will watch it inside
+                        Agri-Learn.
                       </p>
                       <label className="mt-4 block">
-                        <span className="text-sm text-slate-600">YouTube video link</span>
+                        <span className="text-sm text-slate-600">
+                          YouTube video link
+                        </span>
                         <input
                           name="videoUrl"
                           defaultValue={editingPost?.videoUrl}
@@ -639,7 +747,13 @@ export default function ManageLearn() {
                     disabled={saving}
                     className="inline-flex min-w-32 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50"
                   >
-                    {saving ? <Loader2 size={17} className="animate-spin" /> : editingPost ? "Save & publish" : "Publish post"}
+                    {saving ? (
+                      <Loader2 size={17} className="animate-spin" />
+                    ) : editingPost ? (
+                      "Save & publish"
+                    ) : (
+                      "Publish post"
+                    )}
                   </button>
                 </div>
               </form>
@@ -650,23 +764,65 @@ export default function ManageLearn() {
 
       {tagEditor && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/45 px-4 backdrop-blur-sm">
-          <form onSubmit={saveTags} className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+          <form
+            onSubmit={saveTags}
+            className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl"
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-primary">Organize content</p>
-                <h2 className="mt-2 text-xl font-semibold text-slate-900">Edit post tags</h2>
-                <p className="mt-1 line-clamp-1 text-sm text-slate-500">{tagEditor.title}</p>
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-primary">
+                  Organize content
+                </p>
+                <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                  Edit post tags
+                </h2>
+                <p className="mt-1 line-clamp-1 text-sm text-slate-500">
+                  {tagEditor.title}
+                </p>
               </div>
-              <button type="button" onClick={() => setTagEditor(null)} disabled={tagSaving} aria-label="Close" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
+              <button
+                type="button"
+                onClick={() => setTagEditor(null)}
+                disabled={tagSaving}
+                aria-label="Close"
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"
+              >
+                <X size={18} />
+              </button>
             </div>
             <label className="mt-6 block">
               <span className="text-sm text-slate-600">Tags</span>
-              <input autoFocus value={tagDraft} onChange={(event) => setTagDraft(event.target.value)} placeholder="maize, marketing, farm management" className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
-              <span className="mt-2 block text-xs leading-5 text-slate-400">Separate tags with commas. Tags are saved in lowercase, with a maximum of 10.</span>
+              <input
+                autoFocus
+                value={tagDraft}
+                onChange={(event) => setTagDraft(event.target.value)}
+                placeholder="maize, marketing, farm management"
+                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+              />
+              <span className="mt-2 block text-xs leading-5 text-slate-400">
+                Separate tags with commas. Tags are saved in lowercase, with a
+                maximum of 10.
+              </span>
             </label>
             <div className="mt-6 flex justify-end gap-3">
-              <button type="button" onClick={() => setTagEditor(null)} disabled={tagSaving} className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">Cancel</button>
-              <button disabled={tagSaving} className="inline-flex min-w-28 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50">{tagSaving ? <Loader2 size={17} className="animate-spin" /> : "Save tags"}</button>
+              <button
+                type="button"
+                onClick={() => setTagEditor(null)}
+                disabled={tagSaving}
+                className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={tagSaving}
+                className="inline-flex min-w-28 items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50"
+              >
+                {tagSaving ? (
+                  <Loader2 size={17} className="animate-spin" />
+                ) : (
+                  "Save tags"
+                )}
+              </button>
             </div>
           </form>
         </div>

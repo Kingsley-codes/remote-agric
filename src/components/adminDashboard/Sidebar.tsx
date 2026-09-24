@@ -49,7 +49,7 @@ const navLinks = [
   { href: "/admin/dashboard/referrals", label: "Referrals", icon: FiGift },
   {
     href: "/admin/dashboard/agri-learn",
-    label: "Agri-Learn",
+    label: "Agro-Blog",
     icon: FiBookOpen,
   },
   {
