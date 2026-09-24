@@ -359,7 +359,12 @@ export default function EditOpportunityModal({
                     <input
                       type="number"
                       value={formData.rolloverProfit}
-                      onChange={(e) => setFormData({ ...formData, rolloverProfit: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          rolloverProfit: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                       step="0.1"
                       min="0"
@@ -390,14 +395,46 @@ export default function EditOpportunityModal({
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <label className="text-sm font-medium">Maximum units per investor per track
-                  <input type="number" required min={Number(formData.minimumUnit) || 1} max={Number(formData.totalUnit) || undefined} step="1" value={formData.maximumUnit} onChange={e => setFormData({ ...formData, maximumUnit: e.target.value })} disabled={loading} className="mt-2 w-full rounded-lg border p-3" />
+                <label className="text-sm font-medium">
+                  Maximum units per investor per track
+                  <input
+                    type="number"
+                    required
+                    min={Number(formData.minimumUnit) || 1}
+                    max={Number(formData.totalUnit) || undefined}
+                    step="1"
+                    value={formData.maximumUnit}
+                    onChange={(e) =>
+                      setFormData({ ...formData, maximumUnit: e.target.value })
+                    }
+                    disabled={loading}
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                  />
                 </label>
-                <label className="text-sm font-medium">Referral bonus per unit (NGN)
-                  <input type="number" required min="0" step="0.01" value={formData.referralBonus} onChange={e => setFormData({ ...formData, referralBonus: e.target.value })} disabled={loading} className="mt-2 w-full rounded-lg border p-3" />
+                <label className="text-sm font-medium">
+                  Referral bonus per unit (NGN)
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    step="0.01"
+                    value={formData.referralBonus}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        referralBonus: e.target.value,
+                      })
+                    }
+                    disabled={loading}
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                  />
                 </label>
               </div>
-              <p className="text-xs text-slate-500">Saving a new duration recalculates track end months for future investments. Existing investments keep their original schedule and referral rewards.</p>
+              <p className="text-xs text-slate-500">
+                Saving a new duration recalculates track end months for future
+                investments. Existing investments keep their original schedule
+                and referral rewards.
+              </p>
               <TrackManager
                 produceId={investment._id}
                 duration={investment.duration}
