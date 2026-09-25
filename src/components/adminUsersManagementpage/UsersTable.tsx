@@ -17,8 +17,13 @@ import {
 type Status = "Active" | "Pending" | "Suspended";
 
 interface ApiUser {
-  phone?: string; address?: string; gender?: string; username?: string;
-  suspendReason?: string; hasActiveInvestment?: boolean; referredBy?: string;
+  phone?: string;
+  address?: string;
+  gender?: string;
+  username?: string;
+  suspendReason?: string;
+  hasActiveInvestment?: boolean;
+  referredBy?: string;
   _id: string;
   firstName: string;
   lastName: string;
@@ -160,7 +165,11 @@ function ActionMenu({ userId, currentStatus, onAction }: ActionMenuProps) {
   }
 
   return (
-    <div ref={ref} onClick={(event) => event.stopPropagation()} className="relative inline-block">
+    <div
+      ref={ref}
+      onClick={(event) => event.stopPropagation()}
+      className="relative inline-block"
+    >
       <button
         aria-label="User actions"
         onClick={() => setOpen((o) => !o)}
@@ -212,12 +221,16 @@ function UserCard({
       aria-label={`View details for ${user.name}`}
       onClick={onDetails}
       onKeyDown={(event) => {
-        if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+        if (
+          event.target === event.currentTarget &&
+          (event.key === "Enter" || event.key === " ")
+        ) {
           event.preventDefault();
           onDetails();
         }
       }}
-      className="flex cursor-pointer items-start gap-3 p-4 border-b border-[#eaf3e7] last:border-0 hover:bg-[#f9fcf8] focus-visible:outline-2 focus-visible:outline-primary transition-colors">
+      className="flex cursor-pointer items-start gap-3 p-4 border-b border-[#eaf3e7] last:border-0 hover:bg-[#f9fcf8] focus-visible:outline-2 focus-visible:outline-primary transition-colors"
+    >
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span className="font-bold text-gray-700 text-sm truncate">
@@ -325,7 +338,8 @@ export default function UsersTable() {
         setUsers((json.data as ApiUser[]).map(mapApiUser));
         setTotalPages(json.pages ?? 1);
       } catch (err) {
-        if (!controller.signal.aborted) setError(err instanceof Error ? err.message : "Failed to load users");
+        if (!controller.signal.aborted)
+          setError(err instanceof Error ? err.message : "Failed to load users");
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -335,8 +349,14 @@ export default function UsersTable() {
 
   // Re-fetch whenever page, debouncedSearch, or statusFilter changes
   useEffect(() => {
-    const timer = setTimeout(() => void fetchUsers(page, debouncedSearch, statusFilter), 0);
-    return () => { clearTimeout(timer); requestController.current?.abort(); };
+    const timer = setTimeout(
+      () => void fetchUsers(page, debouncedSearch, statusFilter),
+      0,
+    );
+    return () => {
+      clearTimeout(timer);
+      requestController.current?.abort();
+    };
   }, [page, debouncedSearch, statusFilter, fetchUsers]);
 
   // ── Activate / suspend ─────────────────────────────────────────
@@ -364,11 +384,16 @@ export default function UsersTable() {
           throw new Error(`Request failed with status ${res.status}`);
         const json = await res.json();
         if (!json.success) throw new Error(json.message ?? "Action failed");
-        const updateUser = (user: User): User => user.id === userId
-          ? { ...user, status: newStatus, details: { ...user.details, status: newStatus.toLowerCase() } }
-          : user;
+        const updateUser = (user: User): User =>
+          user.id === userId
+            ? {
+                ...user,
+                status: newStatus,
+                details: { ...user.details, status: newStatus.toLowerCase() },
+              }
+            : user;
         setUsers((current) => current.map(updateUser));
-        setSelected((current) => current ? updateUser(current) : null);
+        setSelected((current) => (current ? updateUser(current) : null));
       } catch (err) {
         setActionError(
           err instanceof Error
@@ -402,7 +427,10 @@ export default function UsersTable() {
           <div className="relative flex-1 sm:flex-none">
             <select
               value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
               className="w-full h-11 pl-3 pr-9 bg-white border border-[#d5e7cf] rounded-lg text-sm font-medium text-[#111b0d] focus:ring-1 focus:ring-[#46ec13] focus:border-[#46ec13] appearance-none cursor-pointer hover:bg-gray-50 transition-colors"
             >
               <option>All Status</option>
@@ -454,7 +482,10 @@ export default function UsersTable() {
       )}
 
       {/* ── Table / Cards ── */}
-      <div aria-busy={loading} className="bg-white border border-[#d5e7cf] rounded-xl overflow-hidden shadow-sm">
+      <div
+        aria-busy={loading}
+        className="bg-white border border-[#d5e7cf] rounded-xl overflow-hidden shadow-sm"
+      >
         {/* Desktop table */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -500,9 +531,15 @@ export default function UsersTable() {
                       key={user.id}
                       tabIndex={0}
                       aria-label={`View details for ${user.name}`}
-                      onClick={() => { setActionError(null); setSelected(user); }}
+                      onClick={() => {
+                        setActionError(null);
+                        setSelected(user);
+                      }}
                       onKeyDown={(event) => {
-                        if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                        if (
+                          event.target === event.currentTarget &&
+                          (event.key === "Enter" || event.key === " ")
+                        ) {
                           event.preventDefault();
                           setActionError(null);
                           setSelected(user);
@@ -581,34 +618,117 @@ export default function UsersTable() {
                 </div>
               ))
             : users.map((user) => (
-                <UserCard key={user.id} user={user} onAction={handleAction} onDetails={() => { setActionError(null); setSelected(user); }} />
+                <UserCard
+                  key={user.id}
+                  user={user}
+                  onAction={handleAction}
+                  onDetails={() => {
+                    setActionError(null);
+                    setSelected(user);
+                  }}
+                />
               ))}
         </div>
 
-        {selected && <DetailDialog title="User details" onClose={() => setSelected(null)}>
-        <div className="mb-6 flex items-center gap-4"><Image unoptimized src={selected.avatar} alt={selected.name} width={80} height={80} className="size-20 rounded-full object-cover" /><div><h3 className="text-xl font-semibold">{selected.name}</h3><p className="text-sm text-slate-500">{selected.userID}</p></div></div>
-        <dl className="grid gap-5 text-sm sm:grid-cols-2">{[
-          ["Email", selected.email], ["Phone", selected.details.phone], ["Address", selected.details.address], ["Gender", selected.details.gender],
-          ["Status", selected.status], ["Verified", selected.isVerified ? "Yes" : "No"], ["Wallet balance", selected.balance], ["Wallet ID", selected.details.wallet?.walletId],
-          ["Active investment", selected.details.hasActiveInvestment ? "Yes" : "No"], ["Referred by (user ID)", selected.details.referredBy], ["Suspension reason", selected.details.suspendReason],
-          ["Registered", new Date(selected.details.createdAt).toLocaleString()], ["Last updated", new Date(selected.details.updatedAt).toLocaleString()],
-        ].map(([label, value]) => <div key={label}><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 whitespace-pre-wrap break-words font-medium">{value || "Not provided"}</dd></div>)}</dl>
-        <AdminWithdrawalForm key={selected.id} userId={selected.id} wallet={selected.details.wallet} onUpdate={(wallet) => {
-          const update = (user: User): User => user.id === selected.id ? { ...user, balance: formatWalletBalance(wallet), details: { ...user.details, wallet } } : user;
-          setUsers(current => current.map(update));
-          setSelected(current => current ? update(current) : null);
-        }} />
-        {actionError && <p role="alert" className="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{actionError}</p>}
-        <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-gray-200 pt-5" aria-busy={actionBusy}>
-          <button type="button" disabled={actionBusy || selected.status === "Active"} onClick={() => void handleAction(selected.id, "activate")} className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40">
-            <MdCheckCircle /> Activate User
-          </button>
-          <button type="button" disabled={actionBusy || selected.status === "Suspended"} onClick={() => void handleAction(selected.id, "suspend")} className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40">
-            <MdBlock /> Suspend User
-          </button>
-        </div>
-      </DetailDialog>}
-      {/* Pagination */}
+        {selected && (
+          <DetailDialog title="User details" onClose={() => setSelected(null)}>
+            <div className="mb-6 flex items-center gap-4">
+              <Image
+                unoptimized
+                src={selected.avatar}
+                alt={selected.name}
+                width={80}
+                height={80}
+                className="size-20 rounded-full object-cover"
+              />
+              <div>
+                <h3 className="text-xl font-semibold">{selected.name}</h3>
+                <p className="text-sm text-slate-500">{selected.userID}</p>
+              </div>
+
+              <AdminWithdrawalForm
+                key={selected.id}
+                userId={selected.id}
+                wallet={selected.details.wallet}
+                onUpdate={(wallet) => {
+                  const update = (user: User): User =>
+                    user.id === selected.id
+                      ? {
+                          ...user,
+                          balance: formatWalletBalance(wallet),
+                          details: { ...user.details, wallet },
+                        }
+                      : user;
+                  setUsers((current) => current.map(update));
+                  setSelected((current) => (current ? update(current) : null));
+                }}
+              />
+            </div>
+            <dl className="grid gap-5 text-sm sm:grid-cols-2">
+              {[
+                ["Email", selected.email],
+                ["Phone", selected.details.phone],
+                ["Address", selected.details.address],
+                ["Gender", selected.details.gender],
+                ["Status", selected.status],
+                ["Verified", selected.isVerified ? "Yes" : "No"],
+                ["Wallet ID", selected.details.wallet?.walletId],
+                [
+                  "Active investment",
+                  selected.details.hasActiveInvestment ? "Yes" : "No",
+                ],
+                ["Referred by (user ID)", selected.details.referredBy],
+                ["Suspension reason", selected.details.suspendReason],
+                [
+                  "Registered",
+                  new Date(selected.details.createdAt).toLocaleString(),
+                ],
+                [
+                  "Last updated",
+                  new Date(selected.details.updatedAt).toLocaleString(),
+                ],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-xs text-slate-500">{label}</dt>
+                  <dd className="mt-1 whitespace-pre-wrap break-words font-medium">
+                    {value || "Not provided"}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
+            {actionError && (
+              <p
+                role="alert"
+                className="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+              >
+                {actionError}
+              </p>
+            )}
+            <div
+              className="mt-6 flex flex-wrap justify-end gap-3 border-t border-gray-200 pt-5"
+              aria-busy={actionBusy}
+            >
+              <button
+                type="button"
+                disabled={actionBusy || selected.status === "Active"}
+                onClick={() => void handleAction(selected.id, "activate")}
+                className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <MdCheckCircle /> Activate User
+              </button>
+              <button
+                type="button"
+                disabled={actionBusy || selected.status === "Suspended"}
+                onClick={() => void handleAction(selected.id, "suspend")}
+                className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <MdBlock /> Suspend User
+              </button>
+            </div>
+          </DetailDialog>
+        )}
+        {/* Pagination */}
         <div className="flex items-center justify-between p-4 border-t border-[#d5e7cf] bg-[#f9fcf8]">
           <p className="text-sm text-[#5e9a4c]">
             <span className="font-bold text-[#111b0d]">Page {page}</span>
