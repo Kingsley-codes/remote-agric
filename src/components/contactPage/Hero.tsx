@@ -1,10 +1,15 @@
+import Image from "next/image";
+
 export default function Hero() {
   return (
     <section className="relative h-75 flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <img
+        <Image
           className="w-full h-full object-cover"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9jj_VsV1MIcQ_jbkQ1jvyKQkCV8E3l4UggLlsoVB_P0qd-yP-cwyY0acoFQKtnKPSkQCiOl0M5evZt0b0hPkHQRxjyI37PWMtzldiKOPbpz3Vts3sN09ByAxshnJPI-BgbfWxZ4dI0DcNBvVoQlj2HTrE7S_TpmEMaZv-VsMzlhUSSq_dpe0AtNb9PtuLpquOkDXDkOtot_LrXb-_Ft9jKlrj6jUgKquQTBhgS4_4qNSiEJ-dVyTYMA9S9cN_m7WP98iQEqTsnf40"
+          src="/contact.jpg"
+          fill
+          sizes="100vw"
+          priority
           alt="Farmland"
         />
         <div className="absolute inset-0 bg-primary/40 mix-blend-multiply"></div>

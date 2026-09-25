@@ -1,40 +1,46 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import OpportunityCard from "../opportunitiesPage/OpportunityCard";
 import { ApiResponse, ApiProduce } from "@/lib";
 import axios from "axios";
 import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa";
 
-async function getFeaturedOpportunities(): Promise<ApiProduce[]> {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+export default function FeaturedOpportunities() {
+  const [opportunities, setOpportunities] = useState<ApiProduce[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [revision, setRevision] = useState(0);
 
-  if (!backendUrl) {
-    throw new Error("NEXT_PUBLIC_BACKEND_URL is not defined");
-  }
+  useEffect(() => {
+    const controller = new AbortController();
+    axios.get<ApiResponse>(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}/api/produce`,
+      { signal: controller.signal },
+    ).then(({ data }) => {
+      if (!data.success || !Array.isArray(data.produce)) throw new Error("Unable to load opportunities");
+      if (controller.signal.aborted) return;
+      setOpportunities(data.produce.slice(0, 3));
+    }).catch(() => {
+      if (!controller.signal.aborted) setError("We couldn't load opportunities. Please try again.");
+    }).finally(() => {
+      if (!controller.signal.aborted) setLoading(false);
+    });
+    return () => controller.abort();
+  }, [revision]);
 
-  const res = await axios.get<ApiResponse>(
-    `${backendUrl}/api/produce?isFeatured=true`,
-    {
-      headers: {
-        "Cache-Control": "no-store",
-      },
-    },
-  );
-
-  return res.data.produce;
-}
-
-export default async function FeaturedOpportunities() {
-  const opportunities = await getFeaturedOpportunities();
-
-  if (!opportunities || opportunities.length === 0) {
-    return null;
-  }
+  const retry = () => {
+    setLoading(true);
+    setError("");
+    setRevision(value => value + 1);
+  };
 
   return (
-    <section className="bg-gray-100 py-16 md:py-24">
+    <section aria-labelledby="featured-opportunities-heading" className="bg-gray-100 py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight text-gray-800 md:text-3xl">
+          <h2 id="featured-opportunities-heading" className="text-2xl font-bold tracking-tight text-gray-800 md:text-3xl">
             Featured Opportunities
           </h2>
 
@@ -46,17 +52,22 @@ export default async function FeaturedOpportunities() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {opportunities.map((opportunity) => (
-            <OpportunityCard key={opportunity._id} opportunity={opportunity} />
-          ))}
+        <div aria-busy={loading}>
+          {loading ? <div role="status">
+            <p className="sr-only">Loading featured opportunities...</p>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+              {[0, 1, 2].map(index => <div key={index} className="h-96 animate-pulse rounded-2xl bg-gray-200" />)}
+            </div>
+          </div> : error ? <div role="alert" className="rounded-2xl border border-gray-200 bg-white p-8 text-center">
+            <p className="text-gray-600">{error}</p>
+            <button type="button" onClick={retry} className="mt-4 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-dark">Try again</button>
+          </div> : opportunities.length === 0 ? <p className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-600">New farm opportunities are coming soon. Check back for available farms.</p> : <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {opportunities.map(opportunity => <OpportunityCard key={opportunity._id} opportunity={opportunity} />)}
+          </div>}
         </div>
 
         <div className="mt-8 text-center sm:hidden">
-          <Link
-            className="inline-flex items-center gap-1 text-sm font-bold text-primary transition-colors hover:text-primary-dark"
-            href="/opportunities"
-          >
+          <Link className="inline-flex items-center gap-1 text-sm font-bold text-primary transition-colors hover:text-primary-dark" href="/opportunities">
             View All Projects <FaArrowRight />
           </Link>
         </div>

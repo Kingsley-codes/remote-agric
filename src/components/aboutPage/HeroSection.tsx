@@ -1,15 +1,15 @@
-"use client";
-
-import { CldImage } from "next-cloudinary";
+import Image from "next/image";
 
 export default function HeroSection() {
   return (
     <section className="relative h-[60vh] min-h-100 w-full flex items-end">
       <div className="absolute inset-0 z-0">
-        <CldImage
+        <Image
           className="w-full h-full object-cover"
-          src="cug8dpm46xur3ld9f4kw"
+          src="/about.jpg"
           fill
+          sizes="100vw"
+          priority
           alt="Cassava plantation"
         />
         <div className="absolute inset-0 bg-linear-to-t from-primary/70 to-transparent"></div>

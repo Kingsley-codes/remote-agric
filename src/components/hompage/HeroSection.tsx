@@ -72,8 +72,7 @@ const slides: Slide[] = [
     title: "Remote Agric – Own a Farm Remotely. Grow Food. Grow Together.",
     subtitle:
       "Remote Agric lets everyday people own real farm units across Africa while trusted producers manage cultivation and you follow each stage through harvest.",
-    bgImage:
-      "https://res.cloudinary.com/dbeyl29fl/image/upload/v1768213215/f3tfcfmz8hotxeekiqlb.png",
+    bgImage: "/slide%201.jpg",
     badge: {
       icon: FaShieldAlt,
       text: "Secured & Verified Farm Projects",
@@ -94,8 +93,7 @@ const slides: Slide[] = [
     title: "Your Farm Ownership Goes Directly to Production",
     subtitle:
       "Your payment supplies producers with seeds, fertilizers, equipment and inputs — ensuring every naira supports the farm units you own.",
-    bgImage:
-      "https://res.cloudinary.com/dbeyl29fl/image/upload/v1768213423/mptkzxaetnjot7uhfxlv.png",
+    bgImage: "/slide%202.jpg",
     badge: {
       icon: FaUserCheck,
       text: "Ownership Tier",
@@ -114,8 +112,7 @@ const slides: Slide[] = [
     title: "Track Every Stage of Your Remote Farm",
     subtitle:
       "From land preparation to planting, crop growth and harvest, Remote Agric keeps you informed at every phase through real-time updates and notifications",
-    bgImage:
-      "https://res.cloudinary.com/dbeyl29fl/image/upload/v1768213779/mnpfq3idjgfrve9grtyw.png",
+    bgImage: "/slide%203.jpg",
     badge: {
       icon: BsTransparency,
       text: "Transparency",
@@ -142,8 +139,7 @@ const slides: Slide[] = [
     title: "Empowering Producers. Strengthening Communities.",
     subtitle:
       "We work directly with trusted farming communities to remove operational barriers and help producers focus on what they do best — growing food.",
-    bgImage:
-      "https://res.cloudinary.com/dbeyl29fl/image/upload/v1768213837/yvapk8gjlpc0lkzhtfk3.png",
+    bgImage: "/slide%204.jpg",
     badge: {
       icon: FaUsers,
       text: "Social Impact Driven",
@@ -162,8 +158,7 @@ const slides: Slide[] = [
     title: "Harvest Returns, Built on Real Impact",
     subtitle:
       "Structured farming projects with clear timelines, realistic yields, and shared success. We bridge the gap between rural bounty and urban ownership.",
-    bgImage:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBaGzTc4uLtjnogTXxRMYZiMn8126RQ5cw4wxWgGiO3WZjtA0u4uuQDiqWpGqKpDVgyrexiroNhUreGqwFgv8pyxMffK_FW05DC592s2ZdY6ya9DeZQPu-htLWi8XNpOaiCIfQuoXQdW51NLcRMxluTXk3qR_QZJ9Q44B6Hx_3tW9GvhBV7jg7UJMc9P4p23YmSDqq6DLQZDJKvYkxExUE45Dc_hY-_8Bsh0gdHyEzRBW-4KZxYFmfInuHN0--4WZ0r9cezs3yY5G7D",
+    bgImage: "/slide%205.jpg",
     badge: {
       icon: FaCheckCircle,
       text: "Harvest Season Active",
@@ -189,7 +184,7 @@ const slides: Slide[] = [
 
 export default function HeroSlideshow() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isAutoPlaying] = useState(true);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
