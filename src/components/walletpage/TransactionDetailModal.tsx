@@ -88,6 +88,15 @@ export default function TransactionDetailModal({
               <div>{data.paymentMethod || "—"}</div>
             </div>
 
+            {data.initiatedByAdmin && <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <p className="font-semibold">Admin-initiated wallet withdrawal</p>
+              <p>Triggered by: {data.adminName || "Remote Agric admin"}</p>
+              <p className="whitespace-pre-wrap break-words">Reason: {data.settlementNote}</p>
+              <p>Previous balance: {new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(data.walletBalanceBefore)}</p>
+              <p>Remaining balance: {new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(data.walletBalanceAfter)}</p>
+              <p>This action deducted wallet funds. No bank transfer was initiated.</p>
+            </div>}
+
             {data.produce && (
               <div className="pt-2 border-t border-dashed border-gray-100">
                 <div className="text-gray-500">Produce</div>

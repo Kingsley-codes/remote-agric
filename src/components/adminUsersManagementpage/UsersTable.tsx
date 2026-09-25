@@ -1,5 +1,6 @@
 "use client";
 
+import AdminWithdrawalForm from "./AdminWithdrawalForm";
 import DetailDialog from "@/components/ui/DetailDialog";
 import Image from "next/image";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -592,6 +593,11 @@ export default function UsersTable() {
           ["Active investment", selected.details.hasActiveInvestment ? "Yes" : "No"], ["Referred by (user ID)", selected.details.referredBy], ["Suspension reason", selected.details.suspendReason],
           ["Registered", new Date(selected.details.createdAt).toLocaleString()], ["Last updated", new Date(selected.details.updatedAt).toLocaleString()],
         ].map(([label, value]) => <div key={label}><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 whitespace-pre-wrap break-words font-medium">{value || "Not provided"}</dd></div>)}</dl>
+        <AdminWithdrawalForm key={selected.id} userId={selected.id} wallet={selected.details.wallet} onUpdate={(wallet) => {
+          const update = (user: User): User => user.id === selected.id ? { ...user, balance: formatWalletBalance(wallet), details: { ...user.details, wallet } } : user;
+          setUsers(current => current.map(update));
+          setSelected(current => current ? update(current) : null);
+        }} />
         {actionError && <p role="alert" className="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{actionError}</p>}
         <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-gray-200 pt-5" aria-busy={actionBusy}>
           <button type="button" disabled={actionBusy || selected.status === "Active"} onClick={() => void handleAction(selected.id, "activate")} className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-40">
