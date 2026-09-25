@@ -646,7 +646,7 @@ export default function UsersTable() {
                 <p className="text-sm text-slate-500">{selected.userID}</p>
               </div>
             </div>
-            <div>
+            <div className="mb-6">
               <AdminWithdrawalForm
                 key={selected.id}
                 userId={selected.id}
