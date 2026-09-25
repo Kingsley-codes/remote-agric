@@ -645,7 +645,8 @@ export default function UsersTable() {
                 <h3 className="text-xl font-semibold">{selected.name}</h3>
                 <p className="text-sm text-slate-500">{selected.userID}</p>
               </div>
-
+            </div>
+            <div>
               <AdminWithdrawalForm
                 key={selected.id}
                 userId={selected.id}
@@ -664,6 +665,7 @@ export default function UsersTable() {
                 }}
               />
             </div>
+
             <dl className="grid gap-5 text-sm sm:grid-cols-2">
               {[
                 ["Email", selected.email],
