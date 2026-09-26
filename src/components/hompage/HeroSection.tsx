@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   FaCheckCircle,
   FaChartLine,
@@ -19,6 +20,7 @@ import { IconType } from "react-icons";
 interface ButtonProps {
   text: string;
   primary: boolean;
+  href: string;
   icon?: IconType;
 }
 
@@ -84,8 +86,13 @@ const slides: Slide[] = [
       { value: "₦500M", label: "Harvest Returns" },
     ],
     buttons: [
-      { text: "Own a Farm", primary: true, icon: FaChartLine },
-      { text: "Explore Projects", primary: false },
+      {
+        text: "Own a Farm",
+        primary: true,
+        href: "/opportunities",
+        icon: FaChartLine,
+      },
+      { text: "Explore our Communities", primary: false, href: "/community" },
     ],
   },
   {
@@ -104,7 +111,12 @@ const slides: Slide[] = [
       { value: "98.4%", label: "Ops Efficiency", trend: "Real-time" },
     ],
     buttons: [
-      { text: "View Available Farms", primary: true, icon: FaChartLine },
+      {
+        text: "View Available Farms",
+        primary: true,
+        href: "/opportunities",
+        icon: FaChartLine,
+      },
     ],
   },
   {
@@ -151,7 +163,7 @@ const slides: Slide[] = [
       { value: "1,000+", label: "Jobs Created" },
       { value: "100%", label: "Local Sourcing" },
     ],
-    buttons: [{ text: "Farm With Impact", primary: true }],
+    buttons: [{ text: "Farm With Impact", primary: true, href: "/community" }],
   },
   {
     id: 5,
@@ -244,8 +256,9 @@ export default function HeroSlideshow() {
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             {slide.buttons?.map((button, index) => (
-              <button
+              <Link
                 key={index}
+                href={button.href}
                 className={`flex items-center justify-center gap-2 h-12 px-8 rounded-xl font-semibold text-md transition-all ${
                   button.primary
                     ? "bg-primary text-white hover:bg-primary-dark shadow-lg shadow-[#1a6b41]/30 hover:scale-[1.02]"
@@ -254,7 +267,7 @@ export default function HeroSlideshow() {
               >
                 {button.icon && <button.icon className="w-5 h-5" />}
                 <span>{button.text}</span>
-              </button>
+              </Link>
             ))}
           </div>
 
