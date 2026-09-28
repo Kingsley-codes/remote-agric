@@ -212,8 +212,8 @@ export default function AddFarmerModal({
       setLoading(false);
       return;
     }
-    if (!formData.farmSize) {
-      setError("Farm size is required");
+    if (!Number.isFinite(Number(formData.farmSize)) || Number(formData.farmSize) <= 0) {
+      setError("Enter a farm size greater than zero in acres");
       setLoading(false);
       return;
     }
@@ -386,14 +386,16 @@ export default function AddFarmerModal({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Farm Size <span className="text-red-500">*</span>
+                    Farm Size (acres) <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="text"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
                     name="farmSize"
                     value={formData.farmSize}
                     onChange={handleChange}
-                    placeholder="e.g., 5 hectares, 2 acres"
+                    placeholder="e.g., 5"
                     className="w-full px-3 py-2 border border-[#d5e7cf] rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                     required
                   />

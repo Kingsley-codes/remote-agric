@@ -4,14 +4,9 @@ import { useState } from "react";
 import { IoIosAdd } from "react-icons/io";
 import AddFarmerModal from "./AddFarmerModal";
 
-export default function Header() {
+export default function Header({ onFarmerCreated }: { onFarmerCreated: () => void }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleFarmerCreated = () => {
-    // Refresh the farmers table or show success message
-    console.log("Farmer created successfully");
-    // You can trigger a refetch of the farmers list here
-  };
 
   return (
     <>
@@ -33,7 +28,7 @@ export default function Header() {
       <AddFarmerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={handleFarmerCreated}
+        onSuccess={onFarmerCreated}
       />
     </>
   );

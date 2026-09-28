@@ -19,13 +19,13 @@ import {
   MdTrendingUp,
   MdPhotoCamera,
 } from "react-icons/md";
-import { FormattedFarmer, getFundingStatusBadge } from "./FarmersTable";
+import { Farmer, FormattedFarmer, getFundingStatusBadge } from "./FarmersTable";
 
 // ── Farmer Detail Modal ──────────────────────────────────────────────────────
 interface FarmerDetailModalProps {
   farmer: FormattedFarmer | null;
   onClose: () => void;
-  onUpdate?: () => void; // Callback to refresh the farmers list
+  onUpdate?: (farmer?: Farmer) => void;
 }
 
 type Status = "Active" | "Pending" | "Suspended";
@@ -47,6 +47,7 @@ const statusBadge: Record<Status, { wrapper: string; dot: string }> = {
 };
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
+const money = (value: number) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(value);
 
 export default function FarmerDetailModal({
   farmer,
@@ -57,6 +58,8 @@ export default function FarmerDetailModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [fundingStatus, setFundingStatus] = useState("");
+  const [amountFunded, setAmountFunded] = useState("");
 
   // Profile photo states
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
@@ -70,7 +73,7 @@ export default function FarmerDetailModal({
     farmSize: "",
     fundingAmount: "",
     cropsGrown: [] as string[],
-    expextedYield: "",
+    expectedYield: "",
   });
 
   if (!farmer) return null;
@@ -80,10 +83,10 @@ export default function FarmerDetailModal({
   // Initialize edit data when entering edit mode
   const handleEditClick = () => {
     setEditData({
-      farmSize: farmer.farmSize.replace(/[^0-9.]/g, ""), // Extract number from string like "5 hectares"
-      fundingAmount: farmer.fundingAmount.replace(/[^0-9.]/g, ""),
+      farmSize: farmer.farmSize,
+      fundingAmount: String(farmer.fundingTotal),
       cropsGrown: [...farmer.cropsGrown],
-      expextedYield: farmer.expextedYield,
+      expectedYield: farmer.expectedYield,
     });
     // Reset profile photo states
     setProfilePhoto(null);
@@ -144,7 +147,7 @@ export default function FarmerDetailModal({
       formData.append("profilePhoto", profilePhoto);
 
       const response = await fetch(
-        `${BACKEND_URL}/api/admin/dashboard/farmers/${farmer.id}/photo`,
+        `${BACKEND_URL}/api/admin/dashboard/farmers/${farmer.id}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -163,7 +166,7 @@ export default function FarmerDetailModal({
       // Reset photo states
       setProfilePhoto(null);
       setProfilePhotoPreview(null);
-      onUpdate?.(); // Refresh the farmers list
+      onUpdate?.(data.farmer);
       alert("Profile photo updated successfully!");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -181,15 +184,20 @@ export default function FarmerDetailModal({
   };
 
   const handleUpdateFarmer = async () => {
+    if (!Number.isFinite(Number(editData.farmSize)) || Number(editData.farmSize) <= 0 ||
+        !Number.isFinite(Number(editData.fundingAmount)) || Number(editData.fundingAmount) <= 0) {
+      setError("Farm size in acres and funding amount must be greater than zero");
+      return;
+    }
     setLoading(true);
     setError(null);
 
     try {
       const payload = {
-        farmSize: parseFloat(editData.farmSize) || 0,
-        fundingAmount: parseFloat(editData.fundingAmount) || 0,
+        farmSize: Number(editData.farmSize),
+        fundingAmount: Number(editData.fundingAmount),
         cropsGrown: editData.cropsGrown,
-        expextedYield: editData.expextedYield,
+        expectedYield: editData.expectedYield,
       };
 
       const response = await fetch(
@@ -211,7 +219,7 @@ export default function FarmerDetailModal({
       }
 
       setIsEditing(false);
-      onUpdate?.(); // Refresh the farmers list
+      onUpdate?.(data.farmer);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -219,7 +227,13 @@ export default function FarmerDetailModal({
     }
   };
 
-  const handleUpdateFundingStatus = async (newStatus: number) => {
+  const handleUpdateFundingStatus = async () => {
+    if (!fundingStatus) return;
+    if (fundingStatus === "partially funded" &&
+        (!Number.isFinite(Number(amountFunded)) || Number(amountFunded) <= 0 || Number(amountFunded) >= farmer.fundingTotal)) {
+      setError("Amount funded must be greater than zero and less than the total funding amount");
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -230,7 +244,7 @@ export default function FarmerDetailModal({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ fundingStatus: newStatus }),
+          body: JSON.stringify({ fundingStatus, amountFunded: Number(amountFunded) }),
         },
       );
 
@@ -242,7 +256,8 @@ export default function FarmerDetailModal({
         );
       }
 
-      onUpdate?.(); // Refresh the farmers list
+      onUpdate?.(data.farmer);
+      setFundingStatus("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       setTimeout(() => setError(null), 3000);
@@ -273,7 +288,7 @@ export default function FarmerDetailModal({
         );
       }
 
-      onUpdate?.(); // Refresh the farmers list
+      onUpdate?.(data.farmer);
       alert("Yield marked as received successfully!");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -495,7 +510,7 @@ export default function FarmerDetailModal({
               <div className="space-y-3">
                 <div>
                   <label className="text-xs text-gray-500 uppercase tracking-wider">
-                    Farm Size (hectares)
+                    Farm Size (acres)
                   </label>
                   {isEditing ? (
                     <input
@@ -508,12 +523,13 @@ export default function FarmerDetailModal({
                         }))
                       }
                       className="mt-1 w-full px-3 py-2 border border-[#d5e7cf] rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                      placeholder="Enter farm size in hectares"
+                      placeholder="Enter farm size in acres"
+                      min="0.01"
                       step="0.01"
                     />
                   ) : (
                     <p className="text-gray-800 font-medium">
-                      {farmer.farmSize}
+                      {farmer.farmSize ? `${farmer.farmSize} acres` : "Not recorded"}
                     </p>
                   )}
                 </div>
@@ -584,28 +600,28 @@ export default function FarmerDetailModal({
                   {isEditing ? (
                     <input
                       type="text"
-                      value={editData.expextedYield}
+                      value={editData.expectedYield}
                       onChange={(e) =>
                         setEditData((prev) => ({
                           ...prev,
-                          expextedYield: e.target.value,
+                          expectedYield: e.target.value,
                         }))
                       }
                       className="mt-1 w-full px-3 py-2 border border-[#d5e7cf] rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                       placeholder="e.g., 500 kg, 1000 tons"
                     />
                   ) : (
-                    <p className="text-gray-800">{farmer.expextedYield}</p>
+                    <p className="text-gray-800">{farmer.expectedYield}</p>
                   )}
 
                   {!isEditing && (
                     <button
                       onClick={handleMarkYieldReceived}
-                      disabled={loading}
+                      disabled={loading || farmer.yieldReceived}
                       className="w-full mt-2 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       <MdTrendingUp className="text-base" />
-                      Mark Yield as Received
+                      {farmer.yieldReceived ? "Yield received" : "Mark Yield as Received"}
                     </button>
                   )}
                 </div>
@@ -655,22 +671,49 @@ export default function FarmerDetailModal({
                     </span>
                     {!isEditing && (
                       <select
-                        onChange={(e) =>
-                          handleUpdateFundingStatus(parseInt(e.target.value))
-                        }
+                        aria-label="Funding status"
+                        onChange={(e) => {
+                          setFundingStatus(e.target.value);
+                          setAmountFunded(farmer.amountFunded == null ? "" : String(farmer.amountFunded));
+                          setError(null);
+                        }}
                         disabled={loading}
                         className="px-2 py-1 text-xs border border-[#d5e7cf] rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                        defaultValue=""
+                        value={fundingStatus}
                       >
                         <option value="" disabled>
                           Change Status
                         </option>
-                        <option value="0">Pending</option>
-                        <option value="1">Partially Funded</option>
-                        <option value="2">Fully Funded</option>
+                        <option value="pending">Pending</option>
+                        <option value="partially funded">Partially Funded</option>
+                        <option value="fully funded">Fully Funded</option>
+                        <option value="rejected">Rejected</option>
                       </select>
                     )}
                   </div>
+                  <div className="mt-3 space-y-1 text-sm text-gray-700">
+                    <p>Amount funded: {farmer.amountFunded == null ? "Not recorded" : money(farmer.amountFunded)}</p>
+                    <p>Remaining to fund: {farmer.amountFunded == null ? "Not recorded" : money(Math.max(0, farmer.fundingTotal - farmer.amountFunded))}</p>
+                  </div>
+                  {!isEditing && fundingStatus && (
+                    <div className="mt-3 space-y-3">
+                      {fundingStatus === "partially funded" && (
+                        <label className="block text-sm text-gray-700">
+                          Total amount funded so far (NGN)
+                          <input type="number" min="0.01" step="0.01" max={farmer.fundingTotal}
+                            value={amountFunded} onChange={(e) => setAmountFunded(e.target.value)}
+                            disabled={loading} className="mt-1 w-full px-3 py-2 border border-[#d5e7cf] rounded-lg" />
+                          <span className="block mt-1 text-xs">Total required: {money(farmer.fundingTotal)}</span>
+                        </label>
+                      )}
+                      <div className="flex gap-2">
+                        <button onClick={handleUpdateFundingStatus} disabled={loading}
+                          className="px-3 py-2 bg-primary text-white rounded-lg disabled:opacity-50">Save funding status</button>
+                        <button onClick={() => setFundingStatus("")} disabled={loading}
+                          className="px-3 py-2 border rounded-lg">Cancel</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -702,7 +745,7 @@ export default function FarmerDetailModal({
                     <MdTimeline className="text-xs" /> Joined Date
                   </label>
                   <p className="text-gray-800">
-                    {farmer.joinedDate} at {farmer.joinedTime}
+                    {farmer.joinedDate}{farmer.joinedTime ? ` at ${farmer.joinedTime}` : ""}
                   </p>
                 </div>
               </div>

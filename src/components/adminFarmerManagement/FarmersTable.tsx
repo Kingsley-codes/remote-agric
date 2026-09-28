@@ -9,7 +9,7 @@ import FarmerCard from "./FarmerCard";
 
 type Status = "Active" | "Pending" | "Suspended";
 
-interface Farmer {
+export interface Farmer {
   _id: string;
   name: string;
   town: string;
@@ -17,13 +17,15 @@ interface Farmer {
   farmerID?: string;
   status: string;
   state: string;
-  createdAt: string;
+  createdAt?: string;
   updatedAt: string;
   farmSize: string;
   fundingAmount: string;
   cropsGrown: string[];
   fundingStatus: string;
-  expextedYield: string;
+  expectedYield: string;
+  amountFunded?: number;
+  yieldRecieved?: boolean;
   email?: string;
   phone?: string;
 }
@@ -41,9 +43,12 @@ export interface FormattedFarmer {
   cropsGrown: string[];
   status: Status;
   fundingStatus: string;
+  fundingTotal: number;
+  amountFunded: number | null;
+  yieldReceived: boolean;
   joinedDate: string;
   joinedTime: string;
-  expextedYield: string;
+  expectedYield: string;
   email?: string;
   phone?: string;
 }
@@ -71,8 +76,9 @@ function formatWalletBalance(fundingAmount?: string): string {
   return `₦${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function formatDate(iso: string): { date: string; time: string } {
-  const d = new Date(iso);
+function formatDate(iso?: string): { date: string; time: string } {
+  const d = new Date(iso ?? "");
+  if (Number.isNaN(d.getTime())) return { date: "Not recorded", time: "" };
   return {
     date: d.toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -83,8 +89,24 @@ function formatDate(iso: string): { date: string; time: string } {
   };
 }
 
+function farmSizeInAcres(value: string): string {
+  const numeric = Number(value);
+  if (Number.isFinite(numeric) && numeric > 0) return String(numeric);
+  const match = String(value).trim().match(/^(\d*\.?\d+)\s*(acres?|hectares?|ha)$/i);
+  if (!match) return "";
+  const acres = Number(match[1]) * (/^(hectare|ha)/i.test(match[2] ?? "") ? 2.4710538147 : 1);
+  return acres > 0 ? String(Math.round(acres * 1000000) / 1000000) : "";
+}
+
+function normalizeFundingStatus(value: unknown): string {
+  const status = String(value ?? "pending").trim().toLowerCase();
+  return ({ "0": "pending", "1": "partially funded", "2": "fully funded", partial: "partially funded", funded: "fully funded" } as Record<string, string>)[status] ?? status;
+}
+
 function formatFarmer(f: Farmer): FormattedFarmer {
   const { date, time } = formatDate(f.createdAt);
+  const fundingStatus = normalizeFundingStatus(f.fundingStatus);
+  const fundingTotal = Number(f.fundingAmount);
   return {
     id: f._id,
     farmerID: f.farmerID ?? f._id.slice(-8).toUpperCase(),
@@ -95,14 +117,18 @@ function formatFarmer(f: Farmer): FormattedFarmer {
     email: f.email,
     phone: f.phone,
     avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name)}&background=d5e7cf&color=111b0d&size=128`,
-    farmSize: f.farmSize,
+    farmSize: farmSizeInAcres(f.farmSize),
     fundingAmount: formatWalletBalance(f.fundingAmount),
     status: normalizeStatus(f.status),
     joinedDate: date,
     joinedTime: time,
     cropsGrown: f.cropsGrown,
-    fundingStatus: f.fundingStatus,
-    expextedYield: f.expextedYield,
+    fundingStatus,
+    fundingTotal,
+    amountFunded: fundingStatus === "fully funded" ? fundingTotal :
+      fundingStatus === "pending" || fundingStatus === "rejected" ? 0 : f.amountFunded ?? null,
+    yieldReceived: f.yieldRecieved === true,
+    expectedYield: f.expectedYield,
   };
 }
 
@@ -124,6 +150,10 @@ const statusBadge: Record<Status, { wrapper: string; dot: string }> = {
 
 export function getFundingStatusBadge(status: string) {
   const statusMap: Record<string, { label: string; className: string }> = {
+    rejected: {
+      label: "Rejected",
+      className: "bg-red-50 text-red-700 border-red-100",
+    },
     pending: {
       label: "Pending",
       className: "bg-yellow-50 text-yellow-700 border-yellow-100",
@@ -146,7 +176,7 @@ export function getFundingStatusBadge(status: string) {
     },
   };
 
-  const normalizedStatus = status?.toLowerCase() || "pending";
+  const normalizedStatus = normalizeFundingStatus(status);
   return (
     statusMap[normalizedStatus] || {
       label: "Unknown",
@@ -169,7 +199,7 @@ function SkeletonRow() {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function FarmersTable() {
+export default function FarmersTable({ refreshVersion = 0 }: { refreshVersion?: number }) {
   const [farmers, setFarmers] = useState<FormattedFarmer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -222,7 +252,9 @@ export default function FarmersTable() {
         // FIX: Check both possible response structures
         const farmersData = json.data || json.farmers || [];
 
-        setFarmers(farmersData.map(formatFarmer));
+        const formatted: FormattedFarmer[] = farmersData.map(formatFarmer);
+        setFarmers(formatted);
+        setSelectedFarmer((selected) => selected ? formatted.find((farmer) => farmer.id === selected.id) ?? null : null);
         setPage(json.page ?? currentPage ?? 1);
         setTotalPages(json.pages ?? 1);
       } catch (err) {
@@ -239,7 +271,7 @@ export default function FarmersTable() {
   // Re-fetch on changes
   useEffect(() => {
     fetchFarmers(page, debouncedSearch, statusFilter);
-  }, [page, debouncedSearch, statusFilter, fetchFarmers]);
+  }, [page, debouncedSearch, statusFilter, fetchFarmers, refreshVersion]);
 
   // Activate / suspend
   const handleAction = useCallback(
@@ -288,7 +320,15 @@ export default function FarmersTable() {
         <FarmerDetailModal
           farmer={selectedFarmer}
           onClose={() => setSelectedFarmer(null)}
-          onUpdate={() => fetchFarmers(page, debouncedSearch, statusFilter)} // Add this line
+          onUpdate={(updated) => {
+            if (updated) {
+              const formatted = formatFarmer(updated);
+              setSelectedFarmer(formatted);
+              setFarmers((current) => current.map((farmer) => farmer.id === formatted.id ? formatted : farmer));
+            } else {
+              void fetchFarmers(page, debouncedSearch, statusFilter);
+            }
+          }}
         />
       )}
 
@@ -444,7 +484,7 @@ export default function FarmersTable() {
                       </td>
                       <td className="p-4">
                         <span className="text-sm text-gray-700">
-                          {farmer.farmSize}
+                          {farmer.farmSize ? `${farmer.farmSize} acres` : "Not recorded"}
                         </span>
                       </td>
                       <td className="p-4">

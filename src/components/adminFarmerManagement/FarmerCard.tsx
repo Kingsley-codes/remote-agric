@@ -81,6 +81,7 @@ export default function FarmerCard({
         <p className="text-sm font-semibold text-[#2d4a1e] mt-2">
           {farmer.fundingAmount}
         </p>
+        <p className="text-xs text-gray-600 mt-1">Farm size: {farmer.farmSize ? `${farmer.farmSize} acres` : "Not recorded"}</p>
         <p className="text-xs text-gray-400 mt-1">
           Joined: {farmer.joinedDate}
         </p>
