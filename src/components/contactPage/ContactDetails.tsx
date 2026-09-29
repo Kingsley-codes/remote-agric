@@ -1,7 +1,8 @@
 import { FiPhone, FiMail, FiMapPin } from "react-icons/fi";
 
 export default function ContactDetails() {
-  const address = "Level 4, Heritage Place, 21 Lugard Ave, Ikoyi, Lagos, Nigeria";
+  const address =
+    "Level 4, Heritage Place, 21 Lugard Ave, Ikoyi, Lagos, Nigeria";
   const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
 
   return (

@@ -18,8 +18,8 @@ export default function MissionSection() {
             innovative agricultural solutions.
           </p>
           <p className="text-lg leading-relaxed opacity-90">
-            Our mission is to create a sustainable ecosystem where urban
-            remote farmers and rural producers thrive together.
+            Our mission is to create a sustainable ecosystem where urban remote
+            farmers and rural producers thrive together.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4">
