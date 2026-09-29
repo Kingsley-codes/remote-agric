@@ -29,7 +29,7 @@ export default function MissionSection() {
             </div>
             <div className="text-3xl font-black text-primary mb-2">5k+</div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Producers Empowered
+              Projected Producers Empowered
             </p>
           </div>
           <div className="bg-white p-8 rounded-lg shadow text-center border-t-6 border-[#D96C3A]">
@@ -38,7 +38,7 @@ export default function MissionSection() {
             </div>
             <div className="text-3xl font-black text-[#D96C3A] mb-2">12k+</div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Hectares Cultivated
+              Projected Hectares Cultivated
             </p>
           </div>
           <div className="bg-white p-8 rounded-lg shadow text-center border-t-6 border-[#F7B74A]">
@@ -47,7 +47,7 @@ export default function MissionSection() {
             </div>
             <div className="text-3xl font-black text-[#F7B74A] mb-2">24%</div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Avg. Annual Yield
+              Projected Avg. Annual Yield
             </p>
           </div>
           <div className="bg-white p-8 rounded-lg shadow text-center border-t-6 border-primary">
@@ -56,7 +56,7 @@ export default function MissionSection() {
             </div>
             <div className="text-3xl font-black text-primary mb-2">₦2B+</div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Capital Deployed
+              Projected Capital Deployment
             </p>
           </div>
         </div>
