@@ -7,6 +7,8 @@ import ActionMenu from "./ActionMenu";
 import FarmerDetailModal from "./FarmerDetailModal";
 import FarmerCard from "./FarmerCard";
 
+import { ProduceEntry } from "./ProduceFields";
+
 type Status = "Active" | "Pending" | "Suspended";
 
 export interface Farmer {
@@ -21,11 +23,11 @@ export interface Farmer {
   updatedAt: string;
   farmSize: string;
   fundingAmount: string;
-  cropsGrown: string[];
+  cropsGrown?: string[];
+  produceCultivated?: ProduceEntry[];
   fundingStatus: string;
   expectedYield: string;
   amountFunded?: number;
-  yieldRecieved?: boolean;
   email?: string;
   phone?: string;
 }
@@ -40,12 +42,11 @@ export interface FormattedFarmer {
   avatar: string;
   farmSize: string;
   fundingAmount: string;
-  cropsGrown: string[];
+  produceCultivated: ProduceEntry[];
   status: Status;
   fundingStatus: string;
   fundingTotal: number;
   amountFunded: number | null;
-  yieldReceived: boolean;
   joinedDate: string;
   joinedTime: string;
   expectedYield: string;
@@ -122,12 +123,11 @@ function formatFarmer(f: Farmer): FormattedFarmer {
     status: normalizeStatus(f.status),
     joinedDate: date,
     joinedTime: time,
-    cropsGrown: f.cropsGrown,
+    produceCultivated: f.produceCultivated?.length ? f.produceCultivated : (f.cropsGrown ?? []).map((name) => ({ name, category: "", farmingCapacityKg: "" })),
     fundingStatus,
     fundingTotal,
     amountFunded: fundingStatus === "fully funded" ? fundingTotal :
       fundingStatus === "pending" || fundingStatus === "rejected" ? 0 : f.amountFunded ?? null,
-    yieldReceived: f.yieldRecieved === true,
     expectedYield: f.expectedYield,
   };
 }
@@ -411,7 +411,7 @@ export default function FarmersTable({ refreshVersion = 0 }: { refreshVersion?: 
                   "Producer",
                   "Location",
                   "Farm Size",
-                  "Crops",
+                  "Produce cultivated",
                   "Funding",
                   "Status",
                   "Actions",
@@ -489,17 +489,17 @@ export default function FarmersTable({ refreshVersion = 0 }: { refreshVersion?: 
                       </td>
                       <td className="p-4">
                         <div className="flex flex-wrap gap-1">
-                          {farmer.cropsGrown.slice(0, 2).map((crop, idx) => (
+                          {farmer.produceCultivated.slice(0, 2).map((crop, idx) => (
                             <span
                               key={idx}
                               className="text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded"
                             >
-                              {crop}
+                              {crop.name}
                             </span>
                           ))}
-                          {farmer.cropsGrown.length > 2 && (
+                          {farmer.produceCultivated.length > 2 && (
                             <span className="text-xs text-gray-400">
-                              +{farmer.cropsGrown.length - 2}
+                              +{farmer.produceCultivated.length - 2}
                             </span>
                           )}
                         </div>

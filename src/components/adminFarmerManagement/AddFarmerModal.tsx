@@ -15,6 +15,8 @@ import {
 } from "react-icons/md";
 import { getAllStates, getLGAsForState } from "@/lib/nigerianStatesLGAs";
 
+import ProduceFields, { ProduceEntry, emptyProduce, produceError } from "./ProduceFields";
+
 interface AddFarmerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,28 +30,9 @@ interface FarmerFormData {
   state: string;
   farmSize: string;
   fundingAmount: string;
-  cropsGrown: string[];
+  produceCultivated: ProduceEntry[];
   expectedYield: string;
 }
-
-const CROP_OPTIONS = [
-  "Maize",
-  "Rice",
-  "Cassava",
-  "Yam",
-  "Sorghum",
-  "Millet",
-  "Groundnut",
-  "Cowpea",
-  "Soybean",
-  "Tomato",
-  "Pepper",
-  "Onion",
-  "Cocoa",
-  "Palm Oil",
-  "Rubber",
-  "Cotton",
-];
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
 
@@ -65,14 +48,12 @@ export default function AddFarmerModal({
     state: "",
     farmSize: "",
     fundingAmount: "",
-    cropsGrown: [],
+    produceCultivated: [emptyProduce()],
     expectedYield: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cropInput, setCropInput] = useState("");
-  const [showCropSuggestions, setShowCropSuggestions] = useState(false);
   const [availableLGAs, setAvailableLGAs] = useState<string[]>([]);
 
   // Profile photo states
@@ -96,13 +77,6 @@ export default function AddFarmerModal({
     }
   }, [formData.state]);
 
-  // Filter crop suggestions based on input
-  const cropSuggestions = CROP_OPTIONS.filter(
-    (crop) =>
-      crop.toLowerCase().includes(cropInput.toLowerCase()) &&
-      !formData.cropsGrown.includes(crop),
-  );
-
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen) {
@@ -113,12 +87,10 @@ export default function AddFarmerModal({
         state: "",
         farmSize: "",
         fundingAmount: "",
-        cropsGrown: [],
+        produceCultivated: [emptyProduce()],
         expectedYield: "",
       });
       setError(null);
-      setCropInput("");
-      setShowCropSuggestions(false);
       setAvailableLGAs([]);
       // Reset profile photo
       setProfilePhoto(null);
@@ -167,25 +139,6 @@ export default function AddFarmerModal({
     }
   };
 
-  const addCrop = (crop?: string) => {
-    const cropToAdd = crop || cropInput.trim();
-    if (cropToAdd && !formData.cropsGrown.includes(cropToAdd)) {
-      setFormData((prev) => ({
-        ...prev,
-        cropsGrown: [...prev.cropsGrown, cropToAdd],
-      }));
-      setCropInput("");
-      setShowCropSuggestions(false);
-    }
-  };
-
-  const removeCrop = (crop: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      cropsGrown: prev.cropsGrown.filter((c) => c !== crop),
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -217,8 +170,9 @@ export default function AddFarmerModal({
       setLoading(false);
       return;
     }
-    if (formData.cropsGrown.length === 0) {
-      setError("At least one crop is required");
+    const cultivationError = produceError(formData.produceCultivated);
+    if (cultivationError) {
+      setError(cultivationError);
       setLoading(false);
       return;
     }
@@ -238,9 +192,7 @@ export default function AddFarmerModal({
       submitFormData.append("farmSize", formData.farmSize);
       submitFormData.append("fundingAmount", formData.fundingAmount);
       submitFormData.append("expectedYield", formData.expectedYield);
-      formData.cropsGrown.forEach((crop) => {
-        submitFormData.append("cropsGrown[]", crop);
-      });
+      submitFormData.append("produceCultivated", JSON.stringify(formData.produceCultivated));
       submitFormData.append("profilePhoto", profilePhoto);
 
       const response = await fetch(
@@ -475,79 +427,7 @@ export default function AddFarmerModal({
                 Farming Details
               </h3>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Crops Grown <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={cropInput}
-                        onChange={(e) => {
-                          setCropInput(e.target.value);
-                          setShowCropSuggestions(true);
-                        }}
-                        onFocus={() => setShowCropSuggestions(true)}
-                        onKeyPress={(e) =>
-                          e.key === "Enter" && (e.preventDefault(), addCrop())
-                        }
-                        placeholder="Type a crop name..."
-                        className="flex-1 px-3 py-2 border border-[#d5e7cf] rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => addCrop()}
-                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-                      >
-                        Add
-                      </button>
-                    </div>
-
-                    {/* Crop Suggestions Dropdown */}
-                    {showCropSuggestions &&
-                      cropInput &&
-                      cropSuggestions.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-[#d5e7cf] rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                          {cropSuggestions.map((crop) => (
-                            <button
-                              key={crop}
-                              type="button"
-                              onClick={() => addCrop(crop)}
-                              className="w-full text-left px-3 py-2 hover:bg-[#eaf3e7] transition-colors text-sm"
-                            >
-                              {crop}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                  </div>
-
-                  {/* Selected Crops */}
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {formData.cropsGrown.map((crop) => (
-                      <span
-                        key={crop}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-[#eaf3e7] text-[#2d4a1e] rounded-lg text-sm"
-                      >
-                        {crop}
-                        <button
-                          type="button"
-                          onClick={() => removeCrop(crop)}
-                          className="hover:text-red-600 transition-colors"
-                        >
-                          <MdClose className="text-sm" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-
-                  {formData.cropsGrown.length === 0 && (
-                    <p className="text-xs text-gray-400 mt-1">
-                      Add at least one crop
-                    </p>
-                  )}
-                </div>
+                <ProduceFields value={formData.produceCultivated} disabled={loading} onChange={(produceCultivated) => setFormData((prev) => ({ ...prev, produceCultivated }))} />
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">

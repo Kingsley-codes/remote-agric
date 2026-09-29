@@ -2,9 +2,10 @@
 
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Leaf, Loader2, TrendingUp, Users, WalletCards } from "lucide-react";
+import { Leaf, LandPlot, Loader2, TrendingUp, Users, WalletCards } from "lucide-react";
 
 type Data = {
+  cultivation: { totalAcreage: number; missingAcreageCount: number; missingCapacityCount: number; capacityByProduce: { name: string; category: string; farmingCapacityKg: number }[] };
   stats: { totalInvestments: number; investmentCount: number; totalUsers: number; activeOpportunities: number; pendingWithdrawalAmount: number; pendingWithdrawalCount: number };
   inflow: { _id: { year: number; month: number }; amount: number }[];
   portfolio: { _id: string; amount: number }[];
@@ -13,9 +14,11 @@ type Data = {
 
 export default function AdminOverview() {
   const [data, setData] = useState<Data | null>(null);
+  const [error, setError] = useState(false);
   useEffect(() => {
-    axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/dashboard/overview`, { withCredentials: true }).then((response) => setData(response.data.data));
+    axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/dashboard/overview`, { withCredentials: true }).then((response) => setData(response.data.data)).catch(() => setError(true));
   }, []);
+  if (error) return <div role="alert" className="m-6 rounded-xl border border-red-200 bg-red-50 p-6 text-red-800">Unable to load dashboard. <button onClick={() => window.location.reload()} className="font-semibold underline">Try again</button></div>;
   if (!data) return <div className="flex justify-center p-24"><Loader2 className="animate-spin text-primary" /></div>;
 
   const money = (amount: number) => `₦${amount.toLocaleString("en-NG")}`;
@@ -31,6 +34,21 @@ export default function AdminOverview() {
   return <div className="space-y-7 p-6 lg:p-10">
     <div><p className="text-sm text-gray-500">Live platform performance</p><h1 className="text-3xl font-semibold">Dashboard overview</h1></div>
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">{cards.map(([label, value, Icon]) => <div key={label} className="rounded-2xl bg-white p-6 shadow-sm"><Icon className="text-primary" /><p className="mt-5 text-sm text-gray-500">{label}</p><p className="mt-1 text-2xl font-semibold">{value}</p></div>)}</div>
+    <div className="grid gap-6 lg:grid-cols-3">
+      <section className="rounded-2xl border border-[#d5e7cf] bg-[#f7faf5] p-6 shadow-sm">
+        <LandPlot className="text-primary" aria-hidden="true" />
+        <h2 className="mt-5 font-semibold">Total platform acreage</h2>
+        <p className="mt-3 text-4xl font-semibold tracking-tight text-primary">{data.cultivation.totalAcreage.toLocaleString("en-NG", { maximumFractionDigits: 2 })}<span className="ml-2 text-base font-normal text-gray-500">acres</span></p>
+        <p className="mt-3 text-sm text-gray-500">Combined farm area across all producers.</p>
+        {data.cultivation.missingAcreageCount > 0 && <p className="mt-4 text-xs text-amber-800">{data.cultivation.missingAcreageCount} producer(s) have no valid acreage recorded.</p>}
+      </section>
+      <section className="min-w-0 rounded-2xl bg-white p-6 shadow-sm lg:col-span-2">
+        <h2 className="font-semibold">Farming capacity by produce</h2>
+        <p className="mt-1 text-sm text-gray-500">Combined cultivated capacity across all producers, in kilograms.</p>
+        {data.cultivation.capacityByProduce.length ? <div className="mt-5 max-h-80 overflow-auto"><table className="w-full text-left text-sm"><thead className="sticky top-0 bg-white text-xs text-gray-500"><tr><th scope="col" className="pb-3 pr-3 font-medium">Produce</th><th scope="col" className="pb-3 pr-3 font-medium">Category</th><th scope="col" className="pb-3 text-right font-medium">Capacity (kg)</th></tr></thead><tbody className="divide-y divide-gray-100">{data.cultivation.capacityByProduce.map((entry) => <tr key={`${entry.category}:${entry.name}`}><td className="py-3 pr-3 font-medium capitalize break-words">{entry.name}</td><td className="py-3 pr-3 capitalize text-gray-500">{entry.category}</td><td className="py-3 text-right font-semibold tabular-nums text-primary">{entry.farmingCapacityKg.toLocaleString("en-NG", { maximumFractionDigits: 2 })}</td></tr>)}</tbody></table></div> : <div className="mt-5 rounded-xl border border-dashed border-[#d5e7cf] p-6 text-sm text-gray-500">No farming capacity recorded yet. Add cultivation details to a producer to see totals here.</div>}
+        {data.cultivation.missingCapacityCount > 0 && <p className="mt-4 text-xs text-amber-800">Some cultivation details are incomplete. Totals include recorded capacities only.</p>}
+      </section>
+    </div>
     <div className="grid gap-6 xl:grid-cols-3">
       <div className="rounded-2xl bg-white p-6 shadow-sm xl:col-span-2"><h2 className="font-semibold">Farm ownership inflow</h2><div className="mt-8 flex h-56 items-end gap-4">{data.inflow.map((item) => <div key={`${item._id.year}-${item._id.month}`} className="flex flex-1 flex-col items-center gap-2"><div title={money(item.amount)} className="w-full rounded-t-lg bg-primary" style={{ height: `${Math.max(6, item.amount / max * 180)}px` }} /><span className="text-[10px] font-medium text-gray-400">{new Date(item._id.year, item._id.month - 1).toLocaleString("en", { month: "short" })}</span></div>)}</div></div>
       <div className="rounded-2xl bg-white p-6 shadow-sm"><h2 className="font-semibold">Farm portfolio mix</h2><div className="mt-6 space-y-5">{data.portfolio.map((item) => <div key={item._id}><div className="flex justify-between text-sm"><span className="font-medium">{item._id}</span><span>{Math.round(item.amount / total * 100)}%</span></div><div className="mt-2 h-2 rounded-full bg-gray-100"><div className="h-full rounded-full bg-primary" style={{ width: `${item.amount / total * 100}%` }} /></div></div>)}</div></div>
