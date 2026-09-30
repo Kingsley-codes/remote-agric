@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { CldImage } from "next-cloudinary";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { FcGoogle } from "react-icons/fc";
 import { ArrowLeft } from "lucide-react";
 import { FaArrowRight, FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 import Image from "next/image";
@@ -15,7 +14,6 @@ import Image from "next/image";
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFormValid, setIsFormValid] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,12 +21,8 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  // Check if form is valid
-  useEffect(() => {
-    const isValid =
-      formData.email.trim() !== "" && formData.password.trim() !== "";
-    setIsFormValid(isValid);
-  }, [formData.email, formData.password]);
+  const isFormValid =
+    formData.email.trim() !== "" && formData.password.trim() !== "";
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -65,7 +59,7 @@ export default function LoginPage() {
         localStorage.removeItem("user"); // clear any stale user session
         localStorage.setItem(
           "admin",
-          JSON.stringify({ ...response.data.data.admin, role: "admin" }),
+          JSON.stringify(response.data.data.admin),
         );
 
         setTimeout(() => {
@@ -163,24 +157,6 @@ export default function LoginPage() {
               <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 text-center">
                 Manage remote farm ownership with confidence.
               </p>
-            </div>
-
-            {/* Google Login Button */}
-            <a
-              href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/auth/google`}
-              className="flex w-full items-center justify-center gap-3 rounded-xl bg-white border border-slate-200 p-3 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:cursor-pointer transition-colors shadow-sm mb-6"
-            >
-              <FcGoogle className="w-4 h-4 md:w-5 md:h-5" />
-              <span>Continue with Google</span>
-            </a>
-
-            {/* Divider */}
-            <div className="relative flex items-center py-4">
-              <div className="grow border-t border-slate-200" />
-              <span className="shrink-0 mx-3 md:mx-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
-                Or Login with email
-              </span>
-              <div className="grow border-t border-slate-200" />
             </div>
 
             {/* Login Form */}

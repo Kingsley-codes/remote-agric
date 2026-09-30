@@ -14,6 +14,7 @@ import { FiLogOut, FiChevronUp } from "react-icons/fi";
 import { MdOutlineCardTravel } from "react-icons/md";
 import { FiBell } from "react-icons/fi";
 import axios from "axios";
+import { canAccessAdminPage } from "@/lib/adminAccess";
 
 export interface UserData {
   firstName?: string;
@@ -21,6 +22,7 @@ export interface UserData {
   name?: string;
   profilePhoto?: string;
   email?: string;
+  role?: string;
 }
 
 interface SidebarProps {
@@ -221,7 +223,7 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
 
           {/* Nav */}
           <nav className="flex flex-col gap-2 w-full">
-            {navLinks.map(({ href, label, icon: Icon }) => {
+            {navLinks.filter(({ href }) => canAccessAdminPage(user?.role, href)).map(({ href, label, icon: Icon }) => {
               const isActive =
                 href === "/admin/dashboard"
                   ? pathname === "/admin/dashboard"
@@ -277,7 +279,7 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
                     <p className="text-sm text-gray-600 font-bold">
                       {displayName}
                     </p>
-                    <p className="text-xs text-gray-500">Administrator</p>
+                    <p className="text-xs text-gray-500">{user?.role === "super-admin" ? "Super Admin" : "Admin"}</p>
                   </div>
                   <FiChevronUp
                     className={`transition-transform ${

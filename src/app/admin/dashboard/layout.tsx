@@ -5,12 +5,16 @@ import { useCallback, useState } from "react";
 import AdminDashboardNav from "@/components/adminDashboard/DashboardNav";
 import PushNotifications from "@/components/support/PushNotifications";
 import { useAuth } from "@/hooks/useAuth";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { canAccessAdminPage } from "@/lib/adminAccess";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const { loading, user } = useAuth({
     allowedRoles: ["admin", "super-admin"],
   });
@@ -39,7 +43,15 @@ export default function DashboardLayout({
           isOpen={sidebarOpen}
           onToggle={handleSidebarToggle}
         />
-        <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {canAccessAdminPage(user?.role, pathname) ? children : (
+            <div role="alert" className="p-8">
+              <h1 className="text-xl font-semibold">Access restricted</h1>
+              <p className="mt-2 text-gray-600">Only super admins can access this page.</p>
+              <Link href="/admin/dashboard" className="mt-4 inline-block text-primary underline">Back to dashboard</Link>
+            </div>
+          )}
+        </div>
         <PushNotifications admin />
       </main>
     </div>

@@ -55,7 +55,7 @@ export function useAuth({ allowedRoles }: { allowedRoles: Role[] }) {
         if (!profile) throw new Error("Profile response did not include a user");
 
         // The authenticated endpoint, never local storage, determines the role.
-        const role: Role = isAdminRoute ? "admin" : "user";
+        const role: Role = isAdminRoute ? profile.role : "user";
         const user = { ...profile, profilePhoto: typeof profile.profilePhoto === "string" ? profile.profilePhoto : profile.profilePhoto?.url, role };
         const allowed = rolesRef.current.map((item) => item.toLowerCase());
 
