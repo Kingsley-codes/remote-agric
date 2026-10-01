@@ -62,6 +62,8 @@ export default function WithdrawFundsModal({ onClose }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState<Step>("form");
   const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [transactionID, setTransactionID] = useState("");
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -120,6 +122,8 @@ export default function WithdrawFundsModal({ onClose }: Props) {
         ) {
           clearWithdrawalIntent(idempotencyKey);
         }
+        setSuccessMsg(json.message || "Your withdrawal request is being processed and will be completed within 24 hours.");
+        setTransactionID(json.data?.transactionID || "");
         setStep("success");
       }
     } catch {
@@ -258,11 +262,12 @@ export default function WithdrawFundsModal({ onClose }: Props) {
               </div>
               <div>
                 <h3 className="font-bold text-gray-800 text-lg">
-                  Withdrawal Initiated
+                  Withdrawal Requested
                 </h3>
                 <p className="text-sm text-gray-400 mt-1">
-                  Your withdrawal of {formatted} is being processed.
+                  {successMsg}
                 </p>
+                {transactionID && <p className="mt-3 break-all font-mono text-xs text-gray-500">{transactionID}</p>}
               </div>
               <button
                 onClick={onClose}

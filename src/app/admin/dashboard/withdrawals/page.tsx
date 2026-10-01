@@ -1,2 +1,2 @@
-import WithdrawalDashboard from "@/components/withdrawalsPage/WithdrawalDashboard";
+import WithdrawalDashboard from "@/components/withdrawalsPage/ManualWithdrawalDashboard";
 export default function Page(){return <WithdrawalDashboard/>}
