@@ -17,7 +17,7 @@ export const HeroGallery = ({ images }: HeroGalleryProps) => {
       <div className="sm:hidden space-y-3">
         {/* main image */}
         <div
-          className="w-full aspect-video rounded-xl bg-cover bg-center"
+          className="w-full aspect-square rounded-xl bg-cover bg-center"
           style={{ backgroundImage: `url(${images[activeIndex]})` }}
         />
 
@@ -28,7 +28,7 @@ export const HeroGallery = ({ images }: HeroGalleryProps) => {
               <button
                 key={i}
                 onClick={() => setActiveIndex(i)}
-                className={`shrink-0 w-32 h-20 rounded-lg bg-cover bg-center border
+                className={`shrink-0 w-20 aspect-square rounded-lg bg-cover bg-center border
                   ${
                     i === activeIndex ? "border-primary" : "border-transparent"
                   }`}
@@ -40,14 +40,14 @@ export const HeroGallery = ({ images }: HeroGalleryProps) => {
       </div>
 
       {/* ---------------- Desktop ---------------- */}
-      <div className="hidden sm:grid grid-cols-[110px_1fr] gap-3 h-96">
+      <div className="hidden sm:grid grid-cols-[110px_1fr] gap-3">
         {/* thumbnails on the LEFT */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 self-start">
           {images.map((img, i) => (
             <button
               key={i}
               onClick={() => setActiveIndex(i)}
-              className={`flex-1 rounded-lg bg-cover bg-center border
+              className={`shrink-0 w-full aspect-square rounded-lg bg-cover bg-center border
                 ${i === activeIndex ? "border-primary" : "border-transparent"}`}
               style={{ backgroundImage: `url(${img})` }}
             />
@@ -56,7 +56,7 @@ export const HeroGallery = ({ images }: HeroGalleryProps) => {
 
         {/* big image on the RIGHT */}
         <div
-          className="w-full h-full rounded-xl bg-cover bg-center"
+          className="w-full aspect-square self-start rounded-xl bg-cover bg-center"
           style={{ backgroundImage: `url(${images[activeIndex]})` }}
         />
       </div>

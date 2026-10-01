@@ -65,7 +65,7 @@ export default function OpportunityCard({
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl bg-gray-100 shadow-sm hover:shadow-xl transition-shadow border border-black/5">
-      <div className="relative h-48 w-full bg-gray-200">
+      <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gray-200">
         <div className="absolute top-3 left-3 z-10 rounded-md bg-white/80 px-2 py-1 text-xs font-bold text-primary backdrop-blur-sm">
           {opportunity.produceName}
         </div>

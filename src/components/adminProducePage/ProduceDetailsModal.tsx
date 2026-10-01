@@ -61,7 +61,7 @@ export default function ProduceDetailsModal({ produce, onClose, onEdit, onTracks
             {images.map((image, index) => (
               <div
                 key={`${image.url}-${index}`}
-                className={`rounded-xl bg-slate-100 bg-cover bg-center ${index === 0 ? "col-span-3 h-52 sm:col-span-2 sm:row-span-2 sm:h-full" : "h-28"}`}
+                className={`rounded-xl bg-slate-100 bg-cover bg-center ${index === 0 ? "col-span-3 aspect-square w-full self-start sm:col-span-2 sm:row-span-2" : "h-28"}`}
                 style={{ backgroundImage: `url('${image.url}')` }}
                 role="img"
                 aria-label={`${produce.title} image ${index + 1}`}

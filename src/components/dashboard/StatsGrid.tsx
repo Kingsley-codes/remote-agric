@@ -25,7 +25,7 @@ export default function StatsGrid({
       <StatCard title="Active Projects" value={String(activeProjects)} />
 
       <StatCard
-        title="Projected total return"
+        title="Projected total earnings"
         value={formatNaira(projectedReturn)}
         subtext={`${formatNaira(projectedProfit)} projected profit`}
       />

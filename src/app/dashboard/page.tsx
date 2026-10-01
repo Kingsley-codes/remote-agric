@@ -37,7 +37,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (loading) return;
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/overview`, { credentials: "include" })
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/overview`,
+      { credentials: "include" },
+    )
       .then(async (response) => {
         if (!response.ok) throw new Error("Unable to load dashboard data");
         return response.json();
@@ -48,19 +51,23 @@ export default function DashboardPage() {
   }, [loading]);
 
   const firstName = user?.firstName ?? user?.name?.split(" ")[0] ?? "there";
-  const activeInvestments = dashboard?.userInvestments.filter(
-    (investment) => investment.status === "ongoing",
-  ) ?? [];
-  const projectedProfit = dashboard?.totalProjectedProfit ??
+  const activeInvestments =
+    dashboard?.userInvestments.filter(
+      (investment) => investment.status === "ongoing",
+    ) ?? [];
+  const projectedProfit =
+    dashboard?.totalProjectedProfit ??
     activeInvestments.reduce(
       (total, investment) =>
-        total + investment.totalPrice * Number(investment.profit ?? 0) / 100,
+        total + (investment.totalPrice * Number(investment.profit ?? 0)) / 100,
       0,
     );
-  const projectedReturn = dashboard?.totalProjectedReturn ??
+  const projectedReturn =
+    dashboard?.totalProjectedReturn ??
     activeInvestments.reduce(
       (total, investment) =>
-        total + investment.totalPrice * (1 + Number(investment.profit ?? 0) / 100),
+        total +
+        investment.totalPrice * (1 + Number(investment.profit ?? 0) / 100),
       0,
     );
 
@@ -74,28 +81,56 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 md:p-8 lg:px-12">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-            <div>
-              <h2 className="text-3xl md:text-4xl text-gray-800 font-semibold mb-2">
-                Welcome back, {firstName}
-              </h2>
-              <p className="text-gray-500">
-                Here is an overview of your agricultural portfolio.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Link href="/dashboard/investments" className="flex items-center text-gray-600 gap-2 px-5 py-2.5 rounded-lg bg-white border border-gray-200 text-sm font-bold">View farms</Link>
-              <Link href="/dashboard/wallet" className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-bold">Withdraw</Link>
-            </div>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <h2 className="text-3xl md:text-4xl text-gray-800 font-semibold mb-2">
+            Welcome back, {firstName}
+          </h2>
+          <p className="text-gray-500">
+            Here is an overview of your agricultural portfolio.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Link
+            href="/dashboard/investments"
+            className="flex items-center text-gray-600 gap-2 px-5 py-2.5 rounded-lg bg-white border border-gray-200 text-sm font-bold"
+          >
+            View my farms
+          </Link>
+          <Link
+            href="/dashboard/opportunities"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-bold"
+          >
+            Explore available farms
+          </Link>
+        </div>
+      </div>
 
-          <StatsGrid totalFarmValue={dashboard?.totalInvestedAmount ?? 0} activeProjects={dashboard?.totalActiveInvestments ?? 0} projectedReturn={projectedReturn} projectedProfit={projectedProfit} nextPayout={dashboard?.totalActiveInvestments ? "At harvest" : "No upcoming payout"} />
+      <StatsGrid
+        totalFarmValue={dashboard?.totalInvestedAmount ?? 0}
+        activeProjects={dashboard?.totalActiveInvestments ?? 0}
+        projectedReturn={projectedReturn}
+        projectedProfit={projectedProfit}
+        nextPayout={
+          dashboard?.totalActiveInvestments
+            ? "At harvest"
+            : "No upcoming payout"
+        }
+      />
 
-          <div className="flex flex-col gap-8 mb-8">
-              <YieldChart projectedReturn={projectedReturn} projectedProfit={projectedProfit} investments={dashboard?.userInvestments ?? []} />
-              <ActiveInvestments investments={(dashboard?.userInvestments ?? []).filter((investment) => investment.status === "ongoing").slice(0, 5)} />
-          </div>
+      <div className="flex flex-col gap-8 mb-8">
+        <YieldChart
+          projectedReturn={projectedReturn}
+          projectedProfit={projectedProfit}
+          investments={dashboard?.userInvestments ?? []}
+        />
+        <ActiveInvestments
+          investments={(dashboard?.userInvestments ?? [])
+            .filter((investment) => investment.status === "ongoing")
+            .slice(0, 5)}
+        />
+      </div>
     </div>
   );
 }

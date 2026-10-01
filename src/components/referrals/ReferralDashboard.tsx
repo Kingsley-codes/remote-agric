@@ -1,6 +1,6 @@
 "use client";
 
-import DetailDialog from "@/components/ui/DetailDialog";
+import ReferralDetailsModal from "./ReferralDetailsModal";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { CheckCircle2, Copy, Gift, Loader2, Users } from "lucide-react";
@@ -17,7 +17,7 @@ type Reward = {
   _id: string; amount: number; units: number; referralBonus: number; date: string; transactionID: string;
   referralRewardInvestment?: { title: string; orderID: string; totalPrice: number; track?: { name: string } };
 };
-type Item = {
+export type ReferralItem = {
   rewards?: Reward[];
   _id: string;
   referrer?: Person;
@@ -40,11 +40,11 @@ type ReferralData = {
     earned?: number;
     paid?: number;
   };
-  referrals: Item[];
+  referrals: ReferralItem[];
 };
 
 export default function ReferralDashboard({ admin = false }: { admin?: boolean }) {
-  const [selected, setSelected] = useState<Item | null>(null);
+  const [selected, setSelected] = useState<ReferralItem | null>(null);
   const [error, setError] = useState("");
   const [data, setData] = useState<ReferralData | null>(null);
 
@@ -211,14 +211,13 @@ export default function ReferralDashboard({ admin = false }: { admin?: boolean }
           </tr>))}</tbody></table>
         {!data.referrals.some(r => r.rewards?.length) && <p className="p-6 text-center text-sm text-slate-500">No investment bonuses yet.</p>}
       </div>
-      {selected && <DetailDialog title="Referral details" onClose={() => setSelected(null)}>
-        <dl className="grid gap-4 text-sm sm:grid-cols-2">
-          {[["Referred user", `${selected.referredUser?.firstName ?? ""} ${selected.referredUser?.lastName ?? ""}`], ["Email", selected.referredUser?.email], ["Farmer ID", selected.referredUser?.farmerID], ["Registered", date(selected.createdAt)], ["Eligible until", date(selected.expiresAt)], ["Total earned", money(selected.commission)], ...(admin ? [["Referrer", `${selected.referrer?.firstName ?? ""} ${selected.referrer?.lastName ?? ""}`], ["Referrer ID", selected.referrer?.farmerID]] : [])].map(([label, value]) => <div key={label}><dt className="text-xs text-slate-500">{label}</dt><dd className="mt-1 break-words font-medium">{value || "Not provided"}</dd></div>)}
-        </dl>
-        <h3 className="mb-3 mt-6 font-semibold">Investment rewards</h3>
-        {(selected.rewards ?? []).map(reward => <div key={reward._id} className="mb-3 rounded-xl border p-4 text-sm"><p className="font-semibold">{reward.referralRewardInvestment?.title ?? "Archived investment"}</p><p className="mt-1 text-xs text-slate-500">{reward.referralRewardInvestment?.track?.name} · {reward.referralRewardInvestment?.orderID} · {date(reward.date)}</p><p className="mt-3">{reward.units} units × {money(reward.referralBonus)} = <strong>{money(reward.amount)}</strong></p><p className="mt-2 break-all text-xs text-slate-500">{reward.transactionID}</p></div>)}
-        {!selected.rewards?.length && <p className="text-sm text-slate-500">No investment bonuses yet.</p>}
-      </DetailDialog>}
+      {selected && (
+        <ReferralDetailsModal
+          referral={selected}
+          admin={admin}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </section>
   );
 }
