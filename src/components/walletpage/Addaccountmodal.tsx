@@ -124,7 +124,7 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ accountName, accountNumber, bankCode, password }),
+            body: JSON.stringify({ accountName, accountNumber, bankCode, bankName: selectedBank?.name, password }),
           },
         );
         const json = await res.json();
@@ -142,6 +142,7 @@ export default function AddAccountModal({ onClose, account, onSaved }: Props) {
             accountName,
             accountNumber,
             bankCode,
+            bankName: selectedBank?.name,
             password,
           }),
         },

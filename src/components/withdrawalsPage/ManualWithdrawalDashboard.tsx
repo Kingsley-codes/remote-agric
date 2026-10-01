@@ -9,13 +9,14 @@ type Withdrawal = {
   withdrawalFlow?: string; settlementNote?: string; walletBalanceBefore?: number; walletBalanceAfter?: number;
   approvedBy?: { firstName: string; lastName: string };
   user?: { firstName: string; lastName: string; email: string; farmerID?: string };
-  withdrawalBankAccount?: { accountName: string; accountNumber: string; bankCode: string };
+  withdrawalBankAccount?: { accountName: string; accountNumber: string; bankCode: string; bankName?: string };
+  withdrawalReceipt?: { url: string; fileName: string; mimeType: string; size: number };
 };
 const endpoint = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/dashboard/withdrawals`;
 const money = (value: number) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN" }).format(value);
 const dateTime = (value: string) => new Date(value).toLocaleString("en-NG", { timeZone: "Africa/Lagos" });
 const errorMessage = (error: unknown): string => axios.isAxiosError(error)
-  ? error.response?.data?.message || "Unable to complete the request. Please try again."
+  ? error.response?.data?.message || error.response?.data?.error || "Unable to complete the request. Please try again."
   : "Unable to complete the request. Please try again.";
 const periods = [["all", "All time"], ["today", "Today"], ["yesterday", "Yesterday"],
   ["this-week", "This week"], ["last-week", "Last week"], ["this-month", "This month"],
@@ -45,6 +46,8 @@ function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: (
   const [item, setItem] = useState<Withdrawal | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receipt, setReceipt] = useState<File | null>(null);
   const approving = useRef(false);
   useEffect(() => {
     const controller = new AbortController();
@@ -55,15 +58,35 @@ function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: (
     return () => controller.abort();
   }, [id]);
   async function approve() {
-    if (approving.current) return;
+    if (approving.current || !receipt) return;
     approving.current = true; setBusy(true); setError("");
     try {
-      await axios.post(`${endpoint}/${id}/approve`, {}, { withCredentials: true });
+      const data = new FormData();
+      data.append("receipt", receipt);
+      await axios.post(`${endpoint}/${id}/approve`, data, { withCredentials: true });
       onApproved();
     } catch (error) { setError(errorMessage(error)); }
     finally { approving.current = false; setBusy(false); }
   }
   const bank = item?.withdrawalBankAccount;
+  if (showReceipt && item) return <DetailDialog title="Approve payment" onClose={() => { setShowReceipt(false); setError(""); }} dismissible={!busy}>
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-5"><p className="text-xs text-slate-500">Payment to {userName(item)}</p><p className="mt-1 text-2xl font-semibold text-slate-900">{money(item.amount)}</p><p className="mt-2 text-sm text-slate-600">{bank?.bankName || "Bank name unavailable"} · {bank?.accountNumber}</p><p className="mt-1 break-all font-mono text-xs text-slate-500">{item.transactionID}</p></div>
+    <p className="mt-5 text-sm leading-relaxed text-slate-600">Upload the receipt for this payment. It will be saved with the withdrawal and attached to the confirmation email sent to the user.</p>
+    <label className="mt-5 block rounded-xl border border-dashed border-slate-300 p-5"><span className="text-sm font-semibold text-slate-800">Payment receipt</span><span className="mt-1 block text-xs text-slate-500">JPEG, PNG, WebP or PDF. Maximum 5 MB.</span>
+      <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" disabled={busy} className="mt-4 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:font-semibold file:text-primary" onChange={event => {
+        const file = event.target.files?.[0]; setReceipt(null); setError("");
+        if (!file) return;
+        if (!["image/jpeg", "image/png", "image/webp", "application/pdf"].includes(file.type) || file.size > 5 * 1024 * 1024 || file.size === 0) {
+          setError("Choose a JPEG, PNG, WebP image or PDF no larger than 5 MB."); event.target.value = ""; return;
+        }
+        setReceipt(file);
+      }} />
+      {receipt && <span className="mt-3 block break-all text-xs text-slate-500">Selected: {receipt.name} ({(receipt.size / 1024).toFixed(0)} KB)</span>}
+    </label>
+    {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+    <p className="mt-5 text-xs leading-relaxed text-slate-500">Confirm only after making the payment. Approval deducts the amount from the wallet and completes this withdrawal.</p>
+    <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-5"><button disabled={busy} onClick={() => { setShowReceipt(false); setError(""); }} className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 disabled:opacity-50">Back</button><button disabled={busy || !receipt} onClick={approve} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-50">{busy && <Loader2 size={16} className="animate-spin" />}{busy ? "Uploading and approving..." : "Confirm approval"}</button></div>
+  </DetailDialog>;
   return <DetailDialog title="Withdrawal details" onClose={onClose} dismissible={!busy}>
     {error && <p role="alert" className="mb-5 rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     {!item && !error && <div role="status" className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500"><Loader2 size={18} className="animate-spin" />Loading withdrawal details...</div>}
@@ -83,9 +106,10 @@ function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: (
       <div className="mt-6 border-t border-slate-100 pt-5">
         <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-900"><Building2 size={17} className="text-slate-400" />Bank account</h3>
         {bank ? <dl className="grid grid-cols-1 gap-5 rounded-xl border border-slate-200 p-4 sm:grid-cols-2">
-          <Detail label="Account name" value={bank.accountName} /><Detail label="Account number" value={bank.accountNumber} /><Detail label="Bank code" value={bank.bankCode} />
+          <Detail label="Bank name" value={bank.bankName || "Unavailable — update the linked bank account"} /><Detail label="Bank code" value={bank.bankCode} /><Detail label="Account name" value={bank.accountName} /><Detail label="Account number" value={bank.accountNumber} />
         </dl> : <p className="text-sm text-slate-500">Bank details were not saved for this withdrawal.</p>}
       </div>
+      {item.withdrawalReceipt && <div className="mt-6 border-t border-slate-100 pt-5"><h3 className="text-sm font-bold">Payment receipt</h3><a href={item.withdrawalReceipt.url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">View payment receipt <ArrowUpRight size={16} /></a><p className="mt-1 text-xs text-slate-500">{item.withdrawalReceipt.fileName}</p></div>}
       {(item.walletBalanceBefore !== undefined || item.settlementNote) && <div className="mt-6 border-t border-slate-100 pt-5">
         <h3 className="mb-4 text-sm font-bold">Settlement information</h3>
         <dl className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -96,10 +120,10 @@ function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: (
       </div>}
       {item.status === "pending" && item.withdrawalFlow !== "manual" && <p className="mt-6 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">This request uses the previous payment flow and cannot be manually approved.</p>}
       <div className="mt-6 border-t border-slate-100 pt-5">
-        {item.status === "pending" && item.withdrawalFlow === "manual" && <p className="mb-4 text-sm leading-relaxed text-slate-500">Confirm the bank payment before approving. Approval deducts {money(item.amount)} from the user's wallet and completes this request.</p>}
+        {item.status === "pending" && item.withdrawalFlow === "manual" && <p className="mb-4 text-sm leading-relaxed text-slate-500">Confirm the bank payment before approving. Approval deducts {money(item.amount)} from the user&apos;s wallet and completes this request.</p>}
         <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
           <button type="button" onClick={onClose} disabled={busy} className="rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">Close</button>
-          {item.status === "pending" && item.withdrawalFlow === "manual" && <button type="button" onClick={approve} disabled={busy} className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50">
+          {item.status === "pending" && item.withdrawalFlow === "manual" && <button type="button" onClick={() => { setReceipt(null); setError(""); setShowReceipt(true); }} disabled={busy} className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50">
             {busy ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}{busy ? "Approving..." : "Approve withdrawal"}
           </button>}
         </div>

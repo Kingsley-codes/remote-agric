@@ -88,6 +88,8 @@ export default function TransactionDetailModal({
               <div>{data.paymentMethod || "—"}</div>
             </div>
 
+            {data.withdrawalReceipt && <div className="rounded-lg border border-gray-200 p-3"><p className="font-semibold">Payment receipt</p><a href={data.withdrawalReceipt.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm font-semibold text-primary hover:underline">View payment receipt</a></div>}
+
             {data.initiatedByAdmin && <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
               <p className="font-semibold">Admin-initiated wallet withdrawal</p>
               <p>Triggered by: {data.adminName || "Remote Agric admin"}</p>

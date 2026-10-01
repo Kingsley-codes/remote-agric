@@ -6,7 +6,7 @@ import { FaArrowUp, FaBuildingColumns, FaPen, FaTrash } from "react-icons/fa6";
 import AddAccountModal from "./Addaccountmodal";
 import WithdrawFundsModal from "./Withdrawfundsmodal";
 
-type BankAccount = { accountName: string; accountNumber: string; bankCode: string };
+type BankAccount = { accountName: string; accountNumber: string; bankCode: string; bankName?: string };
 const base = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function WalletActions() {
