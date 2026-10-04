@@ -48,6 +48,7 @@ const navLinks = [
   },
 
   { href: "/admin/dashboard/support", label: "Support", icon: IoIosChatboxes },
+  { href: "/admin/dashboard/community", label: "Community", icon: FaUsers },
   { href: "/admin/dashboard/referrals", label: "Referrals", icon: FiGift },
   {
     href: "/admin/dashboard/agri-learn",
