@@ -176,10 +176,10 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
           ${isOpen ? "md:w-72 md:p-6" : "md:w-16 md:p-3 md:items-center"}
         `}
       >
-        <div className={`flex flex-col ${isOpen ? "gap-8" : "gap-6"} w-full`}>
+        <div className={`flex min-h-0 flex-1 flex-col ${isOpen ? "gap-8" : "gap-6"} w-full`}>
           {/* Logo + toggle */}
           <div
-            className={`flex items-center ${isOpen ? "justify-between" : "justify-center"}`}
+            className={`flex shrink-0 items-center ${isOpen ? "justify-between" : "justify-center"}`}
           >
             {isOpen ? (
               <>
@@ -223,7 +223,7 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
           </div>
 
           {/* Nav */}
-          <nav className="flex flex-col gap-2 w-full">
+          <nav aria-label="Admin navigation" className="flex min-h-0 flex-1 flex-col gap-2 w-full overflow-y-auto overflow-x-hidden overscroll-contain pb-4 [scrollbar-width:thin]">
             {navLinks.filter(({ href }) => canAccessAdminPage(user?.role, href)).map(({ href, label, icon: Icon }) => {
               const isActive =
                 href === "/admin/dashboard"
@@ -234,7 +234,7 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
                   key={href}
                   href={href}
                   title={!isOpen ? label : undefined}
-                  className={`flex items-center gap-3 rounded-xl text-sm font-bold transition-colors whitespace-nowrap
+                  className={`flex shrink-0 items-center gap-3 rounded-xl text-sm font-bold transition-colors whitespace-nowrap
                     ${isOpen ? "px-4 py-3" : "p-3 justify-center"}
                     ${
                       isActive
@@ -252,7 +252,7 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
         </div>
 
         {/* User menu */}
-        <div className="flex flex-col gap-4 w-full">
+        <div className="flex shrink-0 flex-col gap-4 w-full pt-4">
           <div
             ref={menuRef}
             className={`relative flex items-center gap-3 border-t border-gray-400 pt-4 ${

@@ -64,6 +64,7 @@ export function useAuth({ allowedRoles }: { allowedRoles: Role[] }) {
         }
 
         for (const key of keysToCheck) localStorage.removeItem(key);
+        localStorage.removeItem(isAdminRoute ? "user" : "admin");
         localStorage.setItem(ROLE_STORAGE_KEY[role], JSON.stringify(user));
         setUser(user);
         setLoading(false);
