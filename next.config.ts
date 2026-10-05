@@ -8,7 +8,7 @@ const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://connect.facebook.net${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://ui-avatars.com https://img.youtube.com",
+  "img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com https://ui-avatars.com https://img.youtube.com https://www.facebook.com",
   "font-src 'self' data:",
   `connect-src 'self' https://connect.facebook.net https://www.facebook.com https://graph.facebook.com https://res.cloudinary.com${backendOrigin ? ` ${backendOrigin} ${backendWebSocketOrigin}` : ""}`,
   "frame-src https://www.youtube-nocookie.com https://maps.google.com https://www.google.com",
