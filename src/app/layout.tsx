@@ -4,6 +4,7 @@ import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
+import MetaPixel from "@/components/MetaPixel";
 
 export const DMSans = DM_Sans({
   subsets: ["latin"],
@@ -39,6 +40,8 @@ export default function RootLayout({
         className={`${DMSans.variable} ${MontserratFont.variable} antialiased`}
       >
         <ReactQueryProvider>
+          <MetaPixel />
+
           {children}
           <ToastContainer
             position="top-right"
