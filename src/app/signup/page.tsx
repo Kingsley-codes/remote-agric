@@ -11,6 +11,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import { trackMetaEvent } from "@/lib/metaPixel";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,7 +35,11 @@ export default function SignUpPage() {
 
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("ref");
-    if (code) setFormData((current) => ({ ...current, referralCode: code.toUpperCase() }));
+    if (code)
+      setFormData((current) => ({
+        ...current,
+        referralCode: code.toUpperCase(),
+      }));
   }, []);
 
   // Validate password strength
@@ -146,7 +151,9 @@ export default function SignUpPage() {
 
       if (response.status === 202 && response.data.status === "success") {
         setFormStep(3);
-        toast.success(response.data.message || "A verification code has been sent.");
+        toast.success(
+          response.data.message || "A verification code has been sent.",
+        );
       } else {
         // Handle unexpected response format
         toast.error(
@@ -184,6 +191,7 @@ export default function SignUpPage() {
         { withCredentials: true },
       );
       if (response.data.status === "success") {
+        trackMetaEvent("CompleteRegistration");
         toast.success("Email verified. You can now log in.");
         router.push("/login");
       }
@@ -319,12 +327,18 @@ export default function SignUpPage() {
               {/* Heading */}
               <div className="text-center">
                 <h2 className="text-xl text-center md:text-2xl font-semibold text-slate-900 tracking-tight mb-1 md:mb-2">
-                  {formStep === 1 ? "Create your account" : formStep === 2 ? "Set your password" : "Verify your email"}
+                  {formStep === 1
+                    ? "Create your account"
+                    : formStep === 2
+                      ? "Set your password"
+                      : "Verify your email"}
                 </h2>
                 <p className="text-xs text-center md:text-sm text-slate-500">
                   {formStep === 1
                     ? "Begin your journey as a remote farmer with Remote Agric."
-                    : formStep === 2 ? "Secure your account with a strong password." : `Enter the code we sent to ${formData.email}.`}
+                    : formStep === 2
+                      ? "Secure your account with a strong password."
+                      : `Enter the code we sent to ${formData.email}.`}
                 </p>
               </div>
 
@@ -354,8 +368,14 @@ export default function SignUpPage() {
                   >
                     2
                   </div>
-                  <div className={`w-10 md:w-12 h-1 mx-2 ${formStep === 3 ? "bg-primary" : "bg-slate-200"}`} />
-                  <div className={`flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full ${formStep === 3 ? "bg-primary text-white" : "bg-slate-200 text-slate-400"}`}>3</div>
+                  <div
+                    className={`w-10 md:w-12 h-1 mx-2 ${formStep === 3 ? "bg-primary" : "bg-slate-200"}`}
+                  />
+                  <div
+                    className={`flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full ${formStep === 3 ? "bg-primary text-white" : "bg-slate-200 text-slate-400"}`}
+                  >
+                    3
+                  </div>
                 </div>
               </div>
 
@@ -383,7 +403,13 @@ export default function SignUpPage() {
 
               {/* Form */}
               <form
-                onSubmit={formStep === 1 ? handleContinue : formStep === 2 ? handleSubmit : handleVerifyOtp}
+                onSubmit={
+                  formStep === 1
+                    ? handleContinue
+                    : formStep === 2
+                      ? handleSubmit
+                      : handleVerifyOtp
+                }
                 className="flex flex-col gap-3 md:gap-5"
               >
                 {formStep === 1 ? (
@@ -452,8 +478,24 @@ export default function SignUpPage() {
                     </div>
 
                     <div className="flex flex-col gap-1 md:gap-1.5">
-                      <label htmlFor="referralCode" className="text-xs md:text-sm font-semibold text-slate-700">Referral code <span className="font-normal text-slate-400">(optional)</span></label>
-                      <input id="referralCode" name="referralCode" type="text" placeholder="AGU-XXXXXXXX" value={formData.referralCode} onChange={handleInputChange} className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-primary py-2.5 px-3 md:px-4 text-sm uppercase" />
+                      <label
+                        htmlFor="referralCode"
+                        className="text-xs md:text-sm font-semibold text-slate-700"
+                      >
+                        Referral code{" "}
+                        <span className="font-normal text-slate-400">
+                          (optional)
+                        </span>
+                      </label>
+                      <input
+                        id="referralCode"
+                        name="referralCode"
+                        type="text"
+                        placeholder="AGU-XXXXXXXX"
+                        value={formData.referralCode}
+                        onChange={handleInputChange}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-primary py-2.5 px-3 md:px-4 text-sm uppercase"
+                      />
                     </div>
 
                     {/* Continue Button */}
@@ -628,12 +670,43 @@ export default function SignUpPage() {
                 ) : (
                   <>
                     <div className="flex flex-col gap-2">
-                      <label htmlFor="otp" className="text-xs md:text-sm font-semibold text-slate-700">Six-digit verification code</label>
-                      <input id="otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))} placeholder="000000" className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-primary py-3 px-4 text-center text-xl tracking-[0.45em] text-slate-900 placeholder:tracking-normal placeholder:text-sm" required />
-                      <p className="text-xs text-slate-500">The code expires after 10 minutes.</p>
+                      <label
+                        htmlFor="otp"
+                        className="text-xs md:text-sm font-semibold text-slate-700"
+                      >
+                        Six-digit verification code
+                      </label>
+                      <input
+                        id="otp"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        value={otp}
+                        onChange={(event) =>
+                          setOtp(event.target.value.replace(/\D/g, ""))
+                        }
+                        placeholder="000000"
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-primary py-3 px-4 text-center text-xl tracking-[0.45em] text-slate-900 placeholder:tracking-normal placeholder:text-sm"
+                        required
+                      />
+                      <p className="text-xs text-slate-500">
+                        The code expires after 10 minutes.
+                      </p>
                     </div>
-                    <button type="submit" disabled={otp.length !== 6 || isLoading} className="mt-2 md:mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-primary text-white font-semibold text-sm md:text-base py-3 md:py-3.5 disabled:bg-green-200 disabled:cursor-not-allowed">
-                      {isLoading ? <><FaSpinner className="animate-spin" /> Verifying...</> : <>Verify email <FaArrowRight /></>}
+                    <button
+                      type="submit"
+                      disabled={otp.length !== 6 || isLoading}
+                      className="mt-2 md:mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-primary text-white font-semibold text-sm md:text-base py-3 md:py-3.5 disabled:bg-green-200 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? (
+                        <>
+                          <FaSpinner className="animate-spin" /> Verifying...
+                        </>
+                      ) : (
+                        <>
+                          Verify email <FaArrowRight />
+                        </>
+                      )}
                     </button>
                   </>
                 )}
