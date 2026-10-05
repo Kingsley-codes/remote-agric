@@ -35,7 +35,15 @@ jobs:
           NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
           NEXT_PUBLIC_CLOUDINARY_BASE_URL: ${{ vars.NEXT_PUBLIC_CLOUDINARY_BASE_URL }}
           NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID }}
-        run: pnpm run build
+        run: |
+          if [ -z "$NEXT_PUBLIC_META_PIXEL_ID" ]; then
+            echo "META PIXEL ID IS MISSING"
+            exit 1
+          else
+            echo "META PIXEL ID IS AVAILABLE TO THE BUILD"
+          fi
+
+          pnpm run build
 
       - name: Configure SSH
         run: |
