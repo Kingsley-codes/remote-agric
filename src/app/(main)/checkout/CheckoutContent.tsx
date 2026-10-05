@@ -52,6 +52,7 @@ export default function CheckoutContent() {
   const [produce, setProduce] = useState<Produce | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [existingUnits, setExistingUnits] = useState(0);
   const [billingData, setBillingData] = useState<BillingData>({
     firstName: "",
     lastName: "",
@@ -126,6 +127,21 @@ export default function CheckoutContent() {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    if (!user || !produceId || !trackId) return;
+    let cancelled = false;
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/dashboard/investments`, { credentials: "include" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (cancelled || !data) return;
+        const investments: Array<{ produce?: { _id: string } | string; track?: { id: string }; units?: number; orderStatus: string }> = data.data?.userInvestments ?? [];
+        const existing = investments.find((item) => (typeof item.produce === "string" ? item.produce : item.produce?._id) === produceId && item.track?.id === trackId && item.orderStatus !== "cancelled");
+        setExistingUnits(existing?.units ?? 0);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [user, produceId, trackId]);
+
   if (!produceId) return null;
 
   if (loading) return <CheckoutLoading />;
@@ -177,6 +193,7 @@ export default function CheckoutContent() {
               paymentMethod={paymentMethod}
               isAuthenticated={Boolean(user)}
               trackId={trackId}
+              existingUnits={existingUnits}
               rolloverInvestmentId={rolloverInvestmentId}
             />
           </div>

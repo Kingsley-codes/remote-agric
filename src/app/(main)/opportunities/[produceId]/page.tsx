@@ -118,6 +118,7 @@ export default async function Page({ params }: PageProps) {
           <div className="lg:col-span-4">
             <div className="sticky top-24 flex flex-col gap-4">
               <InvestmentCard
+                checkOwnership
                 produceId={produce._id}
                 unitPrice={produce.price}
                 fundedPercent={fundedPercent}
