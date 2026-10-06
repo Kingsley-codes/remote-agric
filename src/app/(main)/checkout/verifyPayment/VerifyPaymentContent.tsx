@@ -5,6 +5,7 @@ import StatusIcon from "@/components/verifyPaymentPage/StatusIcon";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { FiArrowRight, FiDownload, FiHome, FiRefreshCw } from "react-icons/fi";
+import { trackMetaEvent } from "@/lib/metaPixel";
 
 type VerifyStatus = "loading" | "success" | "failed" | "pending";
 
@@ -69,6 +70,33 @@ function StatusBadge({ status }: { status: VerifyStatus }) {
   );
 }
 
+const PURCHASE_TRACKING_KEY = "remote-agric-tracked-purchases";
+
+function hasTrackedPurchase(reference: string) {
+  try {
+    const raw = sessionStorage.getItem(PURCHASE_TRACKING_KEY);
+    const tracked: string[] = raw ? JSON.parse(raw) : [];
+
+    return tracked.includes(reference);
+  } catch {
+    return false;
+  }
+}
+
+function markPurchaseAsTracked(reference: string) {
+  try {
+    const raw = sessionStorage.getItem(PURCHASE_TRACKING_KEY);
+    const tracked: string[] = raw ? JSON.parse(raw) : [];
+
+    if (!tracked.includes(reference)) {
+      tracked.push(reference);
+      sessionStorage.setItem(PURCHASE_TRACKING_KEY, JSON.stringify(tracked));
+    }
+  } catch {
+    // Ignore storage errors. Meta tracking should not break payment flow.
+  }
+}
+
 export default function VerifyPaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -103,7 +131,9 @@ export default function VerifyPaymentContent() {
         const data = await res.json();
 
         if (data.status === "refunded") {
-          setRefundMessage(data.message); setStatus("failed"); return;
+          setRefundMessage(data.message);
+          setStatus("failed");
+          return;
         }
         if (!res.ok) throw new Error(data.message || "Verification failed");
 
@@ -123,6 +153,20 @@ export default function VerifyPaymentContent() {
           produceId: investment?.produce ?? null,
           userEmail: payload.userEmail ?? "—",
         });
+
+        // Track successful purchase
+        if (data.success && !hasTrackedPurchase(reference)) {
+          trackMetaEvent("Purchase", {
+            content_name: investment?.title ?? "Remote farm",
+            content_type: "produce",
+            content_ids: investment?.produce ? [investment.produce] : undefined,
+            value: payload.amount,
+            currency: "NGN",
+            num_items: investment?.units ?? 1,
+          });
+
+          markPurchaseAsTracked(reference);
+        }
 
         setStatus(
           data.success
@@ -216,8 +260,12 @@ export default function VerifyPaymentContent() {
                 <StatusBadge status={status} />
 
                 <div className="space-y-2">
-                  <h2 className="text-3xl font-bold">{refundMessage ? "Payment credited to wallet" : heading}</h2>
-                  <p className="text-gray-500 text-sm max-w-sm">{refundMessage || subtext}</p>
+                  <h2 className="text-3xl font-bold">
+                    {refundMessage ? "Payment credited to wallet" : heading}
+                  </h2>
+                  <p className="text-gray-500 text-sm max-w-sm">
+                    {refundMessage || subtext}
+                  </p>
                 </div>
 
                 {/* CTA buttons */}
@@ -262,10 +310,15 @@ export default function VerifyPaymentContent() {
                   {status === "failed" && (
                     <>
                       <button
-                        onClick={() => refundMessage ? router.push("/dashboard/wallet") : router.back()}
+                        onClick={() =>
+                          refundMessage
+                            ? router.push("/dashboard/wallet")
+                            : router.back()
+                        }
                         className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-green-500/20 transition"
                       >
-                        {refundMessage ? "View wallet" : "Try Again"} <FiArrowRight />
+                        {refundMessage ? "View wallet" : "Try Again"}{" "}
+                        <FiArrowRight />
                       </button>
                       <button
                         onClick={() => router.push("/")}
