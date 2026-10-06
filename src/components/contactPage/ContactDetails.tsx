@@ -33,7 +33,7 @@ export default function ContactDetails() {
                 href="tel:+2348060779290"
                 className="text-sm text-slate-600 hover:text-slate-500"
               >
-                +234 (0) 806 077 9290
+                +234 (0) 703 313 3286
               </a>
             </div>
           </div>

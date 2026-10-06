@@ -5,7 +5,7 @@ import { IoMdMenu } from "react-icons/io";
 import { FaUserCircle, FaHome, FaSignOutAlt } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import axios from "axios";
 
 type NavbarUser = {
@@ -30,6 +30,9 @@ export default function Navbar() {
   }, []);
 
   const router = useRouter();
+  const pathname = usePathname();
+  const isActiveLink = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -104,8 +107,9 @@ export default function Navbar() {
           {navLinks.map((link) => (
             <Link
               key={link.label}
-              className="text-lg hover:text-primary text-gray-800  font-semibold transition-colors"
+              className={`border-b-2 py-2 text-lg font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary ${isActiveLink(link.href) ? "border-primary text-primary" : "border-transparent text-gray-800 hover:border-primary/30 hover:text-primary"}`}
               href={link.href}
+              aria-current={isActiveLink(link.href) ? "page" : undefined}
             >
               {link.label}
             </Link>
@@ -207,6 +211,8 @@ export default function Navbar() {
             onClick={toggleMenu}
             className="md:hidden p-2 hover:text-primary transition-colors"
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMenuOpen}
+            aria-controls="public-mobile-navigation"
           >
             {isMenuOpen ? (
               <span className="text-primary w-10 h-10 font-semibold text-3xl flex items-center justify-center">
@@ -223,13 +229,14 @@ export default function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="fixed inset-0 bg-black/50 z-40" onClick={closeMenu} />
-          <div className="fixed w-full right-0 top-20 bg-gray-100 shadow-lg z-50 animate-slideIn">
+          <div id="public-mobile-navigation" className="fixed w-full right-0 top-20 bg-gray-100 shadow-lg z-50 animate-slideIn">
             <div className="flex flex-col p-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.label}
-                  className="py-3 px-4 text-base font-medium text-gray-800 hover:text-primary hover:bg-gray-200 rounded-lg transition-colors"
+                  className={`border-l-4 py-3 px-4 text-base font-semibold rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${isActiveLink(link.href) ? "border-primary bg-primary/10 text-primary" : "border-transparent text-gray-800 hover:text-primary hover:bg-gray-200"}`}
                   href={link.href}
+                  aria-current={isActiveLink(link.href) ? "page" : undefined}
                   onClick={closeMenu}
                 >
                   {link.label}

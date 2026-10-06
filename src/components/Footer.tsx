@@ -61,7 +61,7 @@ export default function Footer() {
                   href="tel:+2348060779290"
                   className="text-gray-200 hover:text-white"
                 >
-                  +234 (0) 806 077 9290
+                  +234 (0) 703 313 3286
                 </a>
               </p>
             </div>

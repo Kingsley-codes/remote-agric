@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { CldImage } from "next-cloudinary";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash, FaArrowRight, FaSpinner } from "react-icons/fa";
@@ -208,15 +207,15 @@ export default function SignUpPage() {
   const testimonials = [
     {
       id: 1,
-      avatar: "jcpvvrcgijhgqyilk4ry",
+      avatar: "/person 1.jpeg",
     },
     {
       id: 2,
-      avatar: "twnucpgeribcxhmklriu",
+      avatar: "/person 2.jpg",
     },
     {
       id: 3,
-      avatar: "umkgocfaw9gbxhds2uwg",
+      avatar: "/person 3.jpg",
     },
   ];
 
@@ -242,8 +241,8 @@ export default function SignUpPage() {
       {/* Left Side: Visual/Branding */}
       <div className="hidden lg:flex w-1/2 relative bg-slate-900 items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <CldImage
-            src="qny4tdd9zhvjy3yeuklc"
+          <Image
+            src="/signup.png"
             alt="Sustainable agriculture field"
             fill
             className="object-cover opacity-60"
@@ -278,12 +277,12 @@ export default function SignUpPage() {
             <div className="flex -space-x-2 md:-space-x-3">
               {testimonials.slice(0, 3).map((testimonial, index) => (
                 <div key={index} className="relative w-8 h-8 md:w-10 md:h-10">
-                  <CldImage
+                  <Image
                     src={testimonial.avatar}
                     alt={`User ${index + 1}`}
                     className="rounded-full w-8 h-8 md:w-10 md:h-10 border-2 border-slate-800 object-cover"
-                    width={30}
-                    height={30}
+                    width={40}
+                    height={40}
                   />
                 </div>
               ))}

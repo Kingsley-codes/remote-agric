@@ -1,7 +1,7 @@
 "use client";
 
 import { FaQuoteLeft } from "react-icons/fa";
-import { CldImage } from "next-cloudinary";
+import Image from "next/image";
 
 
 export default function StorySection() {
@@ -9,11 +9,12 @@ export default function StorySection() {
     <section className="bg-white py-24 px-6 lg:px-20">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16 items-center">
         <div className="w-full md:w-1/2">
-          <CldImage
-            src="vymffrut2yhhjlqxjpsh"
+          <Image
+            src="/about-us-smilng-farmer.jpg"
             alt="Nigerian farmer smiling"
             width={600}
             height={400}
+            sizes="(max-width: 767px) 100vw, 50vw"
             className="w-full h-auto rounded-xl shadow-gray-800 shadow-2xl object-cover"
           />
 </div>
