@@ -43,7 +43,7 @@ const navLinks = [
   },
   {
     href: "/admin/dashboard/withdrawals",
-    label: "Withdrawals",
+    label: "Transactions",
     icon: FaMoneyBills,
   },
 

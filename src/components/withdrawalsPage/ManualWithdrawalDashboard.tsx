@@ -131,7 +131,7 @@ function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: (
     </>}
   </DetailDialog>;
 }
-export default function ManualWithdrawalDashboard() {
+export default function ManualWithdrawalDashboard({ embedded = false }: { embedded?: boolean }) {
   const [items, setItems] = useState<Withdrawal[]>([]);
   const [status, setStatus] = useState("pending");
   const [period, setPeriod] = useState("all");
@@ -167,11 +167,11 @@ export default function ManualWithdrawalDashboard() {
   const filtersActive = Boolean(query || period !== "all");
   const firstRecord = (page - 1) * 10 + 1;
   const detailsButton = (item: Withdrawal) => <button onClick={() => setSelected(item._id)} aria-label={`View withdrawal ${item.transactionID}`} className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-sm font-semibold text-primary hover:bg-green-50 focus-visible:outline-2 focus-visible:outline-primary">View <ArrowUpRight size={16} /></button>;
-  return <main className="mx-auto w-full max-w-7xl min-w-0 p-4 sm:p-6 lg:p-8">
-    <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
+  return <div className={embedded ? "min-w-0" : "mx-auto w-full max-w-7xl min-w-0 p-4 sm:p-6 lg:p-8"}>
+    {!embedded && <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
       <div><h1 className="pb-2 text-3xl font-semibold tracking-tight text-gray-800">Withdrawals</h1><p className="text-sm text-slate-500">Review withdrawal requests and manage completed payments.</p></div>
       <span className="inline-flex items-center gap-2 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 text-xs font-medium text-primary"><Clock3 size={15} />24-hour processing</span>
-    </header>
+    </header>}
     {notice && <div role="status" className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-800"><CheckCircle2 size={18} className="mt-0.5 shrink-0" /><p>{notice}</p></div>}
     <section className="space-y-4" aria-label="Withdrawal records">
       <div className="flex gap-6 border-b border-slate-200" aria-label="Withdrawal status">
@@ -224,5 +224,5 @@ export default function ManualWithdrawalDashboard() {
     {selected && <WithdrawalDetails key={selected} id={selected} onClose={() => setSelected(null)} onApproved={() => {
       setSelected(null); setNotice("Withdrawal approved. The wallet has been debited and the request is completed."); setPage(1); refresh();
     }} />}
-  </main>;
+  </div>;
 }
