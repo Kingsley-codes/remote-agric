@@ -7,6 +7,7 @@ import { StatsPills } from "@/components/produceDetails/StatsPills";
 import { ApiProduce } from "@/lib";
 import axios from "axios";
 import Link from "next/link";
+import { ViewContentTracker } from "@/components/meta/ViewContentTracker";
 
 async function getProduce(produceId: string): Promise<ApiProduce | null> {
   try {
@@ -66,6 +67,13 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <>
+      <ViewContentTracker
+        contentName={produce.title}
+        contentType="produce"
+        contentIds={[produce._id]}
+        value={produce.price}
+      />
+
       <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* LEFT COLUMN */}
@@ -124,7 +132,9 @@ export default async function Page({ params }: PageProps) {
                 fundedPercent={fundedPercent}
                 soldUnits={soldUnits}
                 remainingUnits={produce.remainingUnit}
-                minimumUnit={produce.minimumUnit} maximumUnit={produce.maximumUnit ?? produce.totalUnit} referralBonus={produce.referralBonus ?? 50}
+                minimumUnit={produce.minimumUnit}
+                maximumUnit={produce.maximumUnit ?? produce.totalUnit}
+                referralBonus={produce.referralBonus ?? 50}
                 tracks={produce.tracks}
               />
 

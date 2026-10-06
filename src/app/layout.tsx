@@ -4,7 +4,7 @@ import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
-import MetaPixel from "@/components/MetaPixel";
+import MetaPixel from "@/components/meta/MetaPixel";
 
 export const DMSans = DM_Sans({
   subsets: ["latin"],

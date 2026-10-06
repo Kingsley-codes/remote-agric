@@ -5,6 +5,7 @@ import axios from "axios";
 import { ApiResponse, ApiProduce } from "@/lib";
 import OpportunityCard from "@/components/opportunitiesPage/OpportunityCard";
 import StatsBanner from "@/components/opportunitiesPage/StatsBanner";
+import { ViewContentTracker } from "@/components/meta/ViewContentTracker";
 
 export default function OpportunitiesPage() {
   const [opportunities, setOpportunities] = useState<ApiProduce[]>([]);
@@ -72,27 +73,36 @@ export default function OpportunitiesPage() {
   }
 
   return (
-    <div className="relative bg-gray-100 flex min-h-screen w-full flex-col overflow-x-hidden">
-      <main className="flex-1">
-        <StatsBanner totalCount={totalCount} />
+    <>
+      <ViewContentTracker
+        contentName="Investment Opportunities"
+        contentType="marketplace"
+      />
 
-        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-10">
-          {opportunities.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="text-lg text-text-muted">No opportunities found.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {opportunities.map((opportunity) => (
-                <OpportunityCard
-                  key={opportunity._id}
-                  opportunity={opportunity}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
+      <div className="relative bg-gray-100 flex min-h-screen w-full flex-col overflow-x-hidden">
+        <main className="flex-1">
+          <StatsBanner totalCount={totalCount} />
+
+          <div className="mx-auto max-w-7xl px-4 py-8 lg:px-10">
+            {opportunities.length === 0 ? (
+              <div className="py-12 text-center">
+                <p className="text-lg text-text-muted">
+                  No opportunities found.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {opportunities.map((opportunity) => (
+                  <OpportunityCard
+                    key={opportunity._id}
+                    opportunity={opportunity}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    </>
   );
 }
