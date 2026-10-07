@@ -6,6 +6,9 @@ declare global {
       command: string,
       eventName: string,
       data?: Record<string, unknown>,
+      options?: {
+        eventID?: string;
+      },
     ) => void;
   }
 }

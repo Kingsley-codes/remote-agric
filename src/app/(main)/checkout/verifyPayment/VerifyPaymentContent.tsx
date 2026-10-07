@@ -156,14 +156,22 @@ export default function VerifyPaymentContent() {
 
         // Track successful purchase
         if (data.success && !hasTrackedPurchase(reference)) {
-          trackMetaEvent("Purchase", {
-            content_name: investment?.title ?? "Remote farm",
-            content_type: "produce",
-            content_ids: investment?.produce ? [investment.produce] : undefined,
-            value: payload.amount,
-            currency: "NGN",
-            num_items: investment?.units ?? 1,
-          });
+          trackMetaEvent(
+            "Purchase",
+            {
+              content_name: investment?.title ?? "Remote farm",
+              content_type: "produce",
+              ...(investment?.produce
+                ? { content_ids: [investment.produce] }
+                : {}),
+              value: payload.amount,
+              currency: "NGN",
+              num_items: investment?.units ?? 1,
+            },
+            {
+              eventID: `purchase_${payload.paymentID}`,
+            },
+          );
 
           markPurchaseAsTracked(reference);
         }

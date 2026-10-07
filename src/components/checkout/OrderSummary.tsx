@@ -149,14 +149,21 @@ export default function OrderSummary({
       }
       clearKey();
       if (paymentMethod === "wallet" && data.success) {
-        trackMetaEvent("Purchase", {
-          content_name: produce.title,
-          content_type: "produce",
-          content_ids: [produce._id],
-          value: total,
-          currency: "NGN",
-          num_items: units,
-        });
+        trackMetaEvent(
+          "Purchase",
+          {
+            content_name: produce.title,
+            content_type: "produce",
+            content_ids: [produce._id],
+            value: total,
+            currency: "NGN",
+            num_items: units,
+          },
+          {
+            eventID: `purchase_${data.data.paymentID}`,
+          },
+        );
+
         router.push("/dashboard/investments");
       } else if (data.data?.authorization_url)
         window.location.href = data.data.authorization_url;
