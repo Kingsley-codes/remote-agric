@@ -8,6 +8,8 @@ type Withdrawal = {
   _id: string; transactionID: string; amount: number; status: string; createdAt: string; approvedAt?: string;
   withdrawalFlow?: string; settlementNote?: string; walletBalanceBefore?: number; walletBalanceAfter?: number;
   approvedBy?: { firstName: string; lastName: string };
+  cancellationReason?: string; cancelledAt?: string;
+  cancelledBy?: { firstName: string; lastName: string };
   user?: { firstName: string; lastName: string; email: string; farmerID?: string };
   withdrawalBankAccount?: { accountName: string; accountNumber: string; bankCode: string; bankName?: string };
   withdrawalReceipt?: { url: string; fileName: string; mimeType: string; size: number };
@@ -26,9 +28,9 @@ const inputClass = "mt-1.5 w-full rounded-lg border border-slate-200 bg-white px
 const userName = (item: Withdrawal) => [item.user?.firstName, item.user?.lastName].filter(Boolean).join(" ") || "Unavailable user";
 const shortDate = (value: string) => new Date(value).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" });
 function StatusBadge({ status }: { status: string }) {
-  return <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${status === "completed" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
-    <span className={`size-1.5 rounded-full ${status === "completed" ? "bg-emerald-500" : "bg-amber-500"}`} />
-    {status === "pending" ? "Requested" : status === "completed" ? "Completed" : status}
+  return <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${status === "completed" ? "bg-emerald-50 text-emerald-700" : status === "cancelled" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"}`}>
+    <span className={`size-1.5 rounded-full ${status === "completed" ? "bg-emerald-500" : status === "cancelled" ? "bg-red-500" : "bg-amber-500"}`} />
+    {status === "pending" ? "Requested" : status === "completed" ? "Completed" : status === "cancelled" ? "Cancelled" : status}
   </span>;
 }
 function Detail({ label, value }: { label: string; value: string }) {
@@ -41,12 +43,14 @@ function UserIdentity({ item }: { item: Withdrawal }) {
     <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900" title={userName(item)}>{userName(item)}</p><p className="mt-0.5 truncate text-xs text-slate-500" title={item.user?.email}>{item.user?.email || "Email unavailable"}</p></div>
   </div>;
 }
-function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: () => void; onApproved: () => void }) {
+function WithdrawalDetails({ id, onClose, onApproved, onCancelled }: { id: string; onClose: () => void; onApproved: () => void; onCancelled: () => void }) {
 
   const [item, setItem] = useState<Withdrawal | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showCancellation, setShowCancellation] = useState(false);
+  const [reason, setReason] = useState("");
   const [receipt, setReceipt] = useState<File | null>(null);
   const approving = useRef(false);
   useEffect(() => {
@@ -69,6 +73,29 @@ function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: (
     finally { approving.current = false; setBusy(false); }
   }
   const bank = item?.withdrawalBankAccount;
+  async function cancel() {
+    if (approving.current || !reason.trim()) return;
+    approving.current = true; setBusy(true); setError("");
+    try {
+      await axios.post(`${endpoint}/${id}/cancel`, { reason: reason.trim() }, { withCredentials: true });
+      onCancelled();
+    } catch (error) { setError(errorMessage(error)); }
+    finally { approving.current = false; setBusy(false); }
+  }
+  if (showCancellation && item) return <DetailDialog title="Cancel withdrawal" onClose={() => { setShowCancellation(false); setError(""); }} dismissible={!busy}>
+    <p className="text-sm text-slate-600">Cancel the {money(item.amount)} withdrawal for {userName(item)}. The wallet balance will remain unchanged.</p>
+    <form onSubmit={event => { event.preventDefault(); void cancel(); }}>
+      <label className="mt-5 block text-sm font-semibold text-slate-700">Reason for cancellation
+        <textarea required maxLength={1000} rows={4} value={reason} disabled={busy} onChange={event => setReason(event.target.value)} className={inputClass} placeholder="Explain why this withdrawal is being cancelled" />
+      </label>
+      <p className="mt-1 text-xs text-slate-500">{reason.length}/1000 characters</p>
+      {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-5">
+        <button type="button" disabled={busy} onClick={() => { setShowCancellation(false); setError(""); }} className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 disabled:opacity-50">Back</button>
+        <button type="submit" disabled={busy || !reason.trim()} className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">{busy && <Loader2 size={16} className="animate-spin" />}{busy ? "Cancelling..." : "Confirm cancellation"}</button>
+      </div>
+    </form>
+  </DetailDialog>;
   if (showReceipt && item) return <DetailDialog title="Approve payment" onClose={() => { setShowReceipt(false); setError(""); }} dismissible={!busy}>
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-5"><p className="text-xs text-slate-500">Payment to {userName(item)}</p><p className="mt-1 text-2xl font-semibold text-slate-900">{money(item.amount)}</p><p className="mt-2 text-sm text-slate-600">{bank?.bankName || "Bank name unavailable"} · {bank?.accountNumber}</p><p className="mt-1 break-all font-mono text-xs text-slate-500">{item.transactionID}</p></div>
     <p className="mt-5 text-sm leading-relaxed text-slate-600">Upload the receipt for this payment. It will be saved with the withdrawal and attached to the confirmation email sent to the user.</p>
@@ -102,6 +129,9 @@ function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: (
         <Detail label="Requested on (WAT)" value={dateTime(item.createdAt)} /><Detail label="User ID" value={item.user?.farmerID || "Unavailable"} />
         {item.approvedAt && <Detail label="Completed on (WAT)" value={dateTime(item.approvedAt)} />}
         {item.approvedBy && <Detail label="Approved by" value={`${item.approvedBy.firstName} ${item.approvedBy.lastName}`} />}
+        {item.cancelledAt && <Detail label="Cancelled on (WAT)" value={dateTime(item.cancelledAt)} />}
+        {item.cancelledBy && <Detail label="Cancelled by" value={`${item.cancelledBy.firstName} ${item.cancelledBy.lastName}`} />}
+        {item.cancellationReason && <div className="sm:col-span-2"><Detail label="Cancellation reason" value={item.cancellationReason} /></div>}
       </dl>
       <div className="mt-6 border-t border-slate-100 pt-5">
         <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-900"><Building2 size={17} className="text-slate-400" />Bank account</h3>
@@ -123,6 +153,7 @@ function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: (
         {item.status === "pending" && item.withdrawalFlow === "manual" && <p className="mb-4 text-sm leading-relaxed text-slate-500">Confirm the bank payment before approving. Approval deducts {money(item.amount)} from the user&apos;s wallet and completes this request.</p>}
         <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
           <button type="button" onClick={onClose} disabled={busy} className="rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">Close</button>
+          {item.status === "pending" && item.withdrawalFlow === "manual" && <button type="button" disabled={busy} onClick={() => { setReason(""); setError(""); setShowCancellation(true); }} className="rounded-lg border border-red-200 px-5 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50">Cancel withdrawal</button>}
           {item.status === "pending" && item.withdrawalFlow === "manual" && <button type="button" onClick={() => { setReceipt(null); setError(""); setShowReceipt(true); }} disabled={busy} className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50">
             {busy ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}{busy ? "Approving..." : "Approve withdrawal"}
           </button>}
@@ -134,6 +165,7 @@ function WithdrawalDetails({ id, onClose, onApproved }: { id: string; onClose: (
 export default function ManualWithdrawalDashboard({ embedded = false }: { embedded?: boolean }) {
   const [items, setItems] = useState<Withdrawal[]>([]);
   const [status, setStatus] = useState("pending");
+  const [historyStatus, setHistoryStatus] = useState("history");
   const [period, setPeriod] = useState("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -152,30 +184,31 @@ export default function ManualWithdrawalDashboard({ embedded = false }: { embedd
       if (invalidRange) { setItems([]); setLoading(false); return; }
       setLoading(true); setError("");
       try {
-        const response = await axios.get(endpoint, { params: { status, date: period, startDate, endDate, q: query, page }, withCredentials: true, signal: controller.signal });
+        const response = await axios.get(endpoint, { params: { status: status === "pending" ? "pending" : historyStatus, date: period, startDate, endDate, q: query, page }, withCredentials: true, signal: controller.signal });
         setItems(response.data.data); setPagination(response.data.pagination);
       } catch (error) { if (!controller.signal.aborted) { setError(errorMessage(error)); setItems([]); } }
       finally { if (!controller.signal.aborted) setLoading(false); }
     }, 200);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [status, period, startDate, endDate, query, page, revision, invalidRange]);
+  }, [status, historyStatus, period, startDate, endDate, query, page, revision, invalidRange]);
   const change = (setter: (value: string) => void, value: string) => {
     setter(value); setPage(1); setLoading(true); setError("");
   };
   const refresh = () => { setLoading(true); setError(""); setRevision(value => value + 1); };
-  const reset = () => { setQuery(""); setPeriod("all"); setStartDate(""); setEndDate(""); setPage(1); refresh(); };
-  const filtersActive = Boolean(query || period !== "all");
+  const reset = () => { setQuery(""); setHistoryStatus("history"); setPeriod("all"); setStartDate(""); setEndDate(""); setPage(1); refresh(); };
+  const filtersActive = Boolean(query || period !== "all" || (status === "history" && historyStatus !== "history"));
+  const statusLabel = status === "pending" ? "requested" : historyStatus === "history" ? "completed or cancelled" : historyStatus;
   const firstRecord = (page - 1) * 10 + 1;
   const detailsButton = (item: Withdrawal) => <button onClick={() => setSelected(item._id)} aria-label={`View withdrawal ${item.transactionID}`} className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-sm font-semibold text-primary hover:bg-green-50 focus-visible:outline-2 focus-visible:outline-primary">View <ArrowUpRight size={16} /></button>;
   return <div className={embedded ? "min-w-0" : "mx-auto w-full max-w-7xl min-w-0 p-4 sm:p-6 lg:p-8"}>
     {!embedded && <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
-      <div><h1 className="pb-2 text-3xl font-semibold tracking-tight text-gray-800">Withdrawals</h1><p className="text-sm text-slate-500">Review withdrawal requests and manage completed payments.</p></div>
+      <div><h1 className="pb-2 text-3xl font-semibold tracking-tight text-gray-800">Withdrawals</h1><p className="text-sm text-slate-500">Review withdrawal requests and view withdrawal history.</p></div>
       <span className="inline-flex items-center gap-2 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 text-xs font-medium text-primary"><Clock3 size={15} />24-hour processing</span>
     </header>}
     {notice && <div role="status" className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-800"><CheckCircle2 size={18} className="mt-0.5 shrink-0" /><p>{notice}</p></div>}
     <section className="space-y-4" aria-label="Withdrawal records">
       <div className="flex gap-6 border-b border-slate-200" aria-label="Withdrawal status">
-        {[["pending", "Requested", Clock3], ["completed", "Completed", CheckCircle2]].map(([value, label, Icon]) => {
+        {[["pending", "Requested", Clock3], ["history", "Withdrawal history", CheckCircle2]].map(([value, label, Icon]) => {
           const TabIcon = Icon as typeof Clock3;
           return <button key={String(value)} type="button" aria-pressed={status === value} onClick={() => change(setStatus, String(value))} className={`-mb-px inline-flex items-center gap-2 border-b-2 px-1 pb-3 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${status === value ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-800"}`}><TabIcon size={16} />{String(label)}</button>;
         })}
@@ -183,20 +216,21 @@ export default function ManualWithdrawalDashboard({ embedded = false }: { embedd
       <div className={`grid gap-4 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 ${period === "custom" ? "xl:grid-cols-4" : ""}`}>
         <label className="text-xs font-semibold text-slate-600">Search<div className="relative"><Search size={16} className="pointer-events-none absolute left-3 top-5 text-slate-400" /><input value={query} onChange={event => change(setQuery, event.target.value)} placeholder="User, email or transaction ID" className={`${inputClass} pl-9`} /></div></label>
         <label className="text-xs font-semibold text-slate-600">Request period<select value={period} onChange={event => change(setPeriod, event.target.value)} className={inputClass}>{periods.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        {status === "history" && <label className="text-xs font-semibold text-slate-600">Status<select value={historyStatus} onChange={event => change(setHistoryStatus, event.target.value)} className={inputClass}><option value="history">Completed and cancelled</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label>}
         {period === "custom" && <>
           <label className="text-xs font-semibold text-slate-600">Start date<input type="date" value={startDate} max={endDate || undefined} onChange={event => change(setStartDate, event.target.value)} className={inputClass} /></label>
           <label className="text-xs font-semibold text-slate-600">End date<input type="date" value={endDate} min={startDate || undefined} onChange={event => change(setEndDate, event.target.value)} className={inputClass} /></label>
         </>}
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-        <p className="text-slate-500">{loading || invalidRange || error ? "Withdrawal records" : `${pagination.total.toLocaleString()} ${status === "pending" ? "requested" : "completed"} withdrawals`}<span className="ml-2 hidden text-xs text-slate-400 sm:inline">All dates in WAT</span></p>
+        <p className="text-slate-500">{loading || invalidRange || error ? "Withdrawal records" : `${pagination.total.toLocaleString()} ${statusLabel} withdrawals`}<span className="ml-2 hidden text-xs text-slate-400 sm:inline">All dates in WAT</span></p>
         <div className="flex items-center gap-4"><button onClick={reset} disabled={!filtersActive} className="text-sm font-semibold text-primary hover:underline disabled:cursor-default disabled:text-slate-400 disabled:no-underline">Reset filters</button><button disabled={loading} onClick={refresh} aria-label="Refresh withdrawals" className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 disabled:opacity-50"><RefreshCw size={16} className={loading ? "animate-spin" : ""} /></button></div>
       </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-busy={loading}>
         {invalidRange ? <div className="p-12 text-center"><Clock3 size={24} className="mx-auto mb-3 text-slate-300" /><p className="text-sm font-semibold text-slate-700">Choose a date range</p><p className="mt-1 text-sm text-slate-500">Select valid start and end dates to view withdrawals.</p></div>
           : loading ? <div role="status" className="flex items-center justify-center gap-2 p-16 text-sm text-slate-500"><Loader2 size={18} className="animate-spin" />Loading withdrawals...</div>
           : error ? <div role="alert" className="p-12 text-center text-sm text-red-600"><p>{error}</p><button onClick={refresh} className="mt-3 font-semibold underline">Try again</button></div>
-          : !items.length ? <div className="px-6 py-16 text-center"><span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-slate-50"><Wallet size={22} className="text-slate-400" /></span><h2 className="text-sm font-semibold text-slate-900">No {status === "pending" ? "requested" : "completed"} withdrawals</h2><p className="mt-1 text-sm text-slate-500">{filtersActive ? "Try another search or adjust your date filters." : status === "pending" ? "New withdrawal requests will appear here." : "Approved withdrawals will appear here."}</p>{filtersActive && <button onClick={reset} className="mt-4 text-sm font-semibold text-primary hover:underline">Clear filters</button>}</div>
+          : !items.length ? <div className="px-6 py-16 text-center"><span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-slate-50"><Wallet size={22} className="text-slate-400" /></span><h2 className="text-sm font-semibold text-slate-900">No {statusLabel} withdrawals</h2><p className="mt-1 text-sm text-slate-500">{filtersActive ? "Try another search or adjust your filters." : status === "pending" ? "New withdrawal requests will appear here." : "Completed and cancelled withdrawals will appear here."}</p>{filtersActive && <button onClick={reset} className="mt-4 text-sm font-semibold text-primary hover:underline">Clear filters</button>}</div>
           : <>
             <table className="hidden w-full table-fixed text-left xl:table">
               <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500"><tr>
@@ -223,6 +257,8 @@ export default function ManualWithdrawalDashboard({ embedded = false }: { embedd
     </section>
     {selected && <WithdrawalDetails key={selected} id={selected} onClose={() => setSelected(null)} onApproved={() => {
       setSelected(null); setNotice("Withdrawal approved. The wallet has been debited and the request is completed."); setPage(1); refresh();
+    }} onCancelled={() => {
+      setSelected(null); setNotice("Withdrawal cancelled. The cancellation reason has been saved."); setPage(1); refresh();
     }} />}
   </div>;
 }
