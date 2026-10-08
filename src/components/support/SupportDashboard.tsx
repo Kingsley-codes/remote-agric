@@ -6,29 +6,67 @@ import { Headphones, Loader2, MessageSquareText, Plus, Search, TicketCheck, X } 
 import { backendUrl, relativeTime, Ticket } from "@/lib/tickets";
 import StatusBadge from "./StatusBadge";
 
+type TicketPeriod = "today" | "this-week" | "this-month" | "custom";
+
 export default function SupportDashboard({ admin = false }: { admin?: boolean }) {
   const [tickets, setTickets] = useState<Ticket[]>([]), [loading, setLoading] = useState(true), [query, setQuery] = useState("");
   const [filter, setFilter] = useState(admin ? "open" : "all"), [modal, setModal] = useState(false), [detail, setDetail] = useState<Ticket | null>(null);
   const [subject, setSubject] = useState(""), [message, setMessage] = useState(""), [category, setCategory] = useState("other"), [priority, setPriority] = useState("medium"), [submitting, setSubmitting] = useState(false);
+  const [stats, setStats] = useState<{ total: number; open: number; resolved: number } | null>(null);
+  const [period, setPeriod] = useState<TicketPeriod>("this-month");
+  const [startDate, setStartDate] = useState(""), [endDate, setEndDate] = useState("");
+  const [error, setError] = useState("");
+  const invalidRange = period === "custom" && (!startDate || !endDate || startDate > endDate);
   const base = admin ? "/api/admin/tickets" : "/api/tickets";
   const route = admin ? "/admin/dashboard/support" : "/dashboard/support";
-  const load = useCallback(async () => { try { const suffix = admin ? `?status=${filter}` : ""; const { data } = await axios.get(`${backendUrl}${base}${suffix}`, { withCredentials: true }); setTickets(data.data.tickets); } finally { setLoading(false); } }, [admin, base, filter]);
-  useEffect(() => { load(); }, [load]);
-  const shown = useMemo(() => tickets.filter((t) => `${t.ticketNumber} ${t.subject} ${t.user?.firstName ?? ""} ${t.user?.lastName ?? ""}`.toLowerCase().includes(query.toLowerCase())), [tickets, query]);
-  async function create(e: FormEvent) { e.preventDefault(); setSubmitting(true); try { await axios.post(`${backendUrl}/api/tickets`, { subject, message, category, priority }, { withCredentials: true }); setModal(false); setSubject(""); setMessage(""); await load(); } finally { setSubmitting(false); } }
+  const load = useCallback((signal?: AbortSignal) => {
+    if (invalidRange) return Promise.resolve();
+    return axios.get(`${backendUrl}${base}`, {
+      params: { status: filter, period, ...(period === "custom" ? { startDate, endDate } : {}) },
+      withCredentials: true,
+      signal,
+    }).then(({ data }) => {
+      if (signal?.aborted) return;
+      setError("");
+      setTickets(data.data.tickets);
+      setStats(data.data.stats);
+    }).catch((error) => {
+      if (!axios.isCancel(error)) setError("Unable to load tickets. Please try again.");
+    }).finally(() => {
+      if (!signal?.aborted) setLoading(false);
+    });
+  }, [base, filter, period, startDate, endDate, invalidRange]);
+  useEffect(() => {
+    const controller = new AbortController();
+    void load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
+  const shown = useMemo(() => tickets.filter((t) =>
+    `${t.ticketNumber} ${t.subject} ${t.user?.firstName ?? ""} ${t.user?.lastName ?? ""}`.toLowerCase().includes(query.toLowerCase())
+  ), [tickets, query]);
+  function changeFilters(change: () => void) {
+    setLoading(true);
+    setError("");
+    change();
+  }
+  async function create(e: FormEvent) { e.preventDefault(); setSubmitting(true); try { await axios.post(`${backendUrl}/api/tickets`, { subject, message, category, priority }, { withCredentials: true }); setModal(false); setSubject(""); setMessage(""); setLoading(true); await load(); } finally { setSubmitting(false); } }
   async function openDetail(ticket: Ticket) { const { data } = await axios.get(`${backendUrl}/api/admin/tickets/${ticket._id}`, { withCredentials: true }); setDetail(data.data.ticket); }
-  const count = (status: string) => tickets.filter((t) => t.status === status).length;
   return <section className="min-h-full bg-[#f6f8f6] px-4 py-7 md:px-8 lg:px-10">
     <div className="mx-auto max-w-7xl">
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="mb-2 text-[10px] font-extrabold uppercase tracking-[.22em] text-primary">Customer care</p><h1 className="text-2xl font-extrabold text-gray-900 md:text-3xl">{admin ? "Support centre" : "Support tickets"}</h1><p className="mt-2 text-sm text-gray-500">{admin ? "Review requests, respond to customers and manage resolutions." : "Start a conversation with our team and track every request in one place."}</p></div>{!admin && <button onClick={() => setModal(true)} className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-lg shadow-green-900/10 transition hover:-translate-y-0.5 hover:bg-primary-dark"><Plus size={18}/>New ticket</button>}</div>
-      <div className="mt-7 grid gap-4 sm:grid-cols-3">{[
-        { label: "Total tickets", value: tickets.length, Icon: MessageSquareText, style: "text-primary bg-green-50" },
-        { label: "Open", value: count("open"), Icon: Headphones, style: "text-amber-700 bg-amber-50" },
-        { label: "Resolved", value: count("resolved") + count("closed"), Icon: TicketCheck, style: "text-green-700 bg-green-50" },
-      ].map(({ label, value, Icon, style }) => <div key={label} className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm"><span className={`rounded-xl p-3 ${style}`}><Icon size={22}/></span><div><p className="text-[10px] font-extrabold uppercase tracking-widest text-gray-500">{label}</p><p className="mt-1 text-2xl font-extrabold">{value}</p></div></div>)}</div>
-      <div className="mt-7 overflow-hidden rounded-2xl bg-white shadow-sm"><div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="font-bold">{admin ? "Customer requests" : "Your requests"}</h2><p className="mt-1 text-xs text-gray-500">Select a ticket to view the conversation.</p></div><div className="flex gap-2"><div className="relative"><Search className="absolute left-3 top-2.5 text-gray-400" size={17}/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search tickets" className="w-full rounded-xl bg-gray-50 py-2.5 pl-9 pr-3 text-sm outline-none ring-primary/20 focus:ring-2"/></div>{admin && <select value={filter} onChange={(e) => setFilter(e.target.value)} className="rounded-xl bg-gray-50 px-3 text-sm outline-none"><option value="open">Open</option><option value="resolved">Resolved</option><option value="closed">Closed</option><option value="all">All</option></select>}</div></div>
+      <p className="mt-7 text-xs font-semibold text-gray-500">Tickets created this month (Lagos time)</p>
+      <div className="mt-3 grid gap-4 sm:grid-cols-3">{[
+        { label: "Total tickets", value: stats?.total, Icon: MessageSquareText, style: "text-primary bg-green-50" },
+        { label: "Open", value: stats?.open, Icon: Headphones, style: "text-amber-700 bg-amber-50" },
+        { label: "Resolved", value: stats?.resolved, Icon: TicketCheck, style: "text-green-700 bg-green-50" },
+      ].map(({ label, value, Icon, style }) => <div key={label} className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm"><span className={`rounded-xl p-3 ${style}`}><Icon size={22}/></span><div><p className="text-[10px] font-extrabold uppercase tracking-widest text-gray-500">{label}</p><p className="mt-1 text-2xl font-extrabold">{error ? "Unavailable" : value ?? "..."}</p></div></div>)}</div>
+      <div className="mt-7 overflow-hidden rounded-2xl bg-white shadow-sm"><div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="font-bold">{admin ? "Customer requests" : "Your requests"}</h2><p className="mt-1 text-xs text-gray-500">Filter by creation date (Lagos time). Select a ticket to view the conversation.</p></div><div className="flex flex-wrap gap-2"><div className="relative"><Search className="absolute left-3 top-2.5 text-gray-400" size={17}/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search tickets" className="w-full rounded-xl bg-gray-50 py-2.5 pl-9 pr-3 text-sm outline-none ring-primary/20 focus:ring-2"/></div>{admin && <select aria-label="Ticket status" value={filter} onChange={(e) => changeFilters(() => setFilter(e.target.value))} className="rounded-xl bg-gray-50 px-3 text-sm outline-none"><option value="open">Open</option><option value="resolved">Resolved</option><option value="closed">Closed</option><option value="all">All</option></select>}<select aria-label="Ticket period" value={period} onChange={(e) => changeFilters(() => setPeriod(e.target.value as TicketPeriod))} className="rounded-xl bg-gray-50 px-3 py-2.5 text-sm outline-none"><option value="today">Today</option><option value="this-week">This week</option><option value="this-month">This month</option><option value="custom">Custom</option></select></div></div>
+        {period === "custom" && <div className="flex flex-wrap gap-3 px-5 pb-4">
+          <label className="text-xs font-semibold text-gray-600">Start date<input type="date" value={startDate} max={endDate || undefined} onChange={(e) => changeFilters(() => setStartDate(e.target.value))} className="mt-1 block rounded-xl bg-gray-50 px-3 py-2 text-sm"/></label>
+          <label className="text-xs font-semibold text-gray-600">End date<input type="date" value={endDate} min={startDate || undefined} onChange={(e) => changeFilters(() => setEndDate(e.target.value))} className="mt-1 block rounded-xl bg-gray-50 px-3 py-2 text-sm"/></label>
+        </div>}
         {admin && <div className="hidden grid-cols-[1fr_130px_110px_120px] items-center gap-3 border-t border-green-900/5 bg-gray-50 px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500 md:grid"><span>Ticket</span><span>Status</span><span>Last activity</span><span>Actions</span></div>}
-        {loading ? <div className="flex justify-center p-16"><Loader2 className="animate-spin text-primary"/></div> : shown.length === 0 ? <div className="p-16 text-center"><MessageSquareText className="mx-auto mb-3 text-gray-300" size={36}/><p className="font-bold">No tickets found</p><p className="mt-1 text-sm text-gray-500">{admin ? "There are no tickets in this view." : "Create your first request when you need a hand."}</p></div> : <div className="divide-y divide-green-900/5">{shown.map((ticket) => <div key={ticket._id} className="grid items-center gap-3 px-5 py-4 transition hover:bg-green-50/50 md:grid-cols-[1fr_130px_110px_120px]">
+        {invalidRange ? <p role="status" className="p-8 text-center text-sm text-gray-500">Choose a start and end date in chronological order.</p> : loading ? <div className="flex justify-center p-16"><Loader2 className="animate-spin text-primary"/></div> : error ? <div role="alert" className="p-8 text-center text-sm text-red-600">{error} <button onClick={() => { setLoading(true); void load(); }} className="font-semibold underline">Retry</button></div> : shown.length === 0 ? <div className="p-16 text-center"><MessageSquareText className="mx-auto mb-3 text-gray-300" size={36}/><p className="font-bold">No tickets found</p><p className="mt-1 text-sm text-gray-500">No tickets match the selected filters.</p></div> : <div className="divide-y divide-green-900/5">{shown.map((ticket) => <div key={ticket._id} className="grid items-center gap-3 px-5 py-4 transition hover:bg-green-50/50 md:grid-cols-[1fr_130px_110px_120px]">
           <button onClick={() => admin ? openDetail(ticket) : undefined} className="min-w-0 text-left"><div className="flex items-center gap-2"><p className="truncate text-sm font-bold text-gray-900">{ticket.subject}</p><span className={`rounded-md px-2 py-0.5 text-[9px] font-extrabold uppercase ${ticket.priority === "high" ? "bg-red-50 text-red-600" : ticket.priority === "medium" ? "bg-amber-50 text-amber-700" : "bg-gray-100 text-gray-600"}`}>{ticket.priority}</span></div><p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">#{ticket.ticketNumber}{ticket.user ? ` · ${ticket.user.firstName} ${ticket.user.lastName}` : ` · ${ticket.category.replace("-", " ")}`}</p></button>
           <StatusBadge status={ticket.status}/><span className="text-xs font-medium text-gray-500">{relativeTime(ticket.lastMessageAt)}</span><Link href={`${route}/${ticket._id}`} className="rounded-xl bg-green-50 px-3 py-2 text-center text-xs font-bold text-primary transition hover:bg-primary hover:text-white">Open chat</Link>
         </div>)}</div>}
