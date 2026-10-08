@@ -176,7 +176,9 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
           ${isOpen ? "md:w-72 md:p-6" : "md:w-16 md:p-3 md:items-center"}
         `}
       >
-        <div className={`flex min-h-0 flex-1 flex-col ${isOpen ? "gap-8" : "gap-6"} w-full`}>
+        <div
+          className={`flex min-h-0 flex-1 flex-col ${isOpen ? "gap-8" : "gap-6"} w-full`}
+        >
           {/* Logo + toggle */}
           <div
             className={`flex shrink-0 items-center ${isOpen ? "justify-between" : "justify-center"}`}
@@ -223,18 +225,23 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
           </div>
 
           {/* Nav */}
-          <nav aria-label="Admin navigation" className="flex min-h-0 flex-1 flex-col gap-2 w-full overflow-y-auto overflow-x-hidden overscroll-contain pb-4 [scrollbar-width:thin]">
-            {navLinks.filter(({ href }) => canAccessAdminPage(user?.role, href)).map(({ href, label, icon: Icon }) => {
-              const isActive =
-                href === "/admin/dashboard"
-                  ? pathname === "/admin/dashboard"
-                  : pathname.startsWith(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  title={!isOpen ? label : undefined}
-                  className={`flex shrink-0 items-center gap-3 rounded-xl text-sm font-bold transition-colors whitespace-nowrap
+          <nav
+            aria-label="Admin navigation"
+            className="flex min-h-0 flex-1 flex-col gap-2 w-full overflow-y-auto overflow-x-hidden overscroll-contain pb-4 [scrollbar-width:thin]"
+          >
+            {navLinks
+              .filter(({ href }) => canAccessAdminPage(user?.role, href))
+              .map(({ href, label, icon: Icon }) => {
+                const isActive =
+                  href === "/admin/dashboard"
+                    ? pathname === "/admin/dashboard"
+                    : pathname.startsWith(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    title={!isOpen ? label : undefined}
+                    className={`flex shrink-0 items-center gap-3 rounded-xl text-sm font-bold transition-colors whitespace-nowrap
                     ${isOpen ? "px-4 py-3" : "p-3 justify-center"}
                     ${
                       isActive
@@ -242,12 +249,12 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
                         : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     }
                   `}
-                >
-                  <Icon size={18} />
-                  {isOpen && label}
-                </Link>
-              );
-            })}
+                  >
+                    <Icon size={18} className="shrink-0" />
+                    {isOpen && label}
+                  </Link>
+                );
+              })}
           </nav>
         </div>
 
@@ -280,7 +287,9 @@ export default function AdminSidebar({ user, isOpen, onToggle }: SidebarProps) {
                     <p className="text-sm text-gray-600 font-bold">
                       {displayName}
                     </p>
-                    <p className="text-xs text-gray-500">{user?.role === "super-admin" ? "Super Admin" : "Admin"}</p>
+                    <p className="text-xs text-gray-500">
+                      {user?.role === "super-admin" ? "Super Admin" : "Admin"}
+                    </p>
                   </div>
                   <FiChevronUp
                     className={`transition-transform ${
