@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ArrowUpRight, RefreshCw, Search } from "lucide-react";
 import axios from "axios";
+import ExportButton from "@/components/ui/ExportButton";
 import DetailDialog from "@/components/ui/DetailDialog";
 import { stageLabel, investmentCountdown } from "@/lib/farmProgress";
 
@@ -81,7 +82,13 @@ export default function InvestmentsTable() {
       <label className="text-xs font-semibold text-slate-600">Category<select value={filters.category} onChange={e => change("category", e.target.value)} className={inputClass}><option value="">All categories</option><option value="crops">Crops</option><option value="livestock">Livestock</option><option value="aquaculture">Aquaculture</option></select></label>
       <label className="text-xs font-semibold text-slate-600">Status<select value={filters.status} onChange={e => change("status", e.target.value)} className={inputClass}><option value="">All statuses</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="pending">Pending</option><option value="cancelled">Cancelled</option></select></label>
     </div>
-    <div className="flex items-center justify-between text-sm"><span className="text-slate-500">{data.pagination.total} ownership records</span><div className="flex items-center gap-4"><button onClick={() => { setFilters({ search: "", status: "", project: "", category: "" }); setPage(1); setLoading(true); setError(""); }} className="font-semibold text-primary hover:underline">Reset filters</button><button disabled={loading} onClick={() => { setLoading(true); setError(""); setRevision(value => value + 1); }} aria-label="Refresh ownerships" className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-50"><RefreshCw size={16} /></button></div></div>
+    <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><span className="text-slate-500">{data.pagination.total} ownership records</span><div className="flex flex-wrap items-center gap-4"><ExportButton<Ownership>
+      title="Farm ownerships" filename="farm-ownerships" endpoint={`${base}/api/admin/dashboard/investments`}
+      params={{ search: filters.search, status: filters.status, project: filters.project, category: filters.category }}
+      disabled={loading || Boolean(error) || filters.search !== query}
+      toData={records => ({ headers: ["Order ID", "Farmer", "Email", "Project", "Category", "Track", "Units", "Amount (NGN)", "Profit (%)", "Duration (months)", "Status", "Stage", "Order date", "Return choice", "Fulfillment"],
+        rows: records.map(item => [item.orderID, name(item), item.investor?.email ?? item.customerEmail, item.title, item.produce?.category, item.track?.name, item.units, item.totalPrice, item.profit, item.duration, statusLabel(item), stageLabel(item.stage), item.orderDate, item.harvestChoice, item.harvestFulfillmentStatus]) })}
+    /><button onClick={() => { setFilters({ search: "", status: "", project: "", category: "" }); setPage(1); setLoading(true); setError(""); }} className="font-semibold text-primary hover:underline">Reset filters</button><button disabled={loading} onClick={() => { setLoading(true); setError(""); setRevision(value => value + 1); }} aria-label="Refresh ownerships" className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-50"><RefreshCw size={16} /></button></div></div>
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-busy={loading}>
       {loading ? <p role="status" className="p-12 text-center text-sm text-slate-500">Loading farm ownerships•€¦</p> : error ? <div role="alert" className="p-8 text-center text-sm text-red-600">{error} <button onClick={() => { setLoading(true); setError(""); setRevision(value => value + 1); }} className="font-semibold underline">Retry</button></div> : !data.data.length ? <p className="p-12 text-center text-sm text-slate-500">No farm ownerships match these filters.</p> : <>
         <table className="hidden w-full table-fixed text-left lg:table">

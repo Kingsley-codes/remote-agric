@@ -1,12 +1,12 @@
 "use client";
 
+import ExportButton from "@/components/ui/ExportButton";
 import AdminWithdrawalForm from "./AdminWithdrawalForm";
 import DetailDialog from "@/components/ui/DetailDialog";
 import Image from "next/image";
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   MdSearch,
-  MdDownload,
   MdExpandMore,
   MdMoreVert,
   MdRefresh,
@@ -450,10 +450,16 @@ export default function UsersTable() {
             <MdRefresh className={`text-lg ${loading ? "animate-spin" : ""}`} />
           </button>
 
-          <button className="h-11 px-4 flex items-center gap-2 bg-white border border-[#d5e7cf] rounded-lg text-sm font-bold text-[#111b0d] hover:bg-gray-50 transition-colors shrink-0">
-            <MdDownload className="text-lg" />
-            <span className="hidden sm:inline">Export</span>
-          </button>
+          <ExportButton<ApiUser>
+            title="Users" filename="users"
+            endpoint={`${BACKEND_URL}/api/admin/dashboard/users`}
+            params={{ q: search, status: ["Active", "Suspended"].includes(statusFilter) ? statusFilter.toLowerCase() : undefined }}
+            disabled={loading || Boolean(error) || search !== debouncedSearch}
+            toData={records => ({
+              headers: ["User ID", "Name", "Email", "Verified", "Wallet balance", "Currency", "Status", "Joined"],
+              rows: records.map(item => [item.farmerID ?? item._id, [item.firstName, item.lastName].filter(Boolean).join(" "), item.email, item.isVerified ? "Yes" : "No", item.wallet?.balance, item.wallet?.currency, normalizeStatus(item.status), item.createdAt]),
+            })}
+          />
         </div>
       </div>
 

@@ -2,6 +2,7 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Building2, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Loader2, RefreshCw, Search, Wallet } from "lucide-react";
+import ExportButton from "@/components/ui/ExportButton";
 import DetailDialog from "@/components/ui/DetailDialog";
 
 type Withdrawal = {
@@ -224,7 +225,13 @@ export default function ManualWithdrawalDashboard({ embedded = false }: { embedd
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
         <p className="text-slate-500">{loading || invalidRange || error ? "Withdrawal records" : `${pagination.total.toLocaleString()} ${statusLabel} withdrawals`}<span className="ml-2 hidden text-xs text-slate-400 sm:inline">All dates in WAT</span></p>
-        <div className="flex items-center gap-4"><button onClick={reset} disabled={!filtersActive} className="text-sm font-semibold text-primary hover:underline disabled:cursor-default disabled:text-slate-400 disabled:no-underline">Reset filters</button><button disabled={loading} onClick={refresh} aria-label="Refresh withdrawals" className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 disabled:opacity-50"><RefreshCw size={16} className={loading ? "animate-spin" : ""} /></button></div>
+        <div className="flex flex-wrap items-center gap-4"><ExportButton<Withdrawal>
+          title="Withdrawals" filename="withdrawals" endpoint={endpoint}
+          params={{ status: status === "pending" ? "pending" : historyStatus, date: period, startDate, endDate, q: query }}
+          disabled={loading || Boolean(error) || Boolean(invalidRange)}
+          toData={records => ({ headers: ["Transaction ID", "User", "Email", "Amount (NGN)", "Status", "Requested (WAT)", "Completed (WAT)", "Cancelled (WAT)"],
+            rows: records.map(item => [item.transactionID, userName(item), item.user?.email, item.amount, item.status, dateTime(item.createdAt), item.approvedAt ? dateTime(item.approvedAt) : "", item.cancelledAt ? dateTime(item.cancelledAt) : ""]) })}
+        /><button onClick={reset} disabled={!filtersActive} className="text-sm font-semibold text-primary hover:underline disabled:cursor-default disabled:text-slate-400 disabled:no-underline">Reset filters</button><button disabled={loading} onClick={refresh} aria-label="Refresh withdrawals" className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50 disabled:opacity-50"><RefreshCw size={16} className={loading ? "animate-spin" : ""} /></button></div>
       </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-busy={loading}>
         {invalidRange ? <div className="p-12 text-center"><Clock3 size={24} className="mx-auto mb-3 text-slate-300" /><p className="text-sm font-semibold text-slate-700">Choose a date range</p><p className="mt-1 text-sm text-slate-500">Select valid start and end dates to view withdrawals.</p></div>
