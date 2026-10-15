@@ -1,4 +1,6 @@
 "use client";
+import PhoneNumberInput from "@/components/PhoneNumberInput";
+import { normalizePhoneNumber } from "@/lib/phone";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
@@ -35,9 +37,14 @@ export default function ProfileSettingsPage() {
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!profile || saving) return;
+    const phone = normalizePhoneNumber(profile.phone ?? "");
+    if (profile.phone?.trim() && !phone) {
+      setError("Enter a valid phone number for the selected country.");
+      return;
+    }
     setSaving(true); setError("");
     const body = new FormData();
-    for (const field of ["firstName", "lastName", "phone", "address", "gender"] as const) body.append(field, profile[field] ?? "");
+    for (const field of ["firstName", "lastName", "phone", "address", "gender"] as const) body.append(field, field === "phone" ? phone ?? "" : profile[field] ?? "");
     if (photo) body.append("profilePhoto", photo);
     if (removePhoto) body.append("removeProfilePhoto", "true");
     try {
@@ -90,7 +97,7 @@ export default function ProfileSettingsPage() {
           {(["firstName", "lastName"] as const).map(field => <label key={field} className="text-sm font-medium">{field === "firstName" ? "First name" : "Last name"}<input required maxLength={80} autoComplete={field === "firstName" ? "given-name" : "family-name"} className={inputClass} value={profile[field]} onChange={e => setProfile({ ...profile, [field]: e.target.value })} /></label>)}
           <label className="text-sm font-medium">Email<input disabled className={inputClass} value={profile.email} /></label>
           <label className="text-sm font-medium">Farmer ID<input disabled className={inputClass} value={profile.farmerID} /></label>
-          <label className="text-sm font-medium">Phone number<input id="phone" type="tel" autoComplete="tel" maxLength={30} placeholder="+234…" className={inputClass} value={profile.phone ?? ""} onChange={e => setProfile({ ...profile, phone: e.target.value })} /></label>
+          <div className="text-sm font-medium"><label htmlFor="phone">Phone number</label><PhoneNumberInput id="phone" className="mt-2" value={profile.phone ?? ""} onChange={(phone) => setProfile({ ...profile, phone })} /></div>
           <label className="text-sm font-medium">Gender<select className={inputClass} value={profile.gender ?? ""} onChange={e => setProfile({ ...profile, gender: e.target.value })}><option value="">Prefer not to say</option><option value="female">Female</option><option value="male">Male</option></select></label>
         </div>
         <label className="block text-sm font-medium">Address<textarea rows={3} maxLength={500} autoComplete="street-address" className={inputClass} value={profile.address ?? ""} onChange={e => setProfile({ ...profile, address: e.target.value })} /></label>

@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizePhoneNumber } from "@/lib/phone";
+
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -122,6 +124,11 @@ export default function OrderSummary({
       setError("Enter your phone number to continue with guest checkout.");
       return;
     }
+    const phone = normalizePhoneNumber(billingData.phone);
+    if (billingData.phone.trim() && !phone) {
+      setError("Enter a valid phone number for the selected country.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -133,6 +140,7 @@ export default function OrderSummary({
         trackId,
         rolloverInvestmentId,
         ...billingData,
+        phone: phone ?? "",
       };
       const key = paymentKey(JSON.stringify(payload));
       const response = await fetch(
@@ -187,7 +195,7 @@ export default function OrderSummary({
   return (
     <>
       <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow">
-        <div className="border-b bg-linear-to-br from-white to-background-light p-6">
+        <div className="border-b mx-4 bg-linear-to-br from-white to-background-light p-6">
           <h3 className="mb-4 text-lg font-bold">Farm Ownership Summary</h3>
           <div className="flex gap-4">
             <div

@@ -1,5 +1,8 @@
 "use client";
 
+import PhoneNumberInput from "@/components/PhoneNumberInput";
+import { normalizePhoneNumber } from "@/lib/phone";
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -127,8 +130,8 @@ export default function SignUpPage() {
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
     if (formStep === 1) {
-      const phone = formData.phone.trim().replace(/[\s().-]/g, "");
-      if (!/^\+?\d{7,15}$/.test(phone)) {
+      const phone = normalizePhoneNumber(formData.phone);
+      if (!phone) {
         toast.error("Enter a valid phone number, including your country code.");
         return;
       }
@@ -143,12 +146,17 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const phone = normalizePhoneNumber(formData.phone);
+    if (!phone) {
+      toast.error("Enter a valid phone number for the selected country.");
+      return;
+    }
     setIsLoading(true);
 
     try {
       const response = await axios.post(
         `${backendUrl}/api/auth/register`,
-        formData,
+        { ...formData, phone },
         {
           withCredentials: true,
         },
@@ -464,10 +472,9 @@ export default function SignUpPage() {
 
                     <div className="flex flex-col gap-1 md:gap-1.5">
                       <label htmlFor="phone" className="text-xs md:text-sm font-semibold text-slate-700">Phone number</label>
-                      <input id="phone" name="phone" type="tel" autoComplete="tel" required maxLength={30}
-                        placeholder="+234 801 234 5678" value={formData.phone} onChange={handleInputChange}
-                        className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white py-2.5 px-3 md:px-4 text-sm text-slate-900 placeholder-slate-400 transition-all" />
-                      <p className="text-xs text-slate-500">Include your country code.</p>
+                      <PhoneNumberInput id="phone" required value={formData.phone}
+                        onChange={(phone) => setFormData((current) => ({ ...current, phone }))} />
+                      <p className="text-xs text-slate-500">Select your country and enter your phone number.</p>
                     </div>
 
                     {/* Email Field */}

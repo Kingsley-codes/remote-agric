@@ -124,13 +124,13 @@ export default function OpportunityCard({
           <div className="flex gap-2">
             <Link
               href={detailsHref}
-              className="flex-1 mt-3 rounded-lg bg-primary py-2.5 text-sm font-bold text-white hover:bg-primary-dark transition-colors"
+              className="flex-1 flex justify-center mt-3 rounded-lg bg-primary py-2.5 text-sm font-bold text-white hover:bg-primary-dark transition-colors"
             >
               Own This Farm
             </Link>
             <Link
               href={detailsHref}
-              className="flex-1 mt-3 rounded-lg bg-white border border-primary py-2.5 text-sm font-bold text-gray-700 hover:bg-primary/50 hover:text-primary transition-colors"
+              className="flex-1 flex justify-center mt-3 rounded-lg bg-white border border-primary py-2.5 text-sm font-bold text-gray-700 hover:bg-primary/50 hover:text-primary transition-colors"
             >
               Details
             </Link>
