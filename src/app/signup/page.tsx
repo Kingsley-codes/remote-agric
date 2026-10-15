@@ -22,6 +22,7 @@ export default function SignUpPage() {
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
     referralCode: "",
@@ -126,8 +127,13 @@ export default function SignUpPage() {
   const handleContinue = (e: React.FormEvent) => {
     e.preventDefault();
     if (formStep === 1) {
+      const phone = formData.phone.trim().replace(/[\s().-]/g, "");
+      if (!/^\+?\d{7,15}$/.test(phone)) {
+        toast.error("Enter a valid phone number, including your country code.");
+        return;
+      }
       // Validate first step fields
-      if (formData.firstName && formData.lastName && formData.email) {
+      if (formData.firstName && formData.lastName && formData.email && formData.phone.trim()) {
         setFormStep(2);
       }
     }
@@ -307,7 +313,7 @@ export default function SignUpPage() {
       </div>
 
       {/* Right Side: Form */}
-      <div className="flex flex-1 flex-col justify-center max-h-screen p-4 md:p-6">
+      <div className="flex flex-1 flex-col justify-center px-4 py-8 md:p-6">
         <div className="w-full max-w-105 mx-auto">
           {/* Mobile Header */}
           <div className="lg:hidden mb-6 flex items-center justify-center gap-3">
@@ -454,6 +460,14 @@ export default function SignUpPage() {
                           required
                         />
                       </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1 md:gap-1.5">
+                      <label htmlFor="phone" className="text-xs md:text-sm font-semibold text-slate-700">Phone number</label>
+                      <input id="phone" name="phone" type="tel" autoComplete="tel" required maxLength={30}
+                        placeholder="+234 801 234 5678" value={formData.phone} onChange={handleInputChange}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white py-2.5 px-3 md:px-4 text-sm text-slate-900 placeholder-slate-400 transition-all" />
+                      <p className="text-xs text-slate-500">Include your country code.</p>
                     </div>
 
                     {/* Email Field */}

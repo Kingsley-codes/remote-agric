@@ -28,6 +28,7 @@ type Produce = {
 };
 
 type UserProfile = {
+  phone?: string;
   _id: string;
   firstName: string;
   lastName: string;
@@ -36,6 +37,7 @@ type UserProfile = {
 };
 
 type BillingData = {
+  phone: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -57,6 +59,7 @@ export default function CheckoutContent() {
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     address: "",
   });
   const [paymentMethod, setPaymentMethod] = useState<"card" | "wallet">(rolloverInvestmentId ? "wallet" : "card");
@@ -116,6 +119,7 @@ export default function CheckoutContent() {
           firstName: u.firstName ?? "",
           lastName: u.lastName ?? "",
           email: u.email ?? "",
+          phone: u.phone ?? "",
           address: u.address ?? "",
         });
       } catch (err) {

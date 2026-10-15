@@ -122,19 +122,18 @@ export default function OpportunityCard({
           </div>
 
           <div className="flex gap-2">
-            <button
-              onClick={() => {
-                router.push(
-                  detailsHref,
-                );
-              }}
+            <Link
+              href={detailsHref}
               className="flex-1 mt-3 rounded-lg bg-primary py-2.5 text-sm font-bold text-white hover:bg-primary-dark transition-colors"
             >
               Own This Farm
-            </button>
-            <button className="flex-1 mt-3 rounded-lg bg-white border border-primary py-2.5 text-sm font-bold text-gray-700 hover:bg-primary/50 hover:text-primary transition-colors">
-              <Link href={detailsHref}>Details</Link>
-            </button>
+            </Link>
+            <Link
+              href={detailsHref}
+              className="flex-1 mt-3 rounded-lg bg-white border border-primary py-2.5 text-sm font-bold text-gray-700 hover:bg-primary/50 hover:text-primary transition-colors"
+            >
+              Details
+            </Link>
           </div>
         </div>
       </div>

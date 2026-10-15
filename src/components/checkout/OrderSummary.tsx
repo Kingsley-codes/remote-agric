@@ -21,6 +21,7 @@ type ProduceType = {
 };
 
 type BillingData = {
+  phone: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -115,6 +116,10 @@ export default function OrderSummary({
     }
     if (rolloverInvestmentId && paymentMethod !== "wallet") {
       setError("Rollover investments must use your Agro Wallet.");
+      return;
+    }
+    if (!isAuthenticated && !billingData.phone.trim()) {
+      setError("Enter your phone number to continue with guest checkout.");
       return;
     }
     setLoading(true);

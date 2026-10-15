@@ -245,6 +245,7 @@ function UserCard({
         {/* ── User ID line (NEW) ── */}
         <p className="text-xs font-mono text-[#5e9a4c] mb-0.5">{user.userID}</p>
         <p className="text-xs text-gray-400 truncate mb-2">{user.email}</p>
+        <p className="text-xs text-gray-600 mb-2">{user.details.phone || "Phone not provided"}</p>
         <div className="flex flex-wrap items-center gap-2">
           <VerifiedBadge verified={user.isVerified} />
           <span
@@ -272,7 +273,7 @@ function UserCard({
 function SkeletonRow() {
   return (
     <tr className="animate-pulse">
-      {Array.from({ length: 7 }).map((_, i) => (
+      {Array.from({ length: 8 }).map((_, i) => (
         <td key={i} className="p-4">
           <div className="h-4 bg-[#eaf3e7] rounded w-3/4" />
         </td>
@@ -418,7 +419,7 @@ export default function UsersTable() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email or ID..."
+            placeholder="Search by name, email, phone or ID..."
             className="w-full h-11 pl-12 pr-4 bg-white border border-[#d5e7cf] rounded-xl text-sm text-[#111b0d] placeholder:text-[#5e9a4c] focus:ring-2 focus:ring-[#46ec13]/50 focus:border-[#46ec13] focus:outline-none transition-all"
           />
         </label>
@@ -456,8 +457,8 @@ export default function UsersTable() {
             params={{ q: search, status: ["Active", "Suspended"].includes(statusFilter) ? statusFilter.toLowerCase() : undefined }}
             disabled={loading || Boolean(error) || search !== debouncedSearch}
             toData={records => ({
-              headers: ["User ID", "Name", "Email", "Verified", "Wallet balance", "Currency", "Status", "Joined"],
-              rows: records.map(item => [item.farmerID ?? item._id, [item.firstName, item.lastName].filter(Boolean).join(" "), item.email, item.isVerified ? "Yes" : "No", item.wallet?.balance, item.wallet?.currency, normalizeStatus(item.status), item.createdAt]),
+              headers: ["User ID", "Name", "Email", "Phone number", "Verified", "Wallet balance", "Currency", "Status", "Joined"],
+              rows: records.map(item => [item.farmerID ?? item._id, [item.firstName, item.lastName].filter(Boolean).join(" "), item.email, item.phone ?? "", item.isVerified ? "Yes" : "No", item.wallet?.balance, item.wallet?.currency, normalizeStatus(item.status), item.createdAt]),
             })}
           />
         </div>
@@ -500,6 +501,7 @@ export default function UsersTable() {
                 {[
                   "User ID",
                   "User",
+                  "Phone number",
                   "Verified",
                   "Wallet Balance",
                   "Status",
@@ -523,7 +525,7 @@ export default function UsersTable() {
               ) : users.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="text-center py-12 text-[#5e9a4c] text-sm"
                   >
                     No users match your search.
@@ -567,6 +569,9 @@ export default function UsersTable() {
                             {user.email}
                           </span>
                         </div>
+                      </td>
+                      <td className="p-4">
+                        <span className="whitespace-nowrap text-sm text-gray-600">{user.details.phone || "Not provided"}</span>
                       </td>
                       <td className="p-4">
                         <VerifiedBadge verified={user.isVerified} />
@@ -675,7 +680,7 @@ export default function UsersTable() {
             <dl className="grid gap-5 text-sm sm:grid-cols-2">
               {[
                 ["Email", selected.email],
-                ["Phone", selected.details.phone],
+                ["Phone number", selected.details.phone || "Not provided"],
                 ["Address", selected.details.address],
                 ["Gender", selected.details.gender],
                 ["Status", selected.status],

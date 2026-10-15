@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { CldImage } from "next-cloudinary";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -57,10 +56,7 @@ export default function LoginPage() {
         toast.success(response.data.message || "Login successful!");
 
         localStorage.removeItem("user"); // clear any stale user session
-        localStorage.setItem(
-          "admin",
-          JSON.stringify(response.data.data.admin),
-        );
+        localStorage.setItem("admin", JSON.stringify(response.data.data.admin));
 
         setTimeout(() => {
           router.push("/admin/dashboard");
@@ -100,8 +96,8 @@ export default function LoginPage() {
       {/* Left Visual Section (Desktop) */}
       <div className="hidden lg:flex bg-slate-900 lg:w-1/2 relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <CldImage
-            src="zv6wbqyvd3hbxj5a9vnn"
+          <Image
+            src="/login.png"
             alt="Sustainable agriculture field"
             fill
             className="object-cover opacity-60"

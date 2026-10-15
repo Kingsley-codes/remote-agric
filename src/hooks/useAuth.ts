@@ -6,6 +6,7 @@ import axios from "axios";
 type Role = "user" | "admin" | "super-admin";
 
 interface AuthenticatedUser {
+  phone?: string;
   firstName?: string;
   lastName?: string;
   name?: string;
