@@ -323,9 +323,7 @@ export default function UsersTable() {
       try {
         const params = new URLSearchParams({ page: String(currentPage) });
         if (q) params.set("q", q);
-        // Backend expects lowercase "active" / "suspended" — skip "All Status" and "Pending"
-        if (status === "Active") params.set("status", "active");
-        if (status === "Suspended") params.set("status", "suspended");
+        if (status !== "All Status") params.set("status", status.toLowerCase());
 
         const res = await fetch(
           `${BACKEND_URL}/api/admin/dashboard/users?${params.toString()}`,
@@ -436,7 +434,6 @@ export default function UsersTable() {
             >
               <option>All Status</option>
               <option>Active</option>
-              <option>Pending</option>
               <option>Suspended</option>
             </select>
             <MdExpandMore className="absolute right-2.5 top-3 text-[#5e9a4c] pointer-events-none text-xl" />
@@ -454,7 +451,7 @@ export default function UsersTable() {
           <ExportButton<ApiUser>
             title="Users" filename="users"
             endpoint={`${BACKEND_URL}/api/admin/dashboard/users`}
-            params={{ q: search, status: ["Active", "Suspended"].includes(statusFilter) ? statusFilter.toLowerCase() : undefined }}
+            params={{ q: search, status: statusFilter !== "All Status" ? statusFilter.toLowerCase() : undefined }}
             disabled={loading || Boolean(error) || search !== debouncedSearch}
             toData={records => ({
               headers: ["User ID", "Name", "Email", "Phone number", "Verified", "Wallet balance", "Currency", "Status", "Joined"],
