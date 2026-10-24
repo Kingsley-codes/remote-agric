@@ -1,3 +1,7 @@
+import { canonicalMetadata } from "@/lib/seo";
+
+export const metadata = canonicalMetadata("/");
+
 import HeroSection from "@/components/hompage/HeroSection";
 import HowItWorks from "@/components/hompage/HowItWorks";
 import FeaturedOpportunities from "@/components/hompage/FeaturedOpportunities";

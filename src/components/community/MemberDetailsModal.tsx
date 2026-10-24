@@ -32,6 +32,9 @@ export function MemberDetailsModal({ room, userId, onClose }: { room: string; us
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/forum/rooms/${encodeURIComponent(room)}/members/${encodeURIComponent(userId)}`, {
       credentials: "include", cache: "no-store", signal: controller.signal,
     }).then(async (response) => {
+      if (!response.headers.get("content-type")?.includes("application/json")) {
+        throw new Error("Member details are temporarily unavailable. Please try again later.");
+      }
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Unable to load member details");
       if (!controller.signal.aborted) setDetails(data);

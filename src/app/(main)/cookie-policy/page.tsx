@@ -1,3 +1,7 @@
+import { canonicalMetadata } from "@/lib/seo";
+
+export const metadata = canonicalMetadata("/cookie-policy");
+
 import LegalPage from "@/components/legal/LegalPage";
 
 export default function CookiePolicyPage() {

@@ -38,6 +38,16 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.remoteagricng.com" }],
+        destination: "https://remoteagricng.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

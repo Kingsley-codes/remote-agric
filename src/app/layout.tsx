@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import MetaPixel from "@/components/meta/MetaPixel";
+import { SITE_URL } from "@/lib/seo";
 
 export const DMSans = DM_Sans({
   subsets: ["latin"],
@@ -19,6 +20,7 @@ export const MontserratFont = Montserrat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Remote Agric",
   description:
     "Own and manage farms remotely with trusted producers, transparent updates, and flexible harvest options.",

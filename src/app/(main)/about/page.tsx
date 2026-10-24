@@ -1,3 +1,7 @@
+import { canonicalMetadata } from "@/lib/seo";
+
+export const metadata = canonicalMetadata("/about");
+
 import CTASection from "@/components/aboutPage/CTASection";
 import HeroSection from "@/components/aboutPage/HeroSection";
 import MissionSection from "@/components/aboutPage/MissionSection";

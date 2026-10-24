@@ -1,3 +1,10 @@
+import { canonicalMetadata } from "@/lib/seo";
+
+export async function generateMetadata({ params }: PageProps) {
+  const { produceId } = await params;
+  return canonicalMetadata(`/opportunities/${encodeURIComponent(produceId)}`);
+}
+
 import { Breadcrumbs } from "@/components/produceDetails/Breadcrumbs";
 import { FAQAccordion } from "@/components/produceDetails/FAQAccordion";
 import { HeroGallery } from "@/components/produceDetails/HeroGallery";

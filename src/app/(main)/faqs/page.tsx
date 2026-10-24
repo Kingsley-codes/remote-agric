@@ -1,3 +1,7 @@
+import { canonicalMetadata } from "@/lib/seo";
+
+export const metadata = canonicalMetadata("/faqs");
+
 import Link from "next/link";
 import { ChevronDown, CircleHelp, Mail, MessageCircleMore } from "lucide-react";
 
